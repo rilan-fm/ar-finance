@@ -1,6 +1,6 @@
-:root{--bg:#f3f6fb;--c:#fff;--tx:#0b1130;--mu:#5b6482;--ac:#0e7490;--bd:#d9e0ee;--ing:#15803d;--gas:#b91c1c;--hl:#af11f2;--onac:#fff}
-@media(prefers-color-scheme:dark){:root{--bg:#0b1130;--c:#131a42;--tx:#e8ecff;--mu:#97a1d0;--ac:#00e5f0;--bd:#262f66;--ing:#4ade80;--gas:#f87171;--onac:#04122a}}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:16px system-ui,sans-serif}
+:root{--bg:#f3f6fb;--c:#fff;--tx:#0b1130;--mu:#5b6482;--ac:#0e7490;--bd:#d9e0ee;--ing:#15803d;--gas:#b91c1c;--hl:#af11f2;--onac:#fff;--c-cy:#0891b2;--c-pu:#af11f2;--c-or:#e07b00;--c-gr:#16a34a;--c-re:#dc2626}
+@media(prefers-color-scheme:dark){:root{--bg:#0b1130;--c:#131a42;--tx:#e8ecff;--mu:#97a1d0;--ac:#00e5f0;--bd:#262f66;--ing:#4ade80;--gas:#f87171;--onac:#04122a;--c-cy:#00f8ff;--c-pu:#c15cff;--c-or:#fe9900;--c-gr:#4ade80;--c-re:#ff6b6b}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:1rem system-ui,sans-serif}
 h2{margin:4px 0 12px;font-size:1.2rem}h3{margin:0 0 8px;font-size:1rem}[hidden]{display:none!important}.muted{color:var(--mu)}.grow{flex:1}
 #app{display:grid;grid-template-columns:230px 1fr;min-height:100vh}
 aside{background:var(--c);border-right:1px solid var(--bd);padding:14px 10px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:6px}
@@ -36,7 +36,7 @@ label{display:flex;flex-direction:column;gap:4px;font-size:.85rem;color:var(--mu
  .top{display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--c);border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:20}}
 .tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:12px}
 .tile{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;background:none;border:0;color:var(--tx);font:inherit;cursor:pointer;padding:4px;transition:transform .38s ease,opacity .38s ease}
-.tile .ic{width:62px;height:62px;border-radius:50%;border:2px solid var(--ac);display:grid;place-items:center;color:var(--ac);transition:background .2s,color .2s}
+.tile .ic{width:62px;height:62px;border-radius:50%;border:2px solid var(--ac);display:grid;place-items:center;color:var(--ik,var(--ac));transition:background .2s,color .2s}
 .tile .ic svg{width:30px;height:30px}.tile .tl{font-size:.78rem;text-align:center;line-height:1.15}
 .tile:hover .ic,.tile.sel .ic{background:var(--ac);color:var(--onac)}
 .tile.away{transform:translate(var(--dx),var(--dy)) scale(.2);opacity:0;z-index:0;pointer-events:none}.tile.zoom{transform:scale(1.25);z-index:2}
@@ -50,3 +50,16 @@ label{display:flex;flex-direction:column;gap:4px;font-size:.85rem;color:var(--mu
 .lv-sub:hover .ic,.lv-sub.big .ic{border-color:#af11f2;background:#af11f2;color:#fff}
 .lv-det .ic{border-color:#fe9900;color:#fe9900}.lv-det:hover .ic,.lv-det.big .ic{background:#fe9900;color:#0b1130}
 .seg2 .btn{border:2px solid var(--ac)}.btn.g,.btn.g.ghost{border:2px solid #fe9900}.btn.g{background:#fe9900;color:#0b1130}.btn.g.ghost{background:transparent;color:#fe9900}
+.fecha-box{display:flex;flex-direction:column;gap:8px;padding:14px;border-radius:16px;background:var(--bg);border:3px solid #fe9900;box-shadow:0 0 0 4px #fe990033}
+.fecha-ttl{font-weight:700;font-size:1.1rem}
+.fecha-in{font-size:1.4rem;font-weight:700;padding:14px;min-height:60px;border:2px solid #fe9900;border-radius:12px;text-align:center}
+.fecha-in::-webkit-calendar-picker-indicator{width:30px;height:30px;cursor:pointer}
+.fecha-txt{color:var(--mu);text-align:center;font-size:.95rem}
+@media(prefers-color-scheme:dark){.fecha-in{color-scheme:dark}}
+.cant-box{display:flex;flex-direction:column;gap:6px;font-size:.85rem;color:var(--mu)}
+.stepper{display:flex;gap:8px}.stepper input{text-align:center;font-size:1.25rem;font-weight:700}
+.stepper button{width:58px;flex:none;border:2px solid var(--ac);background:none;color:var(--ac);border-radius:10px;font-size:1.7rem;line-height:1;cursor:pointer}
+@media(max-width:760px){html{font-size:17.5px}
+ #burger{width:52px;height:52px;font-size:2rem;line-height:1;padding:0;border:2px solid var(--ac);border-radius:12px}
+ .top{gap:12px;padding:8px 10px}.top img{height:38px;width:auto}
+ .acts .btn{flex:1;min-height:58px;font-size:1.1rem}.acts .btn:first-child{flex:1.7}.fecha-in{font-size:1.5rem}}
