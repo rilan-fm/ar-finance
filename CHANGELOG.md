@@ -1,4 +1,12 @@
 # Changelog
+## 0.4.4
+- Registrar: casilla de fecha grande con contorno naranja y fecha en texto largo («Hoy · …»).
+- Iconos de categorías y subcategorías: el icono central toma colores de la marca y de su significado (contorno sin cambios; relleno morado al elegir subcategoría).
+- Cantidad: 1 por defecto en todos los registros, con botones − / +; la importación de Excel y JSON también usa 1 si falta.
+- Móvil: icono ☰ más grande, texto +1.5 px, botones Registrar/Cancelar más grandes, barra superior con el logo completo.
+## 0.4.3
+- Importar desde Excel (Notas): sube un .xlsx (plantilla) o pega las filas copiadas; revisa antes de importar (errores por fila, categorías inexistentes, duplicados omitidos).
+- Plantilla Plantilla_Ar_Finance.xlsx. Inserción por lotes (agregarVarios).
 ## 0.4.2
 - supabase-js fijado en 2.116.0 (compatible con la clave publishable sb_publishable_...).
 - Importar respaldo JSON (Notas): omite duplicados, valida datos, recupera categorías propias y notas.
