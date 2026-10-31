@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ar_Finance</title><meta name="theme-color" content="#0b1130">
+<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="css/styles.css">
+</head><body>
+<section id="login" class="card login">
+  <picture><source media="(prefers-color-scheme:dark)" srcset="img/logo-full-dark.png"><img src="img/logo-full-light.png" alt="Ar_Finance" class="logo-l"></picture>
+  <input id="l-mail" type="email" placeholder="Correo" autocomplete="username">
+  <input id="l-pass" type="password" placeholder="Contraseña" autocomplete="current-password">
+  <button id="l-in" class="btn">Entrar</button>
+  <button id="l-up" class="btn ghost">Crear cuenta (solo la primera vez)</button>
+  <p id="login-msg" class="muted"></p>
+</section>
+<div id="app" hidden>
+<div class="top"><button id="burger" class="btn ghost sm">☰</button><picture><source media="(prefers-color-scheme:dark)" srcset="img/logo-icon-dark.png"><img src="img/logo-icon-light.png" alt="Ar_Finance" height="34"></picture></div>
+<div id="scrim"></div>
+<aside id="side">
+  <picture><source media="(prefers-color-scheme:dark)" srcset="img/logo-full-dark.png"><img src="img/logo-full-light.png" alt="Ar_Finance" class="logo"></picture>
+  <nav id="menu"><button class="mi on" data-t="gen">🏠 General</button><button class="mi" data-t="reg">➕ Registrar</button><button class="mi" data-t="rep">📊 Reportes</button><button class="mi" data-t="his">🧾 Historial</button><button class="mi" data-t="not">📝 Notas</button></nav>
+  <div class="grow"></div><small id="who" class="muted"></small><button id="out" class="btn ghost sm">Salir</button>
+</aside>
+<main>
+<section id="t-gen" class="tab"><h2 id="g-tit"></h2><div id="g-out"></div></section>
+<section id="t-reg" class="tab card" hidden><div id="reg-body" class="col"></div></section>
+<section id="t-rep" class="tab" hidden>
+  <div class="card">
+    <div class="row"><label>Año<select id="f-anio"></select></label><label>Mes<select id="f-mes"></select></label><label>Desde (opcional)<input id="f-d" type="date"></label><label>Hasta (opcional)<input id="f-h" type="date"></label><button id="f-todo" class="btn ghost sm">Limpiar</button></div>
+    <div class="grp">TIPO DE REPORTE</div><div id="f-t" class="tiles sm"></div><div id="f-cats" class="col"></div>
+  </div>
+  <div id="rep-out"></div><button id="pdf" class="btn">⬇ Descargar PDF</button>
+</section>
+<section id="t-his" class="tab card" hidden>
+  <div class="row"><input id="h-q" placeholder="Buscar…"><select id="h-tipo"><option value="">Todos</option><option value="gasto">Gastos</option><option value="ingreso">Ingresos</option></select></div>
+  <ul id="h-list" class="list"></ul>
+</section>
+<section id="t-not" class="tab card" hidden>
+  <textarea id="n-txt" rows="12" placeholder="Escribe tus notas…"></textarea>
+  <div class="row"><small id="n-st" class="muted"></small><span><button id="n-exp" class="btn ghost sm">Respaldo JSON</button> <button id="n-imp" class="btn ghost sm">Importar respaldo</button><input id="n-file" type="file" accept=".json,application/json" hidden></span></div>
+</section>
+</main></div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js"></script>
+<script src="js/config.js"></script>
+<script src="js/data.js"></script>
+<script src="js/reports.js"></script>
+<script src="js/icons.js"></script>
+<script src="js/pdf.js"></script>
+<script src="js/app.js"></script>
+</body></html>
