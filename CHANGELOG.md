@@ -1,4 +1,7 @@
 # Changelog
+## 0.4.5
+- Los archivos css/js se enlazan con ?v=0.4.5 en index.html: el navegador (sobre todo el móvil) pide siempre los archivos nuevos. Subir este número en cada versión.
+- Entrega de actualizaciones como paquete «solo archivos cambiados, con sus carpetas y sin config.js».
 ## 0.4.4
 - Registrar: casilla de fecha grande con contorno naranja y fecha en texto largo («Hoy · …»).
 - Iconos de categorías y subcategorías: el icono central toma colores de la marca y de su significado (contorno sin cambios; relleno morado al elegir subcategoría).
