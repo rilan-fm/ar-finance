@@ -57,6 +57,43 @@ function paraImportar(actuales,lista){const clave=m=>[m.tipo,m.fecha,(+m.monto).
  (Array.isArray(lista)?lista:[]).forEach(m=>{if(!m||!['ingreso','gasto'].includes(m.tipo)||!(+m.monto>0)||!/^\d{4}-\d{2}-\d{2}$/.test(m.fecha)||typeof m.categoria!=='string'||!m.categoria)return;
   const x={tipo:m.tipo,monto:Math.round(+m.monto*100)/100,fecha:m.fecha,categoria:m.categoria.slice(0,60),subcategoria:m.subcategoria?String(m.subcategoria).slice(0,60):null,detalle:m.detalle?String(m.detalle).slice(0,60):null,descripcion:String(m.descripcion||'').slice(0,120),cantidad:+m.cantidad>0?+m.cantidad:null};
   const k=clave(x);if(!vistos.has(k)){vistos.add(k);out.push(x)}});return out}
-const api={paraImportar,MESES,rango,granularidad,serie,tendencia,frecuentes,GASTO,INGRESO,esc,fmt,etiquetaMes,dias,ordenar,filtrar,mesesConDatos,aniosConDatos,totales,porCategoria,porSub,porMes,topProducto};
+const norm=s=>String(s??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+const ALIAS={fecha:'fecha',tipo:'tipo',categoria:'categoria',cat:'categoria',subcategoria:'subcategoria',subcat:'subcategoria',detalle:'detalle',descripcion:'descripcion',concepto:'descripcion',cantidad:'cantidad',monto:'monto',montobs:'monto',importe:'monto',valor:'monto'};
+function numero(v){if(typeof v==='number')return isFinite(v)?v:NaN;let s=String(v??'').replace(/[^\d.,-]/g,'');if(!s||s==='-')return NaN;
+ const c=s.lastIndexOf(','),p=s.lastIndexOf('.');
+ if(c>-1&&p>-1)s=c>p?s.replace(/\./g,'').replace(',','.'):s.replace(/,/g,'');
+ else if(c>-1)s=/,\d{1,2}$/.test(s)&&s.split(',').length===2?s.replace(',','.'):s.replace(/,/g,'');
+ else if(p>-1)s=/\.\d{1,2}$/.test(s)&&s.split('.').length===2?s:s.replace(/\./g,'');
+ return parseFloat(s)}
+function fechaISO(v){let d=null;
+ if(v instanceof Date&&!isNaN(v))d=[v.getUTCFullYear(),v.getUTCMonth()+1,v.getUTCDate()];
+ else if(typeof v==='number'&&v>20000&&v<80000){const t=new Date(Math.round((v-25569)*864e5));d=[t.getUTCFullYear(),t.getUTCMonth()+1,t.getUTCDate()]}
+ else{const s=String(v??'').trim(),m=s.match(/^(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})/);
+  if(m)d=[+m[1],+m[2],+m[3]];
+  else{const n=s.match(/^(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{2,4})/);if(n){let a=+n[1],b=+n[2],y=+n[3];if(y<100)y+=2000;d=b>12&&a<=12?[y,a,b]:[y,b,a]}}}
+ if(!d)return null;const[y,m,dd]=d,t=new Date(Date.UTC(y,m-1,dd));
+ if(y<2000||y>2100||t.getUTCFullYear()!==y||t.getUTCMonth()!==m-1||t.getUTCDate()!==dd)return null;
+ return `${y}-${String(m).padStart(2,'0')}-${String(dd).padStart(2,'0')}`}
+function validarFilas(mat,cat){const out={total:0,validos:[],errores:[],desconocidas:{}};let hi=-1,idx={};
+ for(let i=0;i<Math.min(mat.length,15);i++){const m={};(mat[i]||[]).forEach((h,j)=>{const k=ALIAS[norm(h).replace(/ /g,'')];if(k&&!(k in m))m[k]=j});if('fecha' in m&&'monto' in m){hi=i;idx=m;break}}
+ if(hi<0){out.errores.push({fila:0,msg:'No encontré los encabezados. La primera fila debe tener: Fecha, Tipo, Categoría, Subcategoría, Detalle, Descripción, Cantidad, Monto.'});return out}
+ for(const k of['tipo','categoria'])if(!(k in idx)){out.errores.push({fila:0,msg:'Falta la columna «'+k+'».'});return out}
+ const gc=Object.fromEntries(cat.gasto.map(c=>[norm(c.n),c])),ic=Object.fromEntries(cat.ingreso.map(n=>[norm(n),n]));
+ for(let i=hi+1;i<mat.length;i++){const r=mat[i]||[];if(r.every(x=>String(x??'').trim()===''))continue;out.total++;
+  const g=k=>k in idx?r[idx[k]]:'',fila=i+1,err=m=>out.errores.push({fila,msg:m});
+  const ti=norm(g('tipo')),tipo=/^(gasto|gastos|egreso|egresos)$/.test(ti)?'gasto':/^(ingreso|ingresos)$/.test(ti)?'ingreso':'';
+  if(!tipo){err('Tipo «'+g('tipo')+'» no válido (usa gasto o ingreso).');continue}
+  const fecha=fechaISO(g('fecha'));if(!fecha){err('Fecha «'+(g('fecha') instanceof Date?'(fecha)':g('fecha'))+'» no válida.');continue}
+  const monto=numero(g('monto'));if(!(monto>0)){err('Monto «'+g('monto')+'» no válido (debe ser mayor a 0).');continue}
+  const cn=norm(g('categoria'));let c,nombre,sub=null,det=null;if(tipo==='gasto'){c=gc[cn];nombre=c&&c.n}else nombre=ic[cn];
+  if(!nombre){const k=String(g('categoria')).trim()||'(vacía)',kk=k+' ('+tipo+')';out.desconocidas[kk]=(out.desconocidas[kk]||0)+1;err('Categoría «'+k+'» no existe para '+tipo+'.');continue}
+  if(tipo==='gasto'){const sv=norm(g('subcategoria'));
+   if(sv){sub=c.s.find(x=>norm(x)===sv);if(!sub){err('Subcategoría «'+g('subcategoria')+'» no existe en '+nombre+'.');continue}
+    const dv=norm(g('detalle'));if(dv){det=(c.d[sub]||[]).find(x=>norm(x)===dv);if(!det){err('Detalle «'+g('detalle')+'» no existe en '+sub+'.');continue}}}
+   else if(norm(g('detalle'))){err('Hay detalle pero falta la subcategoría.');continue}}
+  let cantidad=null;const cv=g('cantidad');if(String(cv??'').trim()!==''){cantidad=numero(cv);if(!(cantidad>0)){err('Cantidad «'+cv+'» no válida.');continue}}
+  out.validos.push({tipo,monto:Math.round(monto*100)/100,fecha,categoria:nombre,subcategoria:sub,detalle:det,descripcion:String(g('descripcion')??'').trim().slice(0,120),cantidad})}
+ return out}
+const api={validarFilas,norm,paraImportar,MESES,rango,granularidad,serie,tendencia,frecuentes,GASTO,INGRESO,esc,fmt,etiquetaMes,dias,ordenar,filtrar,mesesConDatos,aniosConDatos,totales,porCategoria,porSub,porMes,topProducto};
 if(typeof module!=='undefined')module.exports=api;else root.Reports=api;
 })(typeof window!=='undefined'?window:globalThis);

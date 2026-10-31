@@ -143,6 +143,26 @@ async function importar(file){try{const j=JSON.parse(await file.text()),nuevos=R
   if(nm&&custom.length<3&&nm.toLowerCase()!==NUEVA.toLowerCase()&&!nomCats().some(x=>x.toLowerCase()===nm.toLowerCase()))custom.push(await D.guardarCat({nombre:nm,subs:(Array.isArray(c.subs)?c.subs:[]).map(x=>String(x).slice(0,40)).slice(0,15)}))}
  if(typeof j.notas==='string'&&j.notas&&!$('#n-txt').value){$('#n-txt').value=j.notas;await D.guardarNota(j.notas)}
  armarCats();todo();msg('#n-st',`Importación lista: ${n} movimientos ✔`)}catch(e){msg('#n-st','Error al importar: '+e.message)}}
+/* ---------- Importar desde Excel ---------- */
+let pend=[];
+const plano=v=>{if(v&&typeof v==='object'&&!(v instanceof Date)){if('result' in v)return v.result;if('text' in v)return v.text;if(Array.isArray(v.richText))return v.richText.map(t=>t.text).join('');return ''}return v};
+const cargaXL=()=>window.ExcelJS?Promise.resolve():new Promise((ok,no)=>{const e=document.createElement('script');e.src='https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js';e.onload=ok;e.onerror=()=>no(new Error('No se pudo cargar la librería de Excel. Usa la opción de pegar las filas.'));document.head.appendChild(e)});
+async function leerXL(f){await cargaXL();const wb=new ExcelJS.Workbook();await wb.xlsx.load(await f.arrayBuffer());const ws=wb.getWorksheet('Movimientos')||wb.worksheets[0];if(!ws)throw new Error('El archivo no tiene hojas.');
+ const n=Math.min(ws.rowCount,5001),c=Math.max(ws.columnCount,8),m=[];for(let i=1;i<=n;i++){const v=ws.getRow(i).values;m.push(Array.from({length:c},(_,j)=>plano(v[j+1])))}return m}
+function leerTxt(t){const l=t.replace(/\r/g,'').split('\n').filter(x=>x.trim()!==''),s=t.includes('\t')?'\t':t.includes(';')?';':',';return l.map(x=>x.split(s))}
+async function revisarXL(){const f=$('#xl-file').files[0],o=$('#xl-res');pend=[];
+ try{o.textContent='Leyendo…';const mat=f?await leerXL(f):leerTxt($('#xl-txt').value);if(!mat.length){o.textContent='No hay datos: sube un archivo o pega las filas.';return}
+  const r=R.validarFilas(mat,{gasto:tree(),ingreso:R.INGRESO});pend=R.paraImportar(movs,r.validos);const dup=r.validos.length-pend.length;
+  const desc=Object.entries(r.desconocidas).map(([k,n])=>`${esc(k)}: ${n}`).join(' · ');
+  o.innerHTML=`<p><b>${r.total}</b> filas leídas · <b class="ingreso">${pend.length}</b> listas para importar · ${dup} duplicadas (se omiten) · <b class="${r.errores.length?'gasto':''}">${r.errores.length}</b> con error</p>`+
+   (desc?`<p class="warn">Categorías que no existen en la app: ${desc}. Corrígelas en el Excel (Buscar y reemplazar) o créalas en Registrar.</p>`:'')+
+   (r.errores.length?`<ul class="list">${r.errores.slice(0,15).map(e=>`<li><span>${e.fila?'Fila '+e.fila+': ':''}${esc(e.msg)}</span></li>`).join('')}</ul>${r.errores.length>15?`<p class="muted">… y ${r.errores.length-15} más.</p>`:''}`:'')+
+   (pend.length?`<button id="xl-go" class="btn">Importar ${pend.length} movimientos</button>`:'')}
+ catch(e){o.textContent='Error: '+e.message}}
+async function importarXL(){const b=$('#xl-go');b.disabled=true;let n=0;
+ try{for(let i=0;i<pend.length;i+=200){const g=pend.slice(i,i+200);movs.push(...await D.agregarVarios(g));n+=g.length;b.textContent=`Importando ${n}/${pend.length}…`}
+  pend=[];todo();$('#xl-res').innerHTML=`<p class="ok">✔ ${n} movimientos importados.</p>`}
+ catch(e){$('#xl-res').innerHTML=`<p class="warn">Error tras ${n} movimientos: ${esc(e.message)}. Pulsa Revisar de nuevo: los ya importados se omiten.</p>`;todo()}}
 function respaldo(){const b=new Blob([JSON.stringify({exportado:new Date().toISOString(),notas:$('#n-txt').value,movimientos:movs,categorias:custom},null,2)],{type:'application/json'});
  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='respaldo-finanzas.json';a.click()}
 /* ---------- Eventos ---------- */
@@ -167,7 +187,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   if(t)return behind(t,()=>{const lv=t.dataset.lv;rs[lv]=t.dataset.v;if(lv==='cat')rs.sub=rs.det='';if(lv==='sub')rs.det='';rs.a=lv;armarCats();renderRep()});
   const b=e.target.closest('[data-undo]');if(b){const lv=b.dataset.undo;rs[lv]='';if(lv==='cat')rs.sub=rs.det='';if(lv==='sub')rs.det='';armarCats();renderRep()}};
  $('#f-todo').onclick=()=>{$('#f-anio').value=$('#f-mes').value=$('#f-d').value=$('#f-h').value='';tipoR='vs';rs={cat:'',sub:'',det:'',a:''};pintaTipos();armarCats();poblar();renderRep()};
- $('#pdf').onclick=pdf;$('#n-txt').oninput=nota;$('#n-exp').onclick=respaldo;$('#n-imp').onclick=()=>$('#n-file').click();$('#n-file').onchange=e=>{const f=e.target.files[0];if(f)importar(f);e.target.value=''};
+ $('#pdf').onclick=pdf;$('#n-xl').onclick=()=>{$('#xl-panel').hidden=false};$('#xl-x').onclick=()=>{$('#xl-panel').hidden=true};$('#xl-rev').onclick=revisarXL;$('#xl-res').onclick=e=>{if(e.target.id==='xl-go')importarXL()};$('#n-txt').oninput=nota;$('#n-exp').onclick=respaldo;$('#n-imp').onclick=()=>$('#n-file').click();$('#n-file').onchange=e=>{const f=e.target.files[0];if(f)importar(f);e.target.value=''};
  $('#out').onclick=async()=>{await D.salir();location.reload()};iniciar();
 });
 })();
