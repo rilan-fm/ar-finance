@@ -38,6 +38,15 @@
 <section id="t-not" class="tab card" hidden>
   <textarea id="n-txt" rows="12" placeholder="Escribe tus notas…"></textarea>
   <div class="row"><small id="n-st" class="muted"></small><span><button id="n-exp" class="btn ghost sm">Respaldo JSON</button> <button id="n-imp" class="btn ghost sm">Importar respaldo</button><input id="n-file" type="file" accept=".json,application/json" hidden></span></div>
+  <div class="row"><button id="n-xl" class="btn ghost sm">📥 Importar desde Excel</button></div>
+  <div id="xl-panel" class="box" hidden>
+    <b>Importar desde Excel</b>
+    <p class="muted lab">Opción 1: sube tu archivo .xlsx (con la plantilla). Opción 2: copia las filas en Excel (con los encabezados) y pégalas abajo.</p>
+    <input id="xl-file" type="file" accept=".xlsx">
+    <textarea id="xl-txt" rows="5" placeholder="O pega aquí las filas copiadas desde Excel (Ctrl+V)…"></textarea>
+    <div class="row"><button id="xl-rev" class="btn sm">Revisar</button><button id="xl-x" class="btn ghost sm">Cerrar</button></div>
+    <div id="xl-res"></div>
+  </div>
 </section>
 </main></div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
