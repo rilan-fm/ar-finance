@@ -36,12 +36,13 @@ function general(){
  <div class="card"><h3>Últimos movimientos</h3><ul class="list">${u.map(fila).join('')}</ul></div>`;
 }
 /* ---------- Registrar ---------- */
-function resetReg(tipo,m='',a=''){st={tipo,fecha:hoy(),cat:'',sub:'',det:'',desc:'',cant:'',monto:'',m,a};drawReg()}
+function resetReg(tipo,m='',a=''){st={tipo,fecha:hoy(),cat:'',sub:'',det:'',desc:'',cant:'1',monto:'',m,a};drawReg()}
 function nuevaCat(){const full=custom.length>=3;
  return `<div class="box"><b>Nueva categoría</b>`+(full?`<p class="warn">Ya tienes 3 categorías propias (el máximo). Elimina una para poder crear otra.</p>`:
  `<label>Nombre<input id="nc-n" maxlength="30"></label><label>Subcategorías (separadas por coma)<textarea id="nc-s" rows="2" placeholder="Ej.: Mascotas, Veterinario"></textarea></label><button class="btn" data-act="nc-ok">Crear categoría</button>`)+
  (custom.length?`<div class="chips">${custom.map(c=>`<span class="chip">${esc(c.nombre)} <button class="del" data-del="${esc(c.id)}" title="Eliminar">🗑</button></span>`).join('')}</div>`:'')+`</div>`}
-const tile=(lv,n,i=0)=>`<button class="tile lv-${lv}" data-lv="${lv}" data-v="${esc(n)}" style="--i:${i}"><span class="ic">${Icons.svg(n)}</span><span class="tl">${esc(n)}</span></button>`;
+const fechaLarga=iso=>{if(!iso)return 'Elige una fecha';const d=new Date(iso+'T12:00:00');if(isNaN(d))return '';const t=d.toLocaleDateString('es-BO',{weekday:'long',day:'numeric',month:'long',year:'numeric'});return (iso===hoy()?'Hoy · ':'')+t.charAt(0).toUpperCase()+t.slice(1)};
+const tile=(lv,n,i=0)=>`<button class="tile lv-${lv}" data-lv="${lv}" data-v="${esc(n)}" style="--i:${i};--ik:${Icons.col(n)}"><span class="ic">${Icons.svg(n)}</span><span class="tl">${esc(n)}</span></button>`;
 const LV={cat:'Categoría',sub:'Subcategoría',det:'Detalle'};
 const lvl=(lv,list,v,a)=>v?`<div class="chosen${a===lv?' pop':''}"><div class="tile big lv-${lv}"><span class="ic">${Icons.svg(v)}</span><span class="tl">${esc(v)}</span></div><button class="btn ghost sm" data-undo="${lv}">↺ Cambiar ${LV[lv].toLowerCase()}</button></div>`
  :`<p class="muted lab">${LV[lv]}</p><div class="tiles${a?' sweep':''}">${list.map((n,i)=>tile(lv,n,i)).join('')}</div>`;
@@ -55,22 +56,22 @@ function drawReg(){
  let h=`<div class="seg2"><button class="btn g${g?'':' ghost'}" data-tipo="gasto">Gasto</button><button class="btn${st.tipo==='ingreso'?'':' ghost'}" data-tipo="ingreso">Ingreso</button></div>`;
  if(st.m)h+=`<p class="ok">${esc(st.m)}</p>`;
  if(st.tipo){
-  h+=`<label>Fecha<input type="date" id="g-fecha" value="${esc(st.fecha)}"></label>`+lvl('cat',g?tree().map(c=>c.n).concat(NUEVA):R.INGRESO,st.cat,a);
+  h+=`<div class="fecha-box"><span class="fecha-ttl">📅 Fecha del registro</span><input type="date" id="g-fecha" class="fecha-in" value="${esc(st.fecha)}"><small id="g-fecha-txt" class="fecha-txt">${fechaLarga(st.fecha)}</small></div>`+lvl('cat',g?tree().map(c=>c.n).concat(NUEVA):R.INGRESO,st.cat,a);
   if(st.cat===NUEVA)h+=nuevaCat();
   else if(st.cat){
    const n=g?tree().find(c=>c.n===st.cat):null,subs=n?n.s:[],dets=n&&n.d[st.sub];
    if(subs.length)h+=lvl('sub',subs,st.sub,a);
    if(subs.length&&st.sub&&dets)h+=lvl('det',dets,st.det,a);
    if((!subs.length||st.sub)&&(!dets||st.det))
-    h+=`<label>Descripción / detalle<input id="g-desc" maxlength="120" value="${esc(st.desc)}"></label>`+(g?`<label>Cantidad (opcional)<input id="g-cant" type="number" step="any" min="0" inputmode="decimal" value="${esc(st.cant)}"></label>`:'')+
-    `<label>Monto (Bs)<input id="g-monto" type="number" step="0.01" min="0.01" inputmode="decimal" value="${esc(st.monto)}"></label><div class="row"><button class="btn" data-act="ok">Registrar ${g?'gasto':'ingreso'}</button><button class="btn ghost" data-act="no">Cancelar</button></div>`;
+    h+=`<label>Descripción / detalle<input id="g-desc" maxlength="120" value="${esc(st.desc)}"></label>`+(g?`<div class="cant-box">Cantidad (1 por defecto)<div class="stepper"><button type="button" data-q="-1" aria-label="Menos">−</button><input id="g-cant" type="number" min="0.01" step="any" inputmode="decimal" value="${esc(st.cant)}"><button type="button" data-q="1" aria-label="Más">+</button></div></div>`:'')+
+    `<label>Monto (Bs)<input id="g-monto" type="number" step="0.01" min="0.01" inputmode="decimal" value="${esc(st.monto)}"></label><div class="row acts"><button class="btn" data-act="ok">Registrar ${g?'gasto':'ingreso'}</button><button class="btn ghost" data-act="no">Cancelar</button></div>`;
   }}
  $('#reg-body').innerHTML=h;
 }
 async function guardar(){
  const monto=Math.round(parseFloat(st.monto)*100)/100,cant=parseFloat(st.cant);
  if(!(monto>0))return alert('Ingresa un monto mayor a 0.');if(!st.fecha)return alert('Elige una fecha.');
- try{movs.push(await D.agregar({tipo:st.tipo,monto,fecha:st.fecha,categoria:st.cat,subcategoria:st.sub||null,detalle:st.det||null,descripcion:st.desc.trim(),cantidad:cant>0?cant:null}));
+ try{movs.push(await D.agregar({tipo:st.tipo,monto,fecha:st.fecha,categoria:st.cat,subcategoria:st.sub||null,detalle:st.det||null,descripcion:st.desc.trim(),cantidad:cant>0?cant:1}));
   resetReg('',`✔ ${st.tipo==='gasto'?'Gasto':'Ingreso'} registrado`);todo()}catch(e){alert('Error: '+e.message)}
 }
 async function crearCat(){
@@ -82,14 +83,14 @@ async function crearCat(){
 async function borrarCat(id){if(!confirm('¿Eliminar esta categoría? Los movimientos ya registrados se conservan.'))return;
  try{await D.eliminarCat(id);custom=custom.filter(c=>c.id!==id);st.cat='';rs.cat=rs.sub=rs.det='';armarCats();drawReg()}catch(e){alert(e.message)}}
 /* ---------- Historial ---------- */
-const fila=m=>`<li><div>${esc(m.categoria)}${m.subcategoria?' › '+esc(m.subcategoria):''}${m.detalle?' › '+esc(m.detalle):''}<small>${esc(m.fecha)} · ${esc(m.descripcion)}${m.cantidad?' · x'+esc(m.cantidad):''}</small></div><div><b class="${esc(m.tipo)}">${m.tipo==='ingreso'?'+':'−'}${F(m.monto)}</b>${m.id?` <button class="del" data-id="${esc(m.id)}" title="Eliminar">🗑</button>`:''}</div></li>`;
+const fila=m=>`<li><div>${esc(m.categoria)}${m.subcategoria?' › '+esc(m.subcategoria):''}${m.detalle?' › '+esc(m.detalle):''}<small>${esc(m.fecha)} · ${esc(m.descripcion)}${m.cantidad&&+m.cantidad!==1?' · x'+esc(+m.cantidad):''}</small></div><div><b class="${esc(m.tipo)}">${m.tipo==='ingreso'?'+':'−'}${F(m.monto)}</b>${m.id?` <button class="del" data-id="${esc(m.id)}" title="Eliminar">🗑</button>`:''}</div></li>`;
 function historial(){const l=R.ordenar(R.filtrar(movs,{q:$('#h-q').value,tipo:$('#h-tipo').value}));
  $('#h-list').innerHTML=l.length?l.map(fila).join(''):'<li class="muted">Sin movimientos.</li>'}
 async function borrar(id){if(!confirm('¿Eliminar este movimiento?'))return;try{await D.eliminar(id);movs=movs.filter(m=>m.id!==id);todo()}catch(e){alert(e.message)}}
 /* ---------- Reportes ---------- */
 const TIPOS=[['vs','Gastos vs Ingresos'],['gasto','Gastos'],['ingreso','Ingresos']],GN={dia:'día',semana:'semana',mes:'mes'},PL={dia:'días',semana:'semanas',mes:'meses'};
 let tipoR='vs',rs={cat:'',sub:'',det:'',a:''};
-const pt=(k,n,x)=>`<button class="tile${x?' sel':''}" data-k="${esc(k)}" data-v="${esc(k)}"><span class="ic">${Icons.svg(k)}</span><span class="tl">${esc(n)}</span></button>`;
+const pt=(k,n,x)=>`<button class="tile${x?' sel':''}" data-k="${esc(k)}" data-v="${esc(k)}" style="--ik:${Icons.col(k)}"><span class="ic">${Icons.svg(k)}</span><span class="tl">${esc(n)}</span></button>`;
 function pintaTipos(){$('#f-t').innerHTML=TIPOS.map(([k,n])=>pt(k,n,k===tipoR)).join('')}
 function armarCats(){const a=rs.a;rs.a='';if(tipoR==='vs'){$('#f-cats').innerHTML='';return}
  const g=tipoR==='gasto',n=g?tree().find(c=>c.n===rs.cat):null,subs=n?n.s:[],dets=n&&n.d[rs.sub];
@@ -171,7 +172,7 @@ document.addEventListener('DOMContentLoaded',()=>{
  $$('.mi').forEach(b=>b.onclick=()=>menu(b.dataset.t));
  $('#burger').onclick=()=>{$('#side').classList.add('open');$('#scrim').classList.add('on')};$('#scrim').onclick=()=>menu($('.mi.on').dataset.t);
  const rb=$('#reg-body');
- rb.addEventListener('change',e=>{if(e.target.id==='g-fecha')st.fecha=e.target.value});
+ rb.addEventListener('change',e=>{if(e.target.id==='g-fecha'){st.fecha=e.target.value;$('#g-fecha-txt').textContent=fechaLarga(st.fecha)}});
  rb.addEventListener('input',e=>{const k={'g-desc':'desc','g-cant':'cant','g-monto':'monto'}[e.target.id];if(k)st[k]=e.target.value});
  rb.addEventListener('click',e=>{
   const t=e.target.closest('.tile[data-lv]');
@@ -179,6 +180,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   const b=e.target.closest('button');if(!b)return;
   if(b.dataset.tipo)resetReg(b.dataset.tipo,'','tipo');
   else if(b.dataset.undo){const lv=b.dataset.undo;st[lv]='';if(lv==='cat')st.sub=st.det='';if(lv==='sub')st.det='';drawReg()}
+  else if(b.dataset.q){const v=Math.max(1,Math.round((parseFloat(st.cant)||1)+ +b.dataset.q));st.cant=String(v);$('#g-cant').value=st.cant}
   else if(b.dataset.act==='ok')guardar();else if(b.dataset.act==='no')resetReg('');else if(b.dataset.act==='nc-ok')crearCat();else if(b.dataset.del)borrarCat(b.dataset.del)});
  $('#h-q').oninput=$('#h-tipo').onchange=historial;$('#h-list').onclick=e=>{const b=e.target.closest('.del');if(b)borrar(b.dataset.id)};
  $('#f-anio').onchange=()=>{poblar();renderRep()};$('#f-mes').onchange=$('#f-d').onchange=$('#f-h').onchange=renderRep;

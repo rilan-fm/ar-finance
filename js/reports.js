@@ -55,7 +55,7 @@ function frecuentes(l){const o={};l.forEach(m=>{const k=(m.subcategoria||m.categ
 function paraImportar(actuales,lista){const clave=m=>[m.tipo,m.fecha,(+m.monto).toFixed(2),m.categoria,m.subcategoria||'',m.detalle||'',String(m.descripcion||'').trim()].join('|');
  const vistos=new Set(actuales.map(clave)),out=[];
  (Array.isArray(lista)?lista:[]).forEach(m=>{if(!m||!['ingreso','gasto'].includes(m.tipo)||!(+m.monto>0)||!/^\d{4}-\d{2}-\d{2}$/.test(m.fecha)||typeof m.categoria!=='string'||!m.categoria)return;
-  const x={tipo:m.tipo,monto:Math.round(+m.monto*100)/100,fecha:m.fecha,categoria:m.categoria.slice(0,60),subcategoria:m.subcategoria?String(m.subcategoria).slice(0,60):null,detalle:m.detalle?String(m.detalle).slice(0,60):null,descripcion:String(m.descripcion||'').slice(0,120),cantidad:+m.cantidad>0?+m.cantidad:null};
+  const x={tipo:m.tipo,monto:Math.round(+m.monto*100)/100,fecha:m.fecha,categoria:m.categoria.slice(0,60),subcategoria:m.subcategoria?String(m.subcategoria).slice(0,60):null,detalle:m.detalle?String(m.detalle).slice(0,60):null,descripcion:String(m.descripcion||'').slice(0,120),cantidad:+m.cantidad>0?+m.cantidad:1};
   const k=clave(x);if(!vistos.has(k)){vistos.add(k);out.push(x)}});return out}
 const norm=s=>String(s??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
 const ALIAS={fecha:'fecha',tipo:'tipo',categoria:'categoria',cat:'categoria',subcategoria:'subcategoria',subcat:'subcategoria',detalle:'detalle',descripcion:'descripcion',concepto:'descripcion',cantidad:'cantidad',monto:'monto',montobs:'monto',importe:'monto',valor:'monto'};
@@ -91,7 +91,7 @@ function validarFilas(mat,cat){const out={total:0,validos:[],errores:[],desconoc
    if(sv){sub=c.s.find(x=>norm(x)===sv);if(!sub){err('Subcategoría «'+g('subcategoria')+'» no existe en '+nombre+'.');continue}
     const dv=norm(g('detalle'));if(dv){det=(c.d[sub]||[]).find(x=>norm(x)===dv);if(!det){err('Detalle «'+g('detalle')+'» no existe en '+sub+'.');continue}}}
    else if(norm(g('detalle'))){err('Hay detalle pero falta la subcategoría.');continue}}
-  let cantidad=null;const cv=g('cantidad');if(String(cv??'').trim()!==''){cantidad=numero(cv);if(!(cantidad>0)){err('Cantidad «'+cv+'» no válida.');continue}}
+  let cantidad=1;const cv=g('cantidad');if(String(cv??'').trim()!==''){cantidad=numero(cv);if(!(cantidad>0)){err('Cantidad «'+cv+'» no válida.');continue}}
   out.validos.push({tipo,monto:Math.round(monto*100)/100,fecha,categoria:nombre,subcategoria:sub,detalle:det,descripcion:String(g('descripcion')??'').trim().slice(0,120),cantidad})}
  return out}
 const api={validarFilas,norm,paraImportar,MESES,rango,granularidad,serie,tendencia,frecuentes,GASTO,INGRESO,esc,fmt,etiquetaMes,dias,ordenar,filtrar,mesesConDatos,aniosConDatos,totales,porCategoria,porSub,porMes,topProducto};
