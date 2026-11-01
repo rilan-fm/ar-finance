@@ -12,7 +12,7 @@ T('Universidad hijos',['Pasajes','Materiales','Matrículas/Inscripciones','Otro'
 T('Préstamos',['De familia','De amigos','Otro']),
 T('Salud',['Medicamentos','Consulta médica','Laboratorio','Otro']),
 T('Viajes en familia',['Comida/Refrigerios','Pasajes/Combustible','Parques/Hotel','Otro'])];
-const INGRESO=['Sueldo','Negocio','Ahorros','Regalo','Otros ingresos'];
+const INGRESO=[T('Rilan',['Sueldo escuela','Dividendo escuela','Trading','Otros ingresos']),T('Ingrid',['Sueldo escuela','Dividendo escuela','Yanbal','Otros ingresos']),T('Hospedaje',['En mi familia','En otras familias']),T('Otros ingresos',[])];
 const MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt=n=>{const[i,d]=Number(n||0).toFixed(2).split('.');return 'Bs '+i.replace(/\B(?=(\d{3})+(?!\d))/g,'.')+','+d};
@@ -78,22 +78,33 @@ function validarFilas(mat,cat){const out={total:0,validos:[],errores:[],desconoc
  for(let i=0;i<Math.min(mat.length,15);i++){const m={};(mat[i]||[]).forEach((h,j)=>{const k=ALIAS[norm(h).replace(/ /g,'')];if(k&&!(k in m))m[k]=j});if('fecha' in m&&'monto' in m){hi=i;idx=m;break}}
  if(hi<0){out.errores.push({fila:0,msg:'No encontré los encabezados. La primera fila debe tener: Fecha, Tipo, Categoría, Subcategoría, Detalle, Descripción, Cantidad, Monto.'});return out}
  for(const k of['tipo','categoria'])if(!(k in idx)){out.errores.push({fila:0,msg:'Falta la columna «'+k+'».'});return out}
- const gc=Object.fromEntries(cat.gasto.map(c=>[norm(c.n),c])),ic=Object.fromEntries(cat.ingreso.map(n=>[norm(n),n]));
+ const gc=Object.fromEntries(cat.gasto.map(c=>[norm(c.n),c])),ic=Object.fromEntries(cat.ingreso.map(c=>[norm(c.n),c]));
  for(let i=hi+1;i<mat.length;i++){const r=mat[i]||[];if(r.every(x=>String(x??'').trim()===''))continue;out.total++;
   const g=k=>k in idx?r[idx[k]]:'',fila=i+1,err=m=>out.errores.push({fila,msg:m});
   const ti=norm(g('tipo')),tipo=/^(gasto|gastos|egreso|egresos)$/.test(ti)?'gasto':/^(ingreso|ingresos)$/.test(ti)?'ingreso':'';
   if(!tipo){err('Tipo «'+g('tipo')+'» no válido (usa gasto o ingreso).');continue}
   const fecha=fechaISO(g('fecha'));if(!fecha){err('Fecha «'+(g('fecha') instanceof Date?'(fecha)':g('fecha'))+'» no válida.');continue}
   const monto=numero(g('monto'));if(!(monto>0)){err('Monto «'+g('monto')+'» no válido (debe ser mayor a 0).');continue}
-  const cn=norm(g('categoria'));let c,nombre,sub=null,det=null;if(tipo==='gasto'){c=gc[cn];nombre=c&&c.n}else nombre=ic[cn];
+  const cn=norm(g('categoria'));let c,nombre,sub=null,det=null;c=(tipo==='gasto'?gc:ic)[cn];nombre=c&&c.n;
   if(!nombre){const k=String(g('categoria')).trim()||'(vacía)',kk=k+' ('+tipo+')';out.desconocidas[kk]=(out.desconocidas[kk]||0)+1;err('Categoría «'+k+'» no existe para '+tipo+'.');continue}
-  if(tipo==='gasto'){const sv=norm(g('subcategoria'));
+  {const sv=norm(g('subcategoria'));
+   if(!sv&&tipo==='ingreso'&&c.s.length){err('Falta la categoría del ingreso (columna Subcategoría).');continue}
    if(sv){sub=c.s.find(x=>norm(x)===sv);if(!sub){err('Subcategoría «'+g('subcategoria')+'» no existe en '+nombre+'.');continue}
     const dv=norm(g('detalle'));if(dv){det=(c.d[sub]||[]).find(x=>norm(x)===dv);if(!det){err('Detalle «'+g('detalle')+'» no existe en '+sub+'.');continue}}}
    else if(norm(g('detalle'))){err('Hay detalle pero falta la subcategoría.');continue}}
   let cantidad=1;const cv=g('cantidad');if(String(cv??'').trim()!==''){cantidad=numero(cv);if(!(cantidad>0)){err('Cantidad «'+cv+'» no válida.');continue}}
   out.validos.push({tipo,monto:Math.round(monto*100)/100,fecha,categoria:nombre,subcategoria:sub,detalle:det,descripcion:String(g('descripcion')??'').trim().slice(0,120),cantidad})}
  return out}
-const api={validarFilas,norm,paraImportar,MESES,rango,granularidad,serie,tendencia,frecuentes,GASTO,INGRESO,esc,fmt,etiquetaMes,dias,ordenar,filtrar,mesesConDatos,aniosConDatos,totales,porCategoria,porSub,porMes,topProducto};
+const pct=(p,t)=>t>0?Math.round(p/t*1000)/10:0;
+const fmtPct=(x,d=1)=>Number(x||0).toFixed(d).replace('.',',')+'%';
+const fmtCorto=n=>{const v=Math.round(Number(n||0));return(v<0?'-':'')+String(Math.abs(v)).replace(/\B(?=(\d{3})+(?!\d))/g,'.')};
+const fechaCorta=s=>s.slice(8,10)+'/'+s.slice(5,7)+'/'+s.slice(0,4);
+const mesCorto=k=>MESES[+k.slice(5,7)-1].slice(0,3)+' '+k.slice(2,4);
+function periodoRapido(k,hoy,l){const ms=mesesConDatos(l),as=aniosConDatos(l);if(!ms.length)return null;
+ if(k==='anio'){const y=hoy.slice(0,4);return{anio:as.includes(y)?y:as[0],mes:''}}
+ const hm=hoy.slice(0,7);let ym=ms.includes(hm)?hm:ms[0];
+ if(k==='anterior'){let y=+ym.slice(0,4),m=+ym.slice(5,7)-1;if(m<1){m=12;y--}ym=y+'-'+String(m).padStart(2,'0');if(!ms.includes(ym))return null}
+ return{anio:ym.slice(0,4),mes:ym.slice(5,7)}}
+const api={pct,fmtPct,fmtCorto,fechaCorta,mesCorto,periodoRapido,validarFilas,norm,paraImportar,MESES,rango,granularidad,serie,tendencia,frecuentes,GASTO,INGRESO,esc,fmt,etiquetaMes,dias,ordenar,filtrar,mesesConDatos,aniosConDatos,totales,porCategoria,porSub,porMes,topProducto};
 if(typeof module!=='undefined')module.exports=api;else root.Reports=api;
 })(typeof window!=='undefined'?window:globalThis);

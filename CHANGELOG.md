@@ -1,4 +1,15 @@
 # Changelog
+## 0.4.7
+- Registrar › Ingreso: nuevo primer paso «Origen del ingreso» (Rilan, Ingrid, Hospedaje, Otros ingresos) y luego su categoría: Rilan (Sueldo escuela, Dividendo escuela, Trading, Otros ingresos), Ingrid (Sueldo escuela, Dividendo escuela, Yanbal, Otros ingresos), Hospedaje (En mi familia, En otras familias). «Otros ingresos» va directo a descripción y monto.
+- En la base: categoria = origen, subcategoria = categoría. Sin cambios de esquema; los ingresos antiguos se conservan.
+- Iconos: Rilan = varón, Ingrid = mujer, Hospedaje = cama/hotel, Trading = gráfico. Mismo flujo animado de siempre.
+- Importar desde Excel: valida origen y categoría de ingresos. Nueva Plantilla_Ar_Finance.xlsx con gastos e ingresos.
+- Reportes (solo lo necesario): el filtro de ingresos usa los nuevos orígenes y muestra también los ingresos antiguos si existen.
+## 0.4.6
+- Reportes, filtros: tarjeta «Filtros» con botones rápidos (Este mes, Mes anterior, Este año), campos más grandes en cuadrícula (2x2 en móvil), selector de tipo como 3 botones con borde, aviso si «Desde» es posterior a «Hasta», calendario visible en modo oscuro y corrección del Mes en blanco al cambiar de año.
+- Reportes, tarjetas: textos más grandes, 2 columnas en móvil, línea con el periodo y nº de movimientos, veredicto con barra de color.
+- Reportes, cálculos nuevos: tasa de ahorro, categoría más fuerte con su %, participación de la categoría en el total, promedio por movimiento.
+- Reportes, gráficos: colores según modo claro/oscuro, cuadrícula visible en oscuro, montos y % en las barras, ejes en Bs, tooltips con Bs, etiquetas largas recortadas, fondo propio (el PDF ya no sale con texto invisible en modo oscuro).
 ## 0.4.5
 - Los archivos css/js se enlazan con ?v=0.4.5 en index.html: el navegador (sobre todo el móvil) pide siempre los archivos nuevos. Subir este número en cada versión.
 - Entrega de actualizaciones como paquete «solo archivos cambiados, con sus carpetas y sin config.js».

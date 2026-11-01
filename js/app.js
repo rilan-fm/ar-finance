@@ -3,7 +3,7 @@ const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],R=R
 let D,movs=[],custom=[],ch={},st;
 const NUEVA='Nueva categoría',hoy=()=>new Date().toLocaleDateString('sv');
 const tree=()=>R.GASTO.concat(custom.map(c=>({n:c.nombre,s:c.subs||[],d:{},id:c.id})));
-const nomCats=()=>tree().map(c=>c.n).concat(R.INGRESO);
+const nomCats=()=>tree().map(c=>c.n).concat(R.INGRESO.map(c=>c.n));
 const sel=(l,id,list,v)=>`<label>${l}<select id="${id}"><option value="">Selecciona…</option>${list.map(x=>`<option${x===v?' selected':''}>${esc(x)}</option>`).join('')}</select></label>`;
 const K=(a,b,c='',cl='a',ic='')=>`<div class="k ${cl}">${ic?`<span class="kic ${c==='ingreso'?'pos':c==='gasto'?'neg':''}">${Icons.svg(ic)}</span>`:''}<div><small>${a}</small><b class="${c}">${b}</b></div></div>`;
 const msg=(e,t)=>$(e).textContent=t;
@@ -43,9 +43,9 @@ function nuevaCat(){const full=custom.length>=3;
  (custom.length?`<div class="chips">${custom.map(c=>`<span class="chip">${esc(c.nombre)} <button class="del" data-del="${esc(c.id)}" title="Eliminar">🗑</button></span>`).join('')}</div>`:'')+`</div>`}
 const fechaLarga=iso=>{if(!iso)return 'Elige una fecha';const d=new Date(iso+'T12:00:00');if(isNaN(d))return '';const t=d.toLocaleDateString('es-BO',{weekday:'long',day:'numeric',month:'long',year:'numeric'});return (iso===hoy()?'Hoy · ':'')+t.charAt(0).toUpperCase()+t.slice(1)};
 const tile=(lv,n,i=0)=>`<button class="tile lv-${lv}" data-lv="${lv}" data-v="${esc(n)}" style="--i:${i};--ik:${Icons.col(n)}"><span class="ic">${Icons.svg(n)}</span><span class="tl">${esc(n)}</span></button>`;
-const LV={cat:'Categoría',sub:'Subcategoría',det:'Detalle'};
-const lvl=(lv,list,v,a)=>v?`<div class="chosen${a===lv?' pop':''}"><div class="tile big lv-${lv}"><span class="ic">${Icons.svg(v)}</span><span class="tl">${esc(v)}</span></div><button class="btn ghost sm" data-undo="${lv}">↺ Cambiar ${LV[lv].toLowerCase()}</button></div>`
- :`<p class="muted lab">${LV[lv]}</p><div class="tiles${a?' sweep':''}">${list.map((n,i)=>tile(lv,n,i)).join('')}</div>`;
+const LV={cat:'Categoría',sub:'Subcategoría',det:'Detalle'},LVI={cat:'Origen del ingreso',sub:'Categoría',det:'Detalle'};
+const lvl=(lv,list,v,a,ing)=>v?`<div class="chosen${a===lv?' pop':''}"><div class="tile big lv-${lv}"><span class="ic">${Icons.svg(v)}</span><span class="tl">${esc(v)}</span></div><button class="btn ghost sm" data-undo="${lv}">↺ Cambiar ${(ing?LVI:LV)[lv].toLowerCase()}</button></div>`
+ :`<p class="muted lab">${(ing?LVI:LV)[lv]}</p><div class="tiles${a?' sweep':''}">${list.map((n,i)=>tile(lv,n,i)).join('')}</div>`;
 let busy=false;
 function behind(t,cb){if(busy)return;busy=true;const r=t.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;
  [...t.parentElement.children].forEach(x=>{if(x===t)return x.classList.add('zoom');const q=x.getBoundingClientRect();
@@ -56,12 +56,12 @@ function drawReg(){
  let h=`<div class="seg2"><button class="btn g${g?'':' ghost'}" data-tipo="gasto">Gasto</button><button class="btn${st.tipo==='ingreso'?'':' ghost'}" data-tipo="ingreso">Ingreso</button></div>`;
  if(st.m)h+=`<p class="ok">${esc(st.m)}</p>`;
  if(st.tipo){
-  h+=`<div class="fecha-box"><span class="fecha-ttl">📅 Fecha del registro</span><input type="date" id="g-fecha" class="fecha-in" value="${esc(st.fecha)}"><small id="g-fecha-txt" class="fecha-txt">${fechaLarga(st.fecha)}</small></div>`+lvl('cat',g?tree().map(c=>c.n).concat(NUEVA):R.INGRESO,st.cat,a);
+  h+=`<div class="fecha-box"><span class="fecha-ttl">📅 Fecha del registro</span><input type="date" id="g-fecha" class="fecha-in" value="${esc(st.fecha)}"><small id="g-fecha-txt" class="fecha-txt">${fechaLarga(st.fecha)}</small></div>`+lvl('cat',g?tree().map(c=>c.n).concat(NUEVA):R.INGRESO.map(c=>c.n),st.cat,a,!g);
   if(st.cat===NUEVA)h+=nuevaCat();
   else if(st.cat){
-   const n=g?tree().find(c=>c.n===st.cat):null,subs=n?n.s:[],dets=n&&n.d[st.sub];
-   if(subs.length)h+=lvl('sub',subs,st.sub,a);
-   if(subs.length&&st.sub&&dets)h+=lvl('det',dets,st.det,a);
+   const n=(g?tree():R.INGRESO).find(c=>c.n===st.cat),subs=n?n.s:[],dets=n&&n.d[st.sub];
+   if(subs.length)h+=lvl('sub',subs,st.sub,a,!g);
+   if(subs.length&&st.sub&&dets)h+=lvl('det',dets,st.det,a,!g);
    if((!subs.length||st.sub)&&(!dets||st.det))
     h+=`<label>Descripción / detalle<input id="g-desc" maxlength="120" value="${esc(st.desc)}"></label>`+(g?`<div class="cant-box">Cantidad (1 por defecto)<div class="stepper"><button type="button" data-q="-1" aria-label="Menos">−</button><input id="g-cant" type="number" min="0.01" step="any" inputmode="decimal" value="${esc(st.cant)}"><button type="button" data-q="1" aria-label="Más">+</button></div></div>`:'')+
     `<label>Monto (Bs)<input id="g-monto" type="number" step="0.01" min="0.01" inputmode="decimal" value="${esc(st.monto)}"></label><div class="row acts"><button class="btn" data-act="ok">Registrar ${g?'gasto':'ingreso'}</button><button class="btn ghost" data-act="no">Cancelar</button></div>`;
@@ -93,44 +93,59 @@ let tipoR='vs',rs={cat:'',sub:'',det:'',a:''};
 const pt=(k,n,x)=>`<button class="tile${x?' sel':''}" data-k="${esc(k)}" data-v="${esc(k)}" style="--ik:${Icons.col(k)}"><span class="ic">${Icons.svg(k)}</span><span class="tl">${esc(n)}</span></button>`;
 function pintaTipos(){$('#f-t').innerHTML=TIPOS.map(([k,n])=>pt(k,n,k===tipoR)).join('')}
 function armarCats(){const a=rs.a;rs.a='';if(tipoR==='vs'){$('#f-cats').innerHTML='';return}
- const g=tipoR==='gasto',n=g?tree().find(c=>c.n===rs.cat):null,subs=n?n.s:[],dets=n&&n.d[rs.sub];
- let h=lvl('cat',g?tree().map(c=>c.n):R.INGRESO,rs.cat,a);
- if(rs.cat&&subs.length)h+=lvl('sub',subs,rs.sub,a);if(rs.sub&&dets)h+=lvl('det',dets,rs.det,a);
+ const g=tipoR==='gasto',n=(g?tree():R.INGRESO).find(c=>c.n===rs.cat),subs=n?n.s:[],dets=n&&n.d[rs.sub],leg=[...new Set(movs.filter(m=>m.tipo==='ingreso').map(m=>m.categoria))].filter(x=>!R.INGRESO.some(c=>c.n===x));
+ let h=lvl('cat',g?tree().map(c=>c.n):R.INGRESO.map(c=>c.n).concat(leg),rs.cat,a,!g);
+ if(rs.cat&&subs.length)h+=lvl('sub',subs,rs.sub,a,!g);if(rs.sub&&dets)h+=lvl('det',dets,rs.det,a,!g);
  $('#f-cats').innerHTML=h}
 function poblar(){const m=$('#f-mes').value,a=$('#f-anio').value,base=a?movs.filter(x=>x.fecha.startsWith(a)):movs;
  $('#f-anio').innerHTML='<option value="">Todos</option>'+R.aniosConDatos(movs).map(k=>`<option>${k}</option>`).join('');
  $('#f-mes').innerHTML='<option value="">Todos</option>'+[...new Set(base.map(x=>x.fecha.slice(5,7)))].sort().map(k=>`<option value="${k}">${R.MESES[+k-1]}</option>`).join('');
- $('#f-anio').value=a;$('#f-mes').value=m}
+ $('#f-anio').value=a;if($('#f-anio').selectedIndex<0)$('#f-anio').value='';$('#f-mes').value=m;if($('#f-mes').selectedIndex<0)$('#f-mes').value=''}
 const filtros=()=>({anio:$('#f-anio').value,mes:$('#f-mes').value,desde:$('#f-d').value,hasta:$('#f-h').value,tipo:tipoR==='vs'?'':tipoR,cats:rs.cat?[rs.cat]:[],sub:rs.sub,det:rs.det});
-const PAL=['#00bcd4','#b100ff','#ff9900','#2563eb','#16a34a','#dc2626','#db2777','#ca8a04','#0891b2','#4b5563','#7c3aed','#65a30d'];
-const COL={gastos:'#af11f2',ingresos:'#00f8ff'},NOM={gastos:'Gastos',ingresos:'Ingresos'};
-const barH=(id,l,c)=>new Chart($(id),{type:'bar',data:{labels:l.map(x=>x.cat),datasets:[{data:l.map(x=>x.total),backgroundColor:c}]},options:{indexAxis:'y',maintainAspectRatio:false,animation:false,plugins:{legend:{display:false}}}});
-const barM=(id,pm)=>new Chart($(id),{type:'bar',data:{labels:pm.map(m=>R.etiquetaMes(m.mes)),datasets:['ingresos','gastos'].map(k=>({label:NOM[k],data:pm.map(m=>m[k]),backgroundColor:COL[k]}))},options:{maintainAspectRatio:false,animation:false}});
-const barS=(id,s,keys)=>new Chart($(id),{type:'bar',data:{labels:s.map(x=>x.label),datasets:keys.map(k=>({label:NOM[k],data:s.map(x=>x[k]),backgroundColor:COL[k]}))},options:{maintainAspectRatio:false,animation:false}});
-const lineEvo=(id,s,keys)=>new Chart($(id),{type:'line',data:{labels:s.map(x=>x.label),datasets:keys.flatMap(k=>{const v=s.map(x=>x[k]);return[{label:NOM[k],data:v,borderColor:COL[k],backgroundColor:COL[k]+'33',tension:.25,pointRadius:s.length>40?0:3},{label:'Tendencia '+NOM[k].toLowerCase(),data:R.tendencia(v).linea,borderColor:COL[k],borderDash:[6,5],pointRadius:0,borderWidth:2}]})},options:{maintainAspectRatio:false,animation:false,plugins:{legend:{position:'bottom'}}}});
+const NOM={gastos:'Gastos',ingresos:'Ingresos'},chico=()=>window.innerWidth<=760,recorta=(s,n)=>s.length>n?s.slice(0,n-1)+'…':s;
+const tema=()=>{const s=getComputedStyle(document.documentElement),v=n=>s.getPropertyValue(n).trim();return{mu:v('--mu'),bd:v('--bd'),c:v('--c'),tx:v('--tx'),gastos:'#af11f2',ingresos:matchMedia('(prefers-color-scheme:dark)').matches?'#00f8ff':'#0891b2'}};
+let TM=tema();
+if(window.Chart)Chart.register({id:'fondo',beforeDraw(c){const x=c.ctx;x.save();x.globalCompositeOperation='destination-over';x.fillStyle=TM.c;x.fillRect(0,0,c.width,c.height);x.restore()}});
+const rotulos={id:'rotulos',afterDatasetsDraw(c,_a,o){if(!o||!o.on)return;const x=c.ctx,m=c.getDatasetMeta(0),d=c.data.datasets[0].data;x.save();x.fillStyle=o.color;x.font='600 '+o.size+'px system-ui,sans-serif';x.textBaseline='middle';x.textAlign='left';
+ m.data.forEach((b,i)=>x.fillText('Bs '+R.fmtCorto(d[i])+' · '+R.fmtPct(R.pct(d[i],o.suma),0),b.x+6,b.y));x.restore()}};
+const ley=()=>({position:'bottom',labels:{usePointStyle:true,boxWidth:8,padding:14}});
+const tip={callbacks:{label:c=>' '+(c.dataset.label?c.dataset.label+': ':'')+F(c.chart.options.indexAxis==='y'?c.parsed.x:c.parsed.y)}};
+const gx=()=>({grid:{display:false},ticks:{maxRotation:chico()?45:0,autoSkip:true,autoSkipPadding:10}}),gy=()=>({beginAtZero:true,grid:{color:TM.bd},ticks:{callback:v=>R.fmtCorto(v)}});
+const opt=(x={})=>({maintainAspectRatio:false,animation:false,interaction:{mode:'index',intersect:false},plugins:{legend:ley(),tooltip:tip},scales:{x:gx(),y:gy()},...x});
+const barH=(id,l,c,suma)=>new Chart($(id),{type:'bar',plugins:[rotulos],data:{labels:l.map(x=>x.cat),datasets:[{data:l.map(x=>x.total),backgroundColor:c,borderRadius:6,maxBarThickness:26}]},
+ options:{indexAxis:'y',maintainAspectRatio:false,animation:false,layout:{padding:{right:chico()?100:124}},plugins:{legend:{display:false},tooltip:{callbacks:{label:q=>' '+F(q.parsed.x)+' · '+R.fmtPct(R.pct(q.parsed.x,suma))}},rotulos:{on:true,color:TM.tx,size:chico()?11:12,suma}},
+  scales:{x:gy(),y:{grid:{display:false},ticks:{callback(v){return recorta(this.getLabelForValue(v),chico()?17:30)}}}}}});
+const ds=(s,keys)=>keys.map(k=>({label:NOM[k],data:s.map(x=>x[k]),backgroundColor:TM[k],borderRadius:4,maxBarThickness:34}));
+const barM=(id,pm)=>new Chart($(id),{type:'bar',data:{labels:pm.map(m=>R.mesCorto(m.mes)),datasets:ds(pm,['ingresos','gastos'])},options:opt()});
+const barS=(id,s,keys)=>new Chart($(id),{type:'bar',data:{labels:s.map(x=>x.label),datasets:ds(s,keys)},options:opt()});
+const lineEvo=(id,s,keys)=>new Chart($(id),{type:'line',data:{labels:s.map(x=>x.label),datasets:keys.flatMap(k=>{const v=s.map(x=>x[k]);return[{label:NOM[k],data:v,borderColor:TM[k],backgroundColor:TM[k]+'26',fill:keys.length===1,tension:.3,borderWidth:2.5,pointRadius:s.length>40?0:3,pointHoverRadius:6},{label:'Tendencia '+NOM[k].toLowerCase(),data:R.tendencia(v).linea,borderColor:TM[k],borderDash:[6,5],pointRadius:0,borderWidth:2,fill:false}]})},options:opt()});
 const badge=v=>`<small class="badge">${{sube:'↗ en aumento',baja:'↘ en descenso',estable:'→ estable'}[R.tendencia(v).dir]}</small>`;
 const card=(h,id,hl,ht)=>`<div class="card${hl?' hl':''}"><h3>${h}</h3><div class="cv"${ht?` style="height:${ht}px"`:''}><canvas id="${id}"></canvas></div></div>`;
+const sub=t=>`<span class="sub">${t}</span>`;
 function renderRep(){
- const f=filtros(),l=R.filtrar(movs,f),o=$('#rep-out');Object.values(ch).forEach(c=>c.destroy());ch={};
- Chart.defaults.color=getComputedStyle(document.body).getPropertyValue('--mu');
- if(!l.length){o.innerHTML='<div class="card muted">Sin datos para este filtro.</div>';return}
+ const f=filtros(),o=$('#rep-out'),fm=$('#f-msg'),mal=f.desde&&f.hasta&&f.desde>f.hasta;Object.values(ch).forEach(c=>c.destroy());ch={};
+ fm.hidden=!mal;fm.textContent=mal?'La fecha «Desde» es posterior a «Hasta». Corrígela para ver el reporte.':'';if(mal){o.innerHTML='';return}
+ TM=tema();Chart.defaults.color=TM.mu;Chart.defaults.font.size=chico()?13:12;
+ const l=R.filtrar(movs,f);
+ if(!l.length){o.innerHTML='<div class="card vacio"><b>Sin datos para este filtro</b><span class="muted">Prueba con otro mes o pulsa «Limpiar».</span></div>';return}
  const[a,b]=R.rango(f,l,hoy()),gr=R.granularidad(f,a,b),s1=R.serie(l,gr[0],a,b),s2=R.serie(l,gr[1],a,b),t=R.totales(l,a,b),sem=Math.max(1,R.dias(a,b)/7);
- const e1=`Evolución por ${GN[gr[0]]}`,e2=`Por ${GN[gr[1]]}`;
+ const e1=`Evolución por ${GN[gr[0]]}`,e2=`Por ${GN[gr[1]]}`,per=`<div class="perio">📅 ${R.fechaCorta(a)} – ${R.fechaCorta(b)} · ${t.n} movimiento${t.n===1?'':'s'}</div>`;
  if(tipoR==='vs'){
-  const sg=s1.filter(x=>x.gastos>x.ingresos).length,tg=R.tendencia(s1.map(x=>x.gastos)).dir,ti=R.tendencia(s1.map(x=>x.ingresos)).dir,nm={sube:'↗ suben',baja:'↘ bajan',estable:'→ estables'};
-  o.innerHTML=`<div class="grid">${K('Ingresos',F(t.ingresos),'ingreso','a','up')}${K('Gastos',F(t.gastos),'gasto','a','down')}${K('Balance',F(t.balance),t.balance<0?'gasto':'ingreso','a','scale')}${K('Gasto promedio por mes',F(t.gMes),'','o','calendar')}${K('Ingreso promedio por mes',F(t.iMes),'','p','calendar')}${K('Gastos > ingresos',sg+' de '+s1.length+' '+PL[gr[0]],sg?'gasto':'ingreso','a','alert')}</div>
-  <p class="muted">${t.balance<0?'⚠ Los gastos superan a los ingresos en este periodo.':'✔ Los ingresos superan a los gastos en este periodo.'} Tendencia: gastos ${nm[tg]}, ingresos ${nm[ti]}.</p>
+  const sg=s1.filter(x=>x.gastos>x.ingresos).length,tg=R.tendencia(s1.map(x=>x.gastos)).dir,ti=R.tendencia(s1.map(x=>x.ingresos)).dir,nm={sube:'↗ suben',baja:'↘ bajan',estable:'→ estables'},
+   pc=R.porCategoria(l)[0],ah=t.ingresos>0?R.pct(t.balance,t.ingresos):null;
+  o.innerHTML=per+`<div class="grid">${K('Ingresos',F(t.ingresos),'ingreso','a','up')}${K('Gastos',F(t.gastos),'gasto','a','down')}${K('Balance',F(t.balance),t.balance<0?'gasto':'ingreso','a','scale')}${K('Tasa de ahorro',ah==null?'—':R.fmtPct(ah),ah!=null&&ah<0?'gasto':'ingreso','a','coin')}${K('Gasto promedio por mes',F(t.gMes),'','o','calendar')}${K('Ingreso promedio por mes',F(t.iMes),'','p','calendar')}${K('Gastos > ingresos',sg+' de '+s1.length+' '+PL[gr[0]],sg?'gasto':'ingreso','a','alert')}${K('Categoría de gasto más fuerte',pc?F(pc.total)+sub(esc(pc.cat)+' · '+R.fmtPct(R.pct(pc.total,t.gastos))+' de tus gastos'):'—','','p','trophy')}</div>
+  <div class="vd${t.balance<0?' mal':''}"><b>${t.balance<0?'⚠ Los gastos superan a los ingresos':t.balance>0?'✔ Los ingresos superan a los gastos':'Ingresos y gastos están igualados'}</b> en este periodo. Tendencia: gastos ${nm[tg]}, ingresos ${nm[ti]}.</div>
   <div class="duo">${card('Comportamiento: ingresos vs. gastos por '+GN[gr[0]],'c1',1)}${card('Ingresos y gastos por mes','c2')}</div>${card(e2,'c3')}`;
   ch.c1=lineEvo('#c1',s1,['ingresos','gastos']);ch.c2=barM('#c2',R.porMes(l));ch.c3=barS('#c3',s2,['ingresos','gastos']);return}
  const gk=tipoR==='gasto'?'gastos':'ingresos',tot=t[gk],W=tipoR==='gasto'?'Gasto':'Ingreso',ev=card(e1+' '+badge(s1.map(x=>x[gk])),'c2');
- if(!f.cats.length){const pc=R.porCategoria(l,tipoR);
-  o.innerHTML=`<div class="grid">${K(W+' total',F(tot),tipoR,'a',tipoR)}${K(W+' promedio por mes',F(t[gk==='gastos'?'gMes':'iMes']),'','o','calendar')}${K(W+' promedio por semana',F(tot/sem),'','p','calweek')}${K(W+' promedio diario',F(tot/R.dias(a,b)),'','a','sun')}${K('Movimientos',t.n,'','a','list')}</div>
+ if(!f.cats.length){const pc=R.porCategoria(l,tipoR),p0=pc[0];
+  o.innerHTML=per+`<div class="grid">${K(W+' total',F(tot),tipoR,'a',tipoR)}${K(W+' promedio por mes',F(t[gk==='gastos'?'gMes':'iMes']),'','o','calendar')}${K(W+' promedio por semana',F(tot/sem),'','p','calweek')}${K(W+' promedio diario',F(tot/R.dias(a,b)),'','a','sun')}${K('Movimientos',t.n,'','a','list')}${K(tipoR==='gasto'?'Categoría más fuerte':'Fuente más fuerte',p0?F(p0.total)+sub(esc(p0.cat)+' · '+R.fmtPct(R.pct(p0.total,tot))+' del total'):'—','','p','trophy')}</div>
   <div class="duo">${card(W+'s por categoría','c1',1,Math.max(280,pc.length*30+40))}${ev}</div>${card(e2,'c3')}`;
-  ch.c1=barH('#c1',pc,COL[gk])}
- else{const fr=R.frecuentes(l),p=fr[0];
-  o.innerHTML=`<h2>${[f.cats[0],f.sub,f.det].filter(Boolean).map(esc).join(' › ')}</h2><div class="grid">${K(W+' total',F(tot),tipoR,'a',tipoR)}${K(W+' más frecuente',esc(p.k)+' · '+F(p.total)+' ('+p.n+'×)','','p','repeat')}${K(W+' promedio por semana',F(tot/sem),'','o','calweek')}</div>
+  ch.c1=barH('#c1',pc,TM[gk],tot)}
+ else{const fr=R.frecuentes(l),p=fr[0],base=R.totales(R.filtrar(movs,{...f,cats:[],sub:'',det:''}))[gk];
+  o.innerHTML=per+`<h2>${[f.cats[0],f.sub,f.det].filter(Boolean).map(esc).join(' › ')}</h2><div class="grid">${K(W+' total',F(tot),tipoR,'a',tipoR)}${K('Participación',R.fmtPct(R.pct(tot,base))+sub('de tus '+gk+' del periodo'),'','o','scale')}${K(W+' más frecuente',F(p.total)+sub(esc(p.k)+' · '+p.n+'×'),'','p','repeat')}${K(W+' promedio por semana',F(tot/sem),'','o','calweek')}${K('Movimientos',t.n,'','a','list')}${K('Promedio por movimiento',F(tot/t.n),'','a','coin')}</div>
   <div class="duo">${card(W+'s más recurrentes y sus montos','c1',1,Math.max(240,Math.min(8,fr.length)*34+40))}${ev}</div>${card(e2,'c3')}`;
-  ch.c1=barH('#c1',fr.slice(0,8).map(x=>({cat:`${x.k} (${x.n}×)`,total:x.total})),COL[gk])}
+  ch.c1=barH('#c1',fr.slice(0,8).map(x=>({cat:`${x.k} (${x.n}×)`,total:x.total})),TM[gk],tot)}
  ch.c2=lineEvo('#c2',s1,[gk]);ch.c3=barS('#c3',s2,[gk]);
 }
 function pdf(){const f=filtros(),l=R.ordenar(R.filtrar(movs,f)),c=Object.values(ch);if(!l.length||c.length<2)return alert('No hay datos para exportar.');const[a,b]=R.rango(f,l,hoy());
@@ -189,6 +204,10 @@ document.addEventListener('DOMContentLoaded',()=>{
   if(t)return behind(t,()=>{const lv=t.dataset.lv;rs[lv]=t.dataset.v;if(lv==='cat')rs.sub=rs.det='';if(lv==='sub')rs.det='';rs.a=lv;armarCats();renderRep()});
   const b=e.target.closest('[data-undo]');if(b){const lv=b.dataset.undo;rs[lv]='';if(lv==='cat')rs.sub=rs.det='';if(lv==='sub')rs.det='';armarCats();renderRep()}};
  $('#f-todo').onclick=()=>{$('#f-anio').value=$('#f-mes').value=$('#f-d').value=$('#f-h').value='';tipoR='vs';rs={cat:'',sub:'',det:'',a:''};pintaTipos();armarCats();poblar();renderRep()};
+ $('#f-q').onclick=e=>{const b=e.target.closest('[data-p]');if(!b)return;const q=R.periodoRapido(b.dataset.p,hoy(),movs),fm=$('#f-msg');
+  if(!q){fm.textContent='No hay movimientos en ese periodo.';fm.hidden=false;return}
+  $('#f-d').value=$('#f-h').value='';$('#f-anio').value=q.anio;poblar();$('#f-mes').value=q.mes;renderRep()};
+ matchMedia('(prefers-color-scheme:dark)').addEventListener('change',()=>{if(!$('#t-rep').hidden)renderRep()});
  $('#pdf').onclick=pdf;$('#n-xl').onclick=()=>{$('#xl-panel').hidden=false};$('#xl-x').onclick=()=>{$('#xl-panel').hidden=true};$('#xl-rev').onclick=revisarXL;$('#xl-res').onclick=e=>{if(e.target.id==='xl-go')importarXL()};$('#n-txt').oninput=nota;$('#n-exp').onclick=respaldo;$('#n-imp').onclick=()=>$('#n-file').click();$('#n-file').onchange=e=>{const f=e.target.files[0];if(f)importar(f);e.target.value=''};
  $('#out').onclick=async()=>{await D.salir();location.reload()};iniciar();
 });
