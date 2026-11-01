@@ -127,3 +127,37 @@ label{display:flex;flex-direction:column;gap:4px;font-size:.85rem;color:var(--mu
 #t-cfg h2{margin:4px 0 12px}#t-cfg .card>h3{margin:0;font-size:1.05rem}
 .cat-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--bd);border-radius:12px}
 .cat-row small{display:block}.acts2{display:flex;align-items:center;gap:8px;flex:none}
+
+/* ---- 0.5.1 Registrar: botones con ilustración, colores, ancho ---- */
+:root{--c-lv:#00d947;--c-az:#356bff}
+.tipos{--ill:#7f88c8;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(prefers-color-scheme:dark){.tipos{--ill:#cdd2f7}}
+.tipo-col{display:flex;flex-direction:column;align-items:center;gap:12px}
+.tipo-col.gas{--tc:#fe9900;--tt:#fff;--tcg:rgba(254,153,0,.4)}
+.tipo-col.ing{--tc:var(--c-cy);--tt:#fff;--tcg:rgba(8,145,178,.4)}
+@media(prefers-color-scheme:dark){.tipo-col.ing{--tt:#0b1130;--tcg:rgba(0,248,255,.35)}}
+.ill-btn{background:none;border:0;padding:0;cursor:pointer;width:100%;display:flex;justify-content:center}
+.ill-btn svg{width:min(100%,150px);height:auto;transition:transform .25s ease,filter .25s ease}
+.il-a{fill:var(--tc)}.il-l{fill:var(--ill)}.il-f{fill:none;stroke:var(--ill);stroke-width:7}.il-s{fill:none;stroke:var(--ill);stroke-width:12}
+.tipo-col:hover .ill-btn svg,.tipo-col.on .ill-btn svg{transform:translateY(-3px) scale(1.04);filter:drop-shadow(0 8px 14px var(--tcg))}
+.btn-tipo{width:100%;max-width:260px;padding:14px 10px;border:3px solid var(--tc);border-radius:16px;background:transparent;color:var(--tx);font:inherit;font-size:1.2rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;transition:background .2s,color .2s,transform .15s,box-shadow .2s}
+.btn-tipo:hover,.btn-tipo.on,.tipo-col:hover .btn-tipo{background:var(--tc);color:var(--tt);box-shadow:0 8px 22px var(--tcg);transform:translateY(-2px);text-shadow:0 1px 2px rgba(0,0,0,.2)}
+.btn-tipo:active{transform:translateY(0) scale(.97)}
+.btn-tipo:focus-visible{outline:3px solid var(--tx);outline-offset:3px}
+.fields{display:flex;flex-direction:column;gap:12px}
+@media(max-width:760px){.tipos.c .ill-btn svg{width:84px}.btn-tipo{font-size:1.1rem}}
+@media(min-width:1000px){
+ #t-reg.tab{max-width:1500px;margin:0 auto;padding:26px 32px;gap:20px}
+ #t-reg .tipos{max-width:900px;width:100%;margin:0 auto;gap:48px}
+ #t-reg .ill-btn svg{width:min(100%,230px)}.btn-tipo{font-size:1.35rem;padding:18px 10px}
+ #t-reg .fecha-box{max-width:680px;width:100%;margin:0 auto}
+ #t-reg .tiles{grid-template-columns:repeat(auto-fill,minmax(140px,150px));justify-content:center;gap:22px 18px}
+ #t-reg .tile .ic{width:86px;height:86px;border-width:3px}#t-reg .tile .ic svg{width:42px;height:42px}#t-reg .tile .tl{font-size:1rem}
+ #t-reg .tile.big .ic{width:104px;height:104px}#t-reg .tile.big svg{width:50px;height:50px}
+ #t-reg .chosen{justify-content:center}#t-reg .lab{text-align:center;font-size:1.05rem}
+ #t-reg .fields{display:grid;grid-template-columns:2fr 1fr 1fr;gap:18px;max-width:1000px;width:100%;margin:0 auto}
+ #t-reg .fields.ni{grid-template-columns:2fr 1fr}
+ #t-reg .fields label,#t-reg .cant-box{font-size:1rem}#t-reg .fields input{font-size:1.1rem;padding:14px}
+ #t-reg .acts{justify-content:center;gap:16px}#t-reg .acts .btn{min-width:240px;padding:16px;font-size:1.1rem}
+ #t-reg .box{max-width:700px;width:100%;margin:0 auto}}
+@media(min-width:1500px){#t-reg .tile .ic{width:100px;height:100px}#t-reg .tile .ic svg{width:48px;height:48px}#t-reg .tiles{grid-template-columns:repeat(auto-fill,minmax(160px,170px))}}

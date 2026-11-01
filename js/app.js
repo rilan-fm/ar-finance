@@ -1,6 +1,6 @@
 (function(){
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],R=Reports,esc=R.esc,F=R.fmt;
-const VERSION='0.5.0';
+const VERSION='0.5.1';
 let D,movs=[],custom=[],ch={},st,userEmail='';
 const NUEVA='Nueva categoría',hoy=()=>new Date().toLocaleDateString('sv');
 const tree=()=>R.GASTO.concat(custom.map(c=>({n:c.nombre,s:c.subs||[],d:{},id:c.id})));
@@ -44,8 +44,8 @@ function general(){
  <div class="go2"><button class="btn" data-go="reg">${Icons.svg('plus')}<span>Añadir registro</span></button><button class="btn ghost" data-go="his">${Icons.svg('list')}<span>Ver historial</span></button></div>`;
  TM=tema();Chart.defaults.color=TM.mu;Chart.defaults.font.size=chico()?13:12;
  const osc=matchMedia('(prefers-color-scheme:dark)').matches;
- chg.g1=new Chart($('#g1'),{type:'doughnut',plugins:[pctDona],data:{labels:['Ingresos','Gastos'],datasets:[{data:[t.ingresos,t.gastos],backgroundColor:[TM.ingresos,TM.gastos],borderColor:TM.c,borderWidth:3}]},
-  options:{maintainAspectRatio:false,animation:false,cutout:'52%',plugins:{legend:ley(),tooltip:{callbacks:{label:q=>' '+q.label+': '+F(q.parsed)+' · '+R.fmtPct(R.pct(q.parsed,t.ingresos+t.gastos))}},pctDona:{on:true,size:chico()?13:15,c0:osc?'#04122a':'#fff',c1:'#fff'}}}});
+ chg.g1=new Chart($('#g1'),{type:'doughnut',plugins:[pctDona],data:{labels:['Ingresos','Gastos'],datasets:[{data:[t.ingresos,t.gastos],backgroundColor:[TM.ingresos,TM.gastos],borderColor:TM.c,borderWidth:2,spacing:2,borderRadius:6,hoverOffset:6}]},
+  options:{maintainAspectRatio:false,animation:false,cutout:'52%',plugins:{legend:ley(),tooltip:{callbacks:{label:q=>' '+q.label+': '+F(q.parsed)+' · '+R.fmtPct(R.pct(q.parsed,t.ingresos+t.gastos))}},pctDona:{on:true,size:chico()?13:15,c0:osc?'#04122a':'#fff',c1:osc?'#0b1130':'#fff'}}}});
  chg.g2=new Chart($('#g2'),{type:'bar',plugins:[rotulos2],data:{labels:todos.map(x=>x.cat),datasets:[
   {label:'Ingresos',data:todos.map((x,i)=>i<ti.length?x.total:null),backgroundColor:TM.ingresos,borderRadius:6,maxBarThickness:26},
   {label:'Gastos',data:todos.map((x,i)=>i>=ti.length?x.total:null),backgroundColor:TM.gastos,borderRadius:6,maxBarThickness:26}]},
@@ -70,7 +70,8 @@ function behind(t,cb){if(busy)return;busy=true;const r=t.getBoundingClientRect()
  setTimeout(()=>{busy=false;cb()},400)}
 function drawReg(){
  const g=st.tipo==='gasto',a=st.a;st.a='';
- let h=`<div class="seg2"><button class="btn g${g?'':' ghost'}" data-tipo="gasto">Gasto</button><button class="btn${st.tipo==='ingreso'?'':' ghost'}" data-tipo="ingreso">Ingreso</button></div>`;
+ const colTipo=(t,n)=>`<div class="tipo-col ${t==='ingreso'?'ing':'gas'}${st.tipo===t?' on':''}"><button type="button" class="ill-btn" data-tipo="${t}" tabindex="-1" aria-hidden="true">${Icons.hero(t)}</button><button type="button" class="btn-tipo${st.tipo===t?' on':''}" data-tipo="${t}">${n}</button></div>`;
+ let h=`<div class="tipos${st.tipo?' c':''}">${colTipo('gasto','Gasto')}${colTipo('ingreso','Ingreso')}</div>`;
  if(st.m)h+=`<p class="ok">${esc(st.m)}</p>`;
  if(st.tipo){
   h+=`<div class="fecha-box"><span class="fecha-ttl">📅 Fecha del registro</span><input type="date" id="g-fecha" class="fecha-in" value="${esc(st.fecha)}"><small id="g-fecha-txt" class="fecha-txt">${fechaLarga(st.fecha)}</small></div>`+lvl('cat',g?tree().map(c=>c.n).concat(NUEVA):R.INGRESO.map(c=>c.n),st.cat,a,!g);
@@ -80,8 +81,8 @@ function drawReg(){
    if(subs.length)h+=lvl('sub',subs,st.sub,a,!g);
    if(subs.length&&st.sub&&dets)h+=lvl('det',dets,st.det,a,!g);
    if((!subs.length||st.sub)&&(!dets||st.det))
-    h+=`<label>Descripción / detalle<input id="g-desc" maxlength="120" value="${esc(st.desc)}"></label>`+(g?`<div class="cant-box">Cantidad (1 por defecto)<div class="stepper"><button type="button" data-q="-1" aria-label="Menos">−</button><input id="g-cant" type="number" min="0.01" step="any" inputmode="decimal" value="${esc(st.cant)}"><button type="button" data-q="1" aria-label="Más">+</button></div></div>`:'')+
-    `<label>Monto (Bs)<input id="g-monto" type="number" step="0.01" min="0.01" inputmode="decimal" value="${esc(st.monto)}"></label><div class="row acts"><button class="btn" data-act="ok">Registrar ${g?'gasto':'ingreso'}</button><button class="btn ghost" data-act="no">Cancelar</button></div>`;
+    h+=`<div class="fields${g?'':' ni'}"><label>Descripción / detalle<input id="g-desc" maxlength="120" value="${esc(st.desc)}"></label>`+(g?`<div class="cant-box">Cantidad (1 por defecto)<div class="stepper"><button type="button" data-q="-1" aria-label="Menos">−</button><input id="g-cant" type="number" min="0.01" step="any" inputmode="decimal" value="${esc(st.cant)}"><button type="button" data-q="1" aria-label="Más">+</button></div></div>`:'')+
+    `<label>Monto (Bs)<input id="g-monto" type="number" step="0.01" min="0.01" inputmode="decimal" value="${esc(st.monto)}"></label></div><div class="row acts"><button class="btn" data-act="ok">Registrar ${g?'gasto':'ingreso'}</button><button class="btn ghost" data-act="no">Cancelar</button></div>`;
   }}
  $('#reg-body').innerHTML=h;
 }
@@ -120,14 +121,18 @@ function poblar(){const m=$('#f-mes').value,a=$('#f-anio').value,base=a?movs.fil
  $('#f-anio').value=a;if($('#f-anio').selectedIndex<0)$('#f-anio').value='';$('#f-mes').value=m;if($('#f-mes').selectedIndex<0)$('#f-mes').value=''}
 const filtros=()=>({anio:$('#f-anio').value,mes:$('#f-mes').value,desde:$('#f-d').value,hasta:$('#f-h').value,tipo:tipoR==='vs'?'':tipoR,cats:rs.cat?[rs.cat]:[],sub:rs.sub,det:rs.det});
 const NOM={gastos:'Gastos',ingresos:'Ingresos'},chico=()=>window.innerWidth<=760,recorta=(s,n)=>s.length>n?s.slice(0,n-1)+'…':s;
-const tema=()=>{const s=getComputedStyle(document.documentElement),v=n=>s.getPropertyValue(n).trim();return{mu:v('--mu'),bd:v('--bd'),c:v('--c'),tx:v('--tx'),gastos:'#af11f2',ingresos:matchMedia('(prefers-color-scheme:dark)').matches?'#00f8ff':'#0891b2'}};
+let PDFM=false;
+const tema=()=>{const osc=!PDFM&&matchMedia('(prefers-color-scheme:dark)').matches,cv=getComputedStyle(document.documentElement).getPropertyValue('--c').trim();
+ return osc?{mu:'#dbe1ff',tx:'#f4f6ff',bd:'rgba(200,210,255,.14)',c:cv,gastos:'#c75bff',ingresos:'#00f8ff',osc}:{mu:'#3b4466',tx:'#0b1130',bd:'rgba(11,17,48,.10)',c:PDFM?'#ffffff':cv,gastos:'#9a17dc',ingresos:'#0a86a8',osc}};
 let TM=tema();
+const DPR0=()=>Math.max(2,window.devicePixelRatio||1);
+if(window.Chart){Chart.defaults.devicePixelRatio=DPR0();Chart.defaults.font.family='system-ui,-apple-system,"Segoe UI",Roboto,sans-serif'}
 if(window.Chart)Chart.register({id:'fondo',beforeDraw(c){const x=c.ctx;x.save();x.globalCompositeOperation='destination-over';x.fillStyle=TM.c;x.fillRect(0,0,c.width,c.height);x.restore()}});
 const rotulos={id:'rotulos',afterDatasetsDraw(c,_a,o){if(!o||!o.on)return;const x=c.ctx,m=c.getDatasetMeta(0),d=c.data.datasets[0].data;x.save();x.fillStyle=o.color;x.font='600 '+o.size+'px system-ui,sans-serif';x.textBaseline='middle';x.textAlign='left';
  m.data.forEach((b,i)=>x.fillText('Bs '+R.fmtCorto(d[i])+' · '+R.fmtPct(R.pct(d[i],o.suma),0),b.x+6,b.y));x.restore()}};
-const ley=()=>({position:'bottom',labels:{usePointStyle:true,boxWidth:8,padding:14}});
-const tip={callbacks:{label:c=>' '+(c.dataset.label?c.dataset.label+': ':'')+F(c.chart.options.indexAxis==='y'?c.parsed.x:c.parsed.y)}};
-const gx=()=>({grid:{display:false},ticks:{maxRotation:chico()?45:0,autoSkip:true,autoSkipPadding:10}}),gy=()=>({beginAtZero:true,grid:{color:TM.bd},ticks:{callback:v=>R.fmtCorto(v)}});
+const ley=()=>({position:'bottom',labels:{usePointStyle:true,pointStyle:'circle',boxWidth:7,boxHeight:7,padding:16,color:TM.mu}});
+const tip={padding:10,cornerRadius:8,boxPadding:4,callbacks:{label:c=>' '+(c.dataset.label?c.dataset.label+': ':'')+F(c.chart.options.indexAxis==='y'?c.parsed.x:c.parsed.y)}};
+const gx=()=>({grid:{display:false},border:{display:false},ticks:{maxRotation:chico()?45:0,autoSkip:true,autoSkipPadding:10,padding:6}}),gy=()=>({beginAtZero:true,border:{display:false},grid:{color:TM.bd,lineWidth:1,drawTicks:false},ticks:{padding:8,callback:v=>R.fmtCorto(v)}});
 const opt=(x={})=>({maintainAspectRatio:false,animation:false,interaction:{mode:'index',intersect:false},plugins:{legend:ley(),tooltip:tip},scales:{x:gx(),y:gy()},...x});
 const barH=(id,l,c,suma)=>new Chart($(id),{type:'bar',plugins:[rotulos],data:{labels:l.map(x=>x.cat),datasets:[{data:l.map(x=>x.total),backgroundColor:c,borderRadius:6,maxBarThickness:26}]},
  options:{indexAxis:'y',maintainAspectRatio:false,animation:false,layout:{padding:{right:chico()?100:124}},plugins:{legend:{display:false},tooltip:{callbacks:{label:q=>' '+F(q.parsed.x)+' · '+R.fmtPct(R.pct(q.parsed.x,suma))}},rotulos:{on:true,color:TM.tx,size:chico()?11:12,suma}},
@@ -135,7 +140,7 @@ const barH=(id,l,c,suma)=>new Chart($(id),{type:'bar',plugins:[rotulos],data:{la
 const ds=(s,keys)=>keys.map(k=>({label:NOM[k],data:s.map(x=>x[k]),backgroundColor:TM[k],borderRadius:4,maxBarThickness:34}));
 const barM=(id,pm)=>new Chart($(id),{type:'bar',data:{labels:pm.map(m=>R.mesCorto(m.mes)),datasets:ds(pm,['ingresos','gastos'])},options:opt()});
 const barS=(id,s,keys)=>new Chart($(id),{type:'bar',data:{labels:s.map(x=>x.label),datasets:ds(s,keys)},options:opt()});
-const lineEvo=(id,s,keys)=>new Chart($(id),{type:'line',data:{labels:s.map(x=>x.label),datasets:keys.flatMap(k=>{const v=s.map(x=>x[k]);return[{label:NOM[k],data:v,borderColor:TM[k],backgroundColor:TM[k]+'26',fill:keys.length===1,tension:.3,borderWidth:2.5,pointRadius:s.length>40?0:3,pointHoverRadius:6},{label:'Tendencia '+NOM[k].toLowerCase(),data:R.tendencia(v).linea,borderColor:TM[k],borderDash:[6,5],pointRadius:0,borderWidth:2,fill:false}]})},options:opt()});
+const lineEvo=(id,s,keys)=>new Chart($(id),{type:'line',data:{labels:s.map(x=>x.label),datasets:keys.flatMap(k=>{const v=s.map(x=>x[k]);return[{label:NOM[k],data:v,borderColor:TM[k],backgroundColor:TM[k]+'26',fill:keys.length===1,tension:.35,borderWidth:2.5,borderCapStyle:'round',borderJoinStyle:'round',pointBackgroundColor:TM[k],pointBorderColor:TM.c,pointBorderWidth:2,pointRadius:s.length>40?0:3.5,pointHoverRadius:6},{label:'Tendencia '+NOM[k].toLowerCase(),data:R.tendencia(v).linea,borderColor:TM[k],borderDash:[6,5],pointRadius:0,borderWidth:1.75,fill:false}]})},options:opt()});
 const badge=v=>`<small class="badge">${{sube:'↗ en aumento',baja:'↘ en descenso',estable:'→ estable'}[R.tendencia(v).dir]}</small>`;
 const card=(h,id,hl,ht)=>`<div class="card${hl?' hl':''}"><h3>${h}</h3><div class="cv"${ht?` style="height:${ht}px"`:''}><canvas id="${id}"></canvas></div></div>`;
 const sub=t=>`<span class="sub">${t}</span>`;
@@ -165,8 +170,11 @@ function renderRep(){
   ch.c1=barH('#c1',fr.slice(0,8).map(x=>({cat:`${x.k} (${x.n}×)`,total:x.total})),TM[gk],tot)}
  ch.c2=lineEvo('#c2',s1,[gk]);ch.c3=barS('#c3',s2,[gk]);
 }
-function pdf(){const f=filtros(),l=R.ordenar(R.filtrar(movs,f)),c=Object.values(ch);if(!l.length||c.length<2)return alert('No hay datos para exportar.');const[a,b]=R.rango(f,l,hoy());
- PDF.generar({rango:`Periodo: ${a} a ${b}`,tot:R.totales(l,a,b),porCat:R.porCategoria(l),filas:l,imgs:c.slice(0,2).map(x=>x.toBase64Image('image/png',1))})}
+function pdf(){const f=filtros(),l=R.ordenar(R.filtrar(movs,f));if(!l.length)return alert('No hay datos para exportar.');const[a,b]=R.rango(f,l,hoy());let imgs=[];
+ PDFM=true;Chart.defaults.devicePixelRatio=3;
+ try{renderRep();imgs=Object.values(ch).slice(0,2).map(x=>({img:x.toBase64Image('image/png',1),w:x.canvas.width,h:x.canvas.height}))}finally{PDFM=false;Chart.defaults.devicePixelRatio=DPR0();renderRep()}
+ if(imgs.length<2)return alert('No hay datos para exportar.');
+ PDF.generar({rango:`Periodo: ${a} a ${b}`,tot:R.totales(l,a,b),porCat:R.porCategoria(l),filas:l,imgs})}
 /* ---------- Notas ---------- */
 let tm;function nota(){msg('#n-st','Guardando…');clearTimeout(tm);tm=setTimeout(async()=>{try{await D.guardarNota($('#n-txt').value);msg('#n-st','Guardado ✔')}catch(e){msg('#n-st','Error: '+e.message)}},800)}
 async function importar(file){try{const j=JSON.parse(await file.text()),nuevos=R.paraImportar(movs,j.movimientos);

@@ -1,4 +1,10 @@
 # Changelog
+## 0.5.1
+- Registrar: usa todo el ancho en pantallas grandes (centrado, iconos y textos más grandes, descripción/cantidad/monto en una fila).
+- Registrar: Gasto e Ingreso ahora son una ilustración (monitor con gráfico, moneda y flecha) con un botón debajo: contorno cuando está inactivo; relleno, elevación y brillo al pasar el cursor o al estar activo. Gasto en naranja, Ingreso en celeste.
+- Iconos: Rilan › Coca/Extras = dos hojas (#00d947); Rilan › Ocio = caña de pesca (#356bff); icono de Rilan en #356bff.
+- Gráficos: más nítidos (el doble de resolución), colores más vivos, ejes y cuadrícula mínimos, texto más claro y bordes finos. Anillo con bordes redondeados.
+- PDF: los gráficos se exportan en alta definición (3x), con fondo blanco y colores claros para imprimir, y mantienen su proporción.
 ## 0.5.0
 - Nueva pestaña ⚙️ Configuración: Mis categorías (editar nombre y subcategorías, eliminar; si cambias el nombre, también se actualizan los movimientos ya registrados), Respaldo y datos (con aviso de cuándo fue el último respaldo), Cuenta (correo, cambiar contraseña, Salir) y Acerca de (versión).
 - Respaldo JSON, Importar respaldo e Importar desde Excel pasan de Notas a Configuración.
