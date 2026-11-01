@@ -1,7 +1,7 @@
 // Iconos minimalistas de contorno redondeado (24x24). Sin dependencias.
 (function(r){
 const P={
-man:'M12 3a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7zM5 21v-3a4 4 0 0 1 4-4h6a4 4 0 0 1 4 4v3zM12 14l-1.3 2.2L12 20l1.3-3.8z',trend:'M3 17l6-6 4 4 8-8M15 7h6v6',
+trash:'M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3',man:'M12 3a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7zM5 21v-3a4 4 0 0 1 4-4h6a4 4 0 0 1 4 4v3zM12 14l-1.3 2.2L12 20l1.3-3.8z',trend:'M3 17l6-6 4 4 8-8M15 7h6v6',
 cart:'M3 4h2l2.4 11h10.2l2-8H6M9 20.5h.01M17 20.5h.01',home:'M3 11l9-8 9 8M5 9.5V21h14V9.5M10 21v-6h4v6',book:'M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3zM5 17a3 3 0 0 1 3-3h11',
 user:'M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM4 21c0-4 3.5-6 8-6s8 2 8 6',woman:'M12 3a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7zM12 10l-5 11h10z',
 car:'M3 14l2-6h14l2 6v4H3zM3 14h18M7.5 17.5h.01M16.5 17.5h.01',church:'M12 2v5M10 4h4M5 21V12l7-5 7 5v9M2 21h20M10 21v-5h4v5',cap:'M2 9l10-5 10 5-10 5zM6 11.5V16c3 2.5 9 2.5 12 0v-4.5',

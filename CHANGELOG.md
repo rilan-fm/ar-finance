@@ -1,4 +1,11 @@
 # Changelog
+## 0.4.8
+- General: resumen del año en curso (si no hay datos de este año, el último año con datos). Ocupa todo el ancho disponible (las demás pestañas mantienen su ancho).
+- General, tarjetas: menos alto, con contorno completo en el color de su borde izquierdo; 5 en una fila en pantallas anchas, una por fila en móvil.
+- General, nuevos gráficos: anillo de % ingresos vs. gastos y barras con las 3 categorías más fuertes de ingresos y de gastos, antes de «Últimos movimientos».
+- General: dos botones grandes al final: «Añadir registro» y «Ver historial».
+- Botón eliminar: ahora es un icono de papelera rojo con contorno, proporcional al texto (General, Historial y categorías propias en Registrar). Antes era un emoji casi invisible en modo oscuro.
+- Fix: el botón eliminar de «Últimos movimientos» en General no hacía nada; ahora elimina (con confirmación).
 ## 0.4.7
 - Registrar › Ingreso: nuevo primer paso «Origen del ingreso» (Rilan, Ingrid, Hospedaje, Otros ingresos) y luego su categoría: Rilan (Sueldo escuela, Dividendo escuela, Trading, Otros ingresos), Ingrid (Sueldo escuela, Dividendo escuela, Yanbal, Otros ingresos), Hospedaje (En mi familia, En otras familias). «Otros ingresos» va directo a descripción y monto.
 - En la base: categoria = origen, subcategoria = categoría. Sin cambios de esquema; los ingresos antiguos se conservan.
