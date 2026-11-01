@@ -13,6 +13,9 @@ function memoria(seed){let m=(seed||[]).map(x=>({...x})),cs=[],n='',k=1,user=nul
   async listarCats(){return cs.map(x=>({...x}))},
   async guardarCat(c){if(cs.length>=3)throw new Error('Máximo 3 categorías propias');const r={...c,id:'c'+k++};cs.push(r);return{...r}},
   async eliminarCat(id){cs=cs.filter(x=>x.id!==id)},
+  async actualizarCat(id,x){const c=cs.find(r=>r.id===id);if(!c)throw new Error('La categoría no existe');Object.assign(c,x);return{...c}},
+  async renombrarCat(a,b){m.forEach(r=>{if(r.tipo==='gasto'&&r.categoria===a)r.categoria=b})},
+  async cambiarClave(p){if(!p||p.length<6)throw new Error('La contraseña debe tener al menos 6 caracteres.')},
   async leerNota(){return n},async guardarNota(t){n=t}};}
 function supabase(url,key){const c=root.supabase.createClient(url,key);let uid=null;
  const ok=r=>{if(r.error)throw new Error(r.error.message);return r.data};
@@ -29,6 +32,9 @@ function supabase(url,key){const c=root.supabase.createClient(url,key);let uid=n
   async listarCats(){return ok(await c.from('categorias').select('*').order('nombre'))},
   async guardarCat(x){return ok(await c.from('categorias').insert(x).select().single())},
   async eliminarCat(id){ok(await c.from('categorias').delete().eq('id',id))},
+  async actualizarCat(id,x){return ok(await c.from('categorias').update(x).eq('id',id).select().single())},
+  async renombrarCat(a,b){ok(await c.from('movimientos').update({categoria:b}).eq('tipo','gasto').eq('categoria',a))},
+  async cambiarClave(p){ok(await c.auth.updateUser({password:p}))},
   async leerNota(){const d=ok(await c.from('notas').select('texto').maybeSingle());return d?d.texto:''},
   async guardarNota(t){ok(await c.from('notas').upsert({user_id:uid,texto:t,actualizado_en:new Date().toISOString()}))}};}
 const api={memoria,supabase};

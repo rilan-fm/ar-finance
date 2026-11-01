@@ -1,4 +1,10 @@
 # Changelog
+## 0.5.0
+- Nueva pestaña ⚙️ Configuración: Mis categorías (editar nombre y subcategorías, eliminar; si cambias el nombre, también se actualizan los movimientos ya registrados), Respaldo y datos (con aviso de cuándo fue el último respaldo), Cuenta (correo, cambiar contraseña, Salir) y Acerca de (versión).
+- Respaldo JSON, Importar respaldo e Importar desde Excel pasan de Notas a Configuración.
+- Datos separados por persona: cada usuario ve solo lo suyo (sin cambios en la base). Instrucciones para crear usuarios en el README.
+## 0.4.9
+- Móvil: barra superior más pequeña. El botón ☰ pasa de 52 a 44 px y el logo de 38 a 32 px (misma proporción, centrados en la misma línea).
 ## 0.4.8
 - General: resumen del año en curso (si no hay datos de este año, el último año con datos). Ocupa todo el ancho disponible (las demás pestañas mantienen su ancho).
 - General, tarjetas: menos alto, con contorno completo en el color de su borde izquierdo; 5 en una fila en pantallas anchas, una por fila en móvil.

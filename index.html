@@ -3,7 +3,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Ar_Finance</title><meta name="theme-color" content="#0b1130">
 <link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icons/icon-192.png">
-<link rel="stylesheet" href="css/styles.css?v=0.4.8">
+<link rel="stylesheet" href="css/styles.css?v=0.5.0">
 </head><body>
 <section id="login" class="card login">
   <picture><source media="(prefers-color-scheme:dark)" srcset="img/logo-full-dark.png"><img src="img/logo-full-light.png" alt="Ar_Finance" class="logo-l"></picture>
@@ -18,7 +18,7 @@
 <div id="scrim"></div>
 <aside id="side">
   <picture><source media="(prefers-color-scheme:dark)" srcset="img/logo-full-dark.png"><img src="img/logo-full-light.png" alt="Ar_Finance" class="logo"></picture>
-  <nav id="menu"><button class="mi on" data-t="gen">🏠 General</button><button class="mi" data-t="reg">➕ Registrar</button><button class="mi" data-t="rep">📊 Reportes</button><button class="mi" data-t="his">🧾 Historial</button><button class="mi" data-t="not">📝 Notas</button></nav>
+  <nav id="menu"><button class="mi on" data-t="gen">🏠 General</button><button class="mi" data-t="reg">➕ Registrar</button><button class="mi" data-t="rep">📊 Reportes</button><button class="mi" data-t="his">🧾 Historial</button><button class="mi" data-t="not">📝 Notas</button><button class="mi" data-t="cfg">⚙️ Configuración</button></nav>
   <div class="grow"></div><small id="who" class="muted"></small><button id="out" class="btn ghost sm">Salir</button>
 </aside>
 <main>
@@ -40,8 +40,14 @@
 </section>
 <section id="t-not" class="tab card" hidden>
   <textarea id="n-txt" rows="12" placeholder="Escribe tus notas…"></textarea>
-  <div class="row"><small id="n-st" class="muted"></small><span><button id="n-exp" class="btn ghost sm">Respaldo JSON</button> <button id="n-imp" class="btn ghost sm">Importar respaldo</button><input id="n-file" type="file" accept=".json,application/json" hidden></span></div>
-  <div class="row"><button id="n-xl" class="btn ghost sm">📥 Importar desde Excel</button></div>
+  <div class="row"><small id="n-st" class="muted"></small></div>
+</section>
+<section id="t-cfg" class="tab" hidden>
+  <h2>⚙️ Configuración</h2>
+  <div class="card"><h3>Mis categorías</h3><p class="muted lab">Categorías propias de gastos (máximo 3). Para crear una nueva: Registrar › Gasto › «Nueva categoría».</p><div id="c-cats" class="col"></div></div>
+  <div class="card"><h3>Respaldo y datos</h3><small id="c-resp" class="muted"></small>
+    <div class="row"><span><button id="n-exp" class="btn ghost sm">Respaldo JSON</button> <button id="n-imp" class="btn ghost sm">Importar respaldo</button><input id="n-file" type="file" accept=".json,application/json" hidden></span><button id="n-xl" class="btn ghost sm">📥 Importar desde Excel</button></div>
+    <small id="c-st" class="muted"></small>
   <div id="xl-panel" class="box" hidden>
     <b>Importar desde Excel</b>
     <p class="muted lab">Opción 1: sube tu archivo .xlsx (con la plantilla). Opción 2: copia las filas en Excel (con los encabezados) y pégalas abajo.</p>
@@ -50,15 +56,20 @@
     <div class="row"><button id="xl-rev" class="btn sm">Revisar</button><button id="xl-x" class="btn ghost sm">Cerrar</button></div>
     <div id="xl-res"></div>
   </div>
+  </div>
+  <div class="card"><h3>Cuenta</h3><p class="lab">Correo: <b id="c-mail"></b></p><p class="muted lab">Tus registros son privados: otras personas, con su propia cuenta, no los ven.</p>
+    <label>Nueva contraseña<input id="c-pw" type="password" autocomplete="new-password"></label><label>Repite la nueva contraseña<input id="c-pw2" type="password" autocomplete="new-password"></label><p id="c-pwm" class="lab"></p>
+    <div class="row"><button id="c-pwb" class="btn sm">Cambiar contraseña</button><button id="c-out" class="btn ghost sm">Salir</button></div></div>
+  <div class="card"><h3>Acerca de</h3><p class="muted lab">Ar_Finance versión <span id="c-ver"></span></p></div>
 </section>
 </main></div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js"></script>
 <script src="js/config.js"></script>
-<script src="js/data.js?v=0.4.8"></script>
-<script src="js/reports.js?v=0.4.8"></script>
-<script src="js/icons.js?v=0.4.8"></script>
-<script src="js/pdf.js?v=0.4.8"></script>
-<script src="js/app.js?v=0.4.8"></script>
+<script src="js/data.js?v=0.5.0"></script>
+<script src="js/reports.js?v=0.5.0"></script>
+<script src="js/icons.js?v=0.5.0"></script>
+<script src="js/pdf.js?v=0.5.0"></script>
+<script src="js/app.js?v=0.5.0"></script>
 </body></html>

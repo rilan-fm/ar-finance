@@ -1,6 +1,7 @@
 (function(){
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],R=Reports,esc=R.esc,F=R.fmt;
-let D,movs=[],custom=[],ch={},st;
+const VERSION='0.5.0';
+let D,movs=[],custom=[],ch={},st,userEmail='';
 const NUEVA='Nueva categoría',hoy=()=>new Date().toLocaleDateString('sv');
 const tree=()=>R.GASTO.concat(custom.map(c=>({n:c.nombre,s:c.subs||[],d:{},id:c.id})));
 const nomCats=()=>tree().map(c=>c.n).concat(R.INGRESO.map(c=>c.n));
@@ -18,7 +19,7 @@ function iniciar(){
 }
 async function acceso(m){try{msg('#login-msg','…');await entrar(await D[m]($('#l-mail').value.trim(),$('#l-pass').value))}catch(e){msg('#login-msg',e.message)}}
 async function entrar(u){
- $('#login').hidden=true;$('#app').hidden=false;$('#who').textContent=u.email;
+ $('#login').hidden=true;$('#app').hidden=false;$('#who').textContent=u.email;userEmail=u.email;$('#c-mail').textContent=u.email;
  movs=await D.listar();custom=await D.listarCats();$('#n-txt').value=await D.leerNota();
  const a=R.aniosConDatos(movs),y=String(new Date().getFullYear());
  resetReg('');pintaTipos();armarCats();poblar();if(a.length){$('#f-anio').value=a.includes(y)?y:a[0]}todo();
@@ -97,7 +98,7 @@ async function crearCat(){
  try{custom.push(await D.guardarCat({nombre:n,subs}));st.cat=n;st.sub=st.det='';armarCats();drawReg()}catch(e){alert(e.message)}
 }
 async function borrarCat(id){if(!confirm('¿Eliminar esta categoría? Los movimientos ya registrados se conservan.'))return;
- try{await D.eliminarCat(id);custom=custom.filter(c=>c.id!==id);st.cat='';rs.cat=rs.sub=rs.det='';armarCats();drawReg()}catch(e){alert(e.message)}}
+ try{await D.eliminarCat(id);custom=custom.filter(c=>c.id!==id);st.cat='';rs.cat=rs.sub=rs.det='';armarCats();drawReg();pintaCfgCats()}catch(e){alert(e.message)}}
 /* ---------- Historial ---------- */
 const fila=m=>`<li><div>${esc(m.categoria)}${m.subcategoria?' › '+esc(m.subcategoria):''}${m.detalle?' › '+esc(m.detalle):''}<small>${esc(m.fecha)} · ${esc(m.descripcion)}${m.cantidad&&+m.cantidad!==1?' · x'+esc(+m.cantidad):''}</small></div><div><b class="${esc(m.tipo)}">${m.tipo==='ingreso'?'+':'−'}${F(m.monto)}</b>${m.id?` <button class="del" data-id="${esc(m.id)}" title="Eliminar" aria-label="Eliminar">${Icons.svg('trash')}</button>`:''}</div></li>`;
 function historial(){const l=R.ordenar(R.filtrar(movs,{q:$('#h-q').value,tipo:$('#h-tipo').value}));
@@ -170,11 +171,11 @@ function pdf(){const f=filtros(),l=R.ordenar(R.filtrar(movs,f)),c=Object.values(
 let tm;function nota(){msg('#n-st','Guardando…');clearTimeout(tm);tm=setTimeout(async()=>{try{await D.guardarNota($('#n-txt').value);msg('#n-st','Guardado ✔')}catch(e){msg('#n-st','Error: '+e.message)}},800)}
 async function importar(file){try{const j=JSON.parse(await file.text()),nuevos=R.paraImportar(movs,j.movimientos);
  if(!confirm(`Se importarán ${nuevos.length} movimientos nuevos (los duplicados se omiten). ¿Continuar?`))return;
- let n=0;for(const m of nuevos){movs.push(await D.agregar(m));msg('#n-st',`Importando ${++n}/${nuevos.length}…`)}
+ let n=0;for(const m of nuevos){movs.push(await D.agregar(m));msg('#c-st',`Importando ${++n}/${nuevos.length}…`)}
  for(const c of (Array.isArray(j.categorias)?j.categorias:[])){const nm=String(c&&c.nombre||'').trim().slice(0,30);
   if(nm&&custom.length<3&&nm.toLowerCase()!==NUEVA.toLowerCase()&&!nomCats().some(x=>x.toLowerCase()===nm.toLowerCase()))custom.push(await D.guardarCat({nombre:nm,subs:(Array.isArray(c.subs)?c.subs:[]).map(x=>String(x).slice(0,40)).slice(0,15)}))}
  if(typeof j.notas==='string'&&j.notas&&!$('#n-txt').value){$('#n-txt').value=j.notas;await D.guardarNota(j.notas)}
- armarCats();todo();msg('#n-st',`Importación lista: ${n} movimientos ✔`)}catch(e){msg('#n-st','Error al importar: '+e.message)}}
+ armarCats();todo();msg('#c-st',`Importación lista: ${n} movimientos ✔`)}catch(e){msg('#c-st','Error al importar: '+e.message)}}
 /* ---------- Importar desde Excel ---------- */
 let pend=[];
 const plano=v=>{if(v&&typeof v==='object'&&!(v instanceof Date)){if('result' in v)return v.result;if('text' in v)return v.text;if(Array.isArray(v.richText))return v.richText.map(t=>t.text).join('');return ''}return v};
@@ -196,9 +197,29 @@ async function importarXL(){const b=$('#xl-go');b.disabled=true;let n=0;
   pend=[];todo();$('#xl-res').innerHTML=`<p class="ok">✔ ${n} movimientos importados.</p>`}
  catch(e){$('#xl-res').innerHTML=`<p class="warn">Error tras ${n} movimientos: ${esc(e.message)}. Pulsa Revisar de nuevo: los ya importados se omiten.</p>`;todo()}}
 function respaldo(){const b=new Blob([JSON.stringify({exportado:new Date().toISOString(),notas:$('#n-txt').value,movimientos:movs,categorias:custom},null,2)],{type:'application/json'});
- const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='respaldo-finanzas.json';a.click()}
+ const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='respaldo-finanzas.json';a.click();try{localStorage.setItem(kResp(),hoy())}catch(e){}estadoResp()}
+/* ---------- Configuración ---------- */
+let cfgEd='';
+function pintaCfg(){cfgEd='';pintaCfgCats();estadoResp();$('#c-ver').textContent=VERSION}
+function pintaCfgCats(){const el=$('#c-cats');
+ if(!custom.length){el.innerHTML='<p class="muted lab">Aún no tienes categorías propias.</p>';return}
+ el.innerHTML=custom.map(c=>c.id===cfgEd?`<div class="box"><label>Nombre<input id="ce-n" maxlength="30" value="${esc(c.nombre)}"></label><label>Subcategorías (separadas por coma)<textarea id="ce-s" rows="2">${esc((c.subs||[]).join(', '))}</textarea></label><div class="row"><button class="btn sm" data-ce="ok" data-id="${esc(c.id)}">Guardar</button><button class="btn ghost sm" data-ce="no">Cancelar</button></div></div>`
+  :`<div class="cat-row"><div><b>${esc(c.nombre)}</b><small class="muted">${(c.subs||[]).length?esc(c.subs.join(', ')):'Sin subcategorías'}</small></div><div class="acts2"><button class="btn ghost sm" data-ce="ed" data-id="${esc(c.id)}">✎ Editar</button><button class="del" data-ce="del" data-id="${esc(c.id)}" title="Eliminar" aria-label="Eliminar">${Icons.svg('trash')}</button></div></div>`).join('')}
+async function editarCat(id){const c=custom.find(x=>x.id===id);if(!c)return;
+ const n=$('#ce-n').value.trim(),subs=[...new Set($('#ce-s').value.split(/[,;\n]/).map(x=>x.trim()).filter(Boolean))].slice(0,15),viejo=c.nombre;
+ if(!n)return alert('Escribe un nombre.');
+ if(n.toLowerCase()===NUEVA.toLowerCase()||nomCats().filter(x=>x!==viejo).some(x=>x.toLowerCase()===n.toLowerCase()))return alert('Ya existe una categoría con ese nombre.');
+ const k=n===viejo?0:movs.filter(m=>m.tipo==='gasto'&&m.categoria===viejo).length;
+ if(k&&!confirm(`Se cambiará el nombre también en ${k} movimiento${k===1?'':'s'} ya registrado${k===1?'':'s'}. ¿Continuar?`))return;
+ try{await D.actualizarCat(id,{nombre:n,subs});if(k){await D.renombrarCat(viejo,n);movs.forEach(m=>{if(m.tipo==='gasto'&&m.categoria===viejo)m.categoria=n})}
+  c.nombre=n;c.subs=subs;if(st.cat===viejo){st.cat=n;if(st.sub&&!subs.includes(st.sub))st.sub=st.det=''}if(rs.cat===viejo){rs.cat=n;if(rs.sub&&!subs.includes(rs.sub))rs.sub=rs.det=''}
+  cfgEd='';armarCats();drawReg();todo();pintaCfgCats()}catch(e){alert('Error: '+e.message)}}
+const kResp=()=>'ar_resp_'+userEmail;
+function estadoResp(){let f=null;try{f=localStorage.getItem(kResp())}catch(e){}const el=$('#c-resp');
+ if(!f){el.textContent='Aún no has hecho un respaldo desde este dispositivo.';el.className='warn';return}
+ const n=R.diasEntre(f,hoy());el.textContent='Último respaldo: '+R.fechaCorta(f)+' (hace '+n+(n===1?' día':' días')+')';el.className=n>14?'warn':'muted'}
 /* ---------- Eventos ---------- */
-function menu(t){$$('.mi').forEach(x=>x.classList.toggle('on',x.dataset.t===t));$$('.tab').forEach(s=>s.hidden=s.id!=='t-'+t);$('#side').classList.remove('open');$('#scrim').classList.remove('on');if(t==='rep')renderRep();if(t==='gen')general()}
+function menu(t){$$('.mi').forEach(x=>x.classList.toggle('on',x.dataset.t===t));$$('.tab').forEach(s=>s.hidden=s.id!=='t-'+t);$('#side').classList.remove('open');$('#scrim').classList.remove('on');if(t==='rep')renderRep();if(t==='gen')general();if(t==='cfg')pintaCfg()}
 document.addEventListener('DOMContentLoaded',()=>{
  $$('.mi').forEach(b=>b.onclick=()=>menu(b.dataset.t));
  $('#burger').onclick=()=>{$('#side').classList.add('open');$('#scrim').classList.add('on')};$('#scrim').onclick=()=>menu($('.mi.on').dataset.t);
@@ -226,6 +247,11 @@ document.addEventListener('DOMContentLoaded',()=>{
   $('#f-d').value=$('#f-h').value='';$('#f-anio').value=q.anio;poblar();$('#f-mes').value=q.mes;renderRep()};
  matchMedia('(prefers-color-scheme:dark)').addEventListener('change',()=>{{if(!$('#t-rep').hidden)renderRep();if(!$('#t-gen').hidden)general()}});
  $('#pdf').onclick=pdf;$('#n-xl').onclick=()=>{$('#xl-panel').hidden=false};$('#xl-x').onclick=()=>{$('#xl-panel').hidden=true};$('#xl-rev').onclick=revisarXL;$('#xl-res').onclick=e=>{if(e.target.id==='xl-go')importarXL()};$('#n-txt').oninput=nota;$('#n-exp').onclick=respaldo;$('#n-imp').onclick=()=>$('#n-file').click();$('#n-file').onchange=e=>{const f=e.target.files[0];if(f)importar(f);e.target.value=''};
- $('#out').onclick=async()=>{await D.salir();location.reload()};iniciar();
+ $('#c-cats').onclick=e=>{const b=e.target.closest('[data-ce]');if(!b)return;const k=b.dataset.ce;
+  if(k==='ed'){cfgEd=b.dataset.id;pintaCfgCats()}else if(k==='no'){cfgEd='';pintaCfgCats()}else if(k==='ok')editarCat(b.dataset.id);else if(k==='del')borrarCat(b.dataset.id)};
+ $('#c-pwb').onclick=async()=>{const a=$('#c-pw').value,b=$('#c-pw2').value,m=$('#c-pwm'),bad=t=>{m.className='warn lab';m.textContent=t};
+  if(a.length<6)return bad('La contraseña debe tener al menos 6 caracteres.');if(a!==b)return bad('Las contraseñas no coinciden.');
+  try{await D.cambiarClave(a);$('#c-pw').value=$('#c-pw2').value='';m.className='ok lab';m.textContent='✔ Contraseña cambiada.'}catch(e){bad('Error: '+e.message)}};
+ $('#out').onclick=$('#c-out').onclick=async()=>{await D.salir();location.reload()};iniciar();
 });
 })();

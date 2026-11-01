@@ -106,6 +106,7 @@ function periodoRapido(k,hoy,l){const ms=mesesConDatos(l),as=aniosConDatos(l);if
  if(k==='anterior'){let y=+ym.slice(0,4),m=+ym.slice(5,7)-1;if(m<1){m=12;y--}ym=y+'-'+String(m).padStart(2,'0');if(!ms.includes(ym))return null}
  return{anio:ym.slice(0,4),mes:ym.slice(5,7)}}
 const anioResumen=(hoy,l)=>{const as=aniosConDatos(l),y=hoy.slice(0,4);return as.includes(y)?y:(as[0]||y)};
-const api={anioResumen,pct,fmtPct,fmtCorto,fechaCorta,mesCorto,periodoRapido,validarFilas,norm,paraImportar,MESES,rango,granularidad,serie,tendencia,frecuentes,GASTO,INGRESO,esc,fmt,etiquetaMes,dias,ordenar,filtrar,mesesConDatos,aniosConDatos,totales,porCategoria,porSub,porMes,topProducto};
+const diasEntre=(a,b)=>Math.round((U(b)-U(a))/864e5);
+const api={diasEntre,anioResumen,pct,fmtPct,fmtCorto,fechaCorta,mesCorto,periodoRapido,validarFilas,norm,paraImportar,MESES,rango,granularidad,serie,tendencia,frecuentes,GASTO,INGRESO,esc,fmt,etiquetaMes,dias,ordenar,filtrar,mesesConDatos,aniosConDatos,totales,porCategoria,porSub,porMes,topProducto};
 if(typeof module!=='undefined')module.exports=api;else root.Reports=api;
 })(typeof window!=='undefined'?window:globalThis);
