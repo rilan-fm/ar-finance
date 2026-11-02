@@ -3,7 +3,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Ar_Finance</title><meta name="theme-color" content="#0b1130">
 <link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icons/icon-192.png">
-<link rel="stylesheet" href="css/styles.css?v=0.6.0">
+<link rel="stylesheet" href="css/styles.css?v=0.7.0">
 </head><body>
 <section id="login" class="card login">
   <picture><source media="(prefers-color-scheme:dark)" srcset="img/logo-full-dark.png"><img src="img/logo-full-light.png" alt="Ar_Finance" class="logo-l"></picture>
@@ -23,7 +23,7 @@
 </aside>
 <main>
 <button id="sb-show" class="sb-tg" title="Mostrar menú" aria-label="Mostrar menú">☰</button>
-<section id="t-gen" class="tab"><h2 id="g-tit"></h2><div id="g-out"></div></section>
+<section id="t-gen" class="tab"><h2 id="g-tit"></h2><div id="g-av"></div><div id="g-out"></div></section>
 <section id="t-reg" class="tab card" hidden><div id="reg-body" class="col"></div></section>
 <section id="t-rep" class="tab" hidden>
   <div class="card fil">
@@ -40,7 +40,22 @@
     <div class="card hn-l"><h3>🧾 Historial <small class="muted">(del más reciente al más antiguo, según cuándo lo registraste)</small></h3>
       <div class="hbar"><input id="h-q" placeholder="Buscar…"><select id="h-tipo"><option value="">Todos</option><option value="gasto">Gastos</option><option value="ingreso">Ingresos</option></select></div>
       <ul id="h-list" class="list"></ul><button id="h-mas" class="btn ghost sm" hidden>Mostrar más</button></div>
-    <div class="hn-r"><div class="card"><h3>📝 Notas</h3><textarea id="n-txt" rows="14" placeholder="Escribe tus notas…"></textarea><div class="row"><small id="n-st" class="muted"></small></div></div></div>
+    <div class="hn-r">
+      <div class="card"><h3>📝 Notas</h3><textarea id="n-txt" rows="1" placeholder="Escribe tus notas…"></textarea><div class="row"><small id="n-st" class="muted"></small></div></div>
+      <div class="card"><h3>💰 Presupuestos del mes <small class="muted">(aviso al llegar al 80 %)</small></h3><ul id="pr-list" class="list"></ul>
+        <div id="pr-form" class="box"><b>Fijar presupuesto mensual</b><div class="row2"><label>Categoría<select id="pr-c"></select></label><label>Límite (Bs)<input id="pr-m" type="number" step="0.01" min="0.01" inputmode="decimal"></label></div><button id="pr-ok" class="btn sm">Guardar presupuesto</button><small id="pr-msg" class="muted"></small></div></div>
+      <div class="card"><h3>🔔 Pagos recurrentes</h3><ul id="rc-list" class="list"></ul>
+        <div id="rc-form" class="box"><b>Agregar pago recurrente</b>
+          <label>Concepto<select id="rc-p"><option value="">Selecciona…</option><option value="0">Luz</option><option value="1">Agua</option><option value="2">Internet</option><option value="3">Gas</option><option value="4">Pensión del colegio</option><option value="o">Otro…</option></select></label>
+          <div id="rc-o" class="col" hidden><label>Nombre<input id="rc-n" maxlength="40"></label><label>Categoría<select id="rc-c"></select></label><label>Subcategoría (opcional)<select id="rc-s"></select></label></div>
+          <div class="row2"><label>Monto estimado (Bs)<input id="rc-m" type="number" step="0.01" min="0.01" inputmode="decimal"></label><label>Día del mes (1 a 31)<input id="rc-d" type="number" min="1" max="31" inputmode="numeric"></label></div>
+          <button id="rc-ok" class="btn sm">Agregar pago recurrente</button><small id="rc-msg" class="muted"></small></div></div>
+      <div class="card"><h3>🎯 Metas de ahorro</h3><ul id="mt-list" class="list"></ul>
+        <div id="mt-form" class="box"><b>Crear una meta</b>
+          <label>Nombre de la meta<input id="mt-n" maxlength="40" placeholder="Ej.: Viaje familiar"></label>
+          <div class="row2"><label>Objetivo (Bs)<input id="mt-o" type="number" step="0.01" min="0.01" inputmode="decimal"></label><label>Fecha límite (opcional)<input id="mt-f" type="date"></label></div>
+          <button id="mt-ok" class="btn sm">Crear meta</button><small id="mt-msg" class="muted"></small></div></div>
+    </div>
   </div>
 </section>
 <section id="t-cfg" class="tab" hidden>
@@ -69,9 +84,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js"></script>
 <script src="js/config.js"></script>
-<script src="js/data.js?v=0.6.0"></script>
-<script src="js/reports.js?v=0.6.0"></script>
-<script src="js/icons.js?v=0.6.0"></script>
-<script src="js/pdf.js?v=0.6.0"></script>
-<script src="js/app.js?v=0.6.0"></script>
+<script src="js/data.js?v=0.7.0"></script>
+<script src="js/reports.js?v=0.7.0"></script>
+<script src="js/icons.js?v=0.7.0"></script>
+<script src="js/pdf.js?v=0.7.0"></script>
+<script src="js/app.js?v=0.7.0"></script>
 </body></html>

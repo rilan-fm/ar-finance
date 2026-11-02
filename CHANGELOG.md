@@ -1,4 +1,12 @@
 # Changelog
+## 0.7.0
+- Notas: el cuadro es ahora una sola línea delgada y crece solo al escribir (hasta el 70 % de la altura de la pantalla).
+- Presupuestos por categoría (Historial y notas): fijas un límite mensual por categoría de gasto; barra de avance con colores (normal, naranja desde el 80 %, rojo al pasarte). Si una categoría se acerca o supera el límite, aparece un aviso en General.
+- Pagos recurrentes (Historial y notas): luz, agua, internet, gas, pensión del colegio u otro. Cada uno tiene un día del mes y un estado: pagado este mes, vence en N días, vence hoy o vencido. El botón «Pagar» registra el gasto (te pide el monto real). Los avisos vencidos o por vencer aparecen en General.
+- Metas de ahorro (Historial y notas): nombre, objetivo y fecha límite opcional; botón «Aportar» (número negativo para retirar), barra de avance, cuánto falta y cuánto ahorrar por mes para llegar a tiempo.
+- Respaldo JSON e importación incluyen presupuestos, pagos recurrentes y metas. Renombrar una categoría propia actualiza también sus presupuestos y pagos recurrentes.
+- Base de datos: 3 tablas nuevas con RLS (migraciones 001 y 002). La app sigue funcionando si aún no las ejecutas (esas tarjetas avisan que falta la migración).
+- Fix móvil: las tarjetas de Historial y notas ya no desbordan en pantallas angostas.
 ## 0.6.0
 - Menú lateral plegable (escritorio): botón ‹ para ocultarlo y ☰ (arriba a la izquierda) para mostrarlo; se recuerda en el dispositivo. Al ocultarlo, el contenido usa todo el ancho.
 - Todas las pestañas usan todo el ancho con márgenes laterales moderados (16 a 48 px según la pantalla). Configuración se acomoda en dos columnas en pantallas anchas.
