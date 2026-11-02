@@ -1,4 +1,12 @@
 # Changelog
+## 0.6.0
+- Menú lateral plegable (escritorio): botón ‹ para ocultarlo y ☰ (arriba a la izquierda) para mostrarlo; se recuerda en el dispositivo. Al ocultarlo, el contenido usa todo el ancho.
+- Todas las pestañas usan todo el ancho con márgenes laterales moderados (16 a 48 px según la pantalla). Configuración se acomoda en dos columnas en pantallas anchas.
+- Historial y Notas se fusionan en una sola pestaña: historial a la izquierda (más ancho) y notas a la derecha.
+- Historial ordenado por momento de registro (lo último que registraste va primero, sin importar la fecha del movimiento). «Últimos movimientos» de General usa el mismo orden. Muestra 50 y botón «Mostrar más».
+- Editar movimientos (botón lápiz en Historial y en General): fecha, categoría, subcategoría, detalle, descripción, cantidad y monto.
+- Reportes: ningún tipo viene activado. «Gastos vs Ingresos» muestra dos columnas (Gastos a la izquierda, más ancha; Ingresos a la derecha) con interruptor por categoría. Cada categoría activada genera un bloque (tarjetas, veredicto y 2 gráficos); si activas la misma categoría en ambas columnas (ej. Rilan) se comparan en un mismo bloque. Los nuevos bloques se agregan abajo y, con 2 o más, aparece «Total de la selección». Botones «Activar todas» / «Quitar». Pulsar de nuevo un tipo lo desactiva.
+- PDF de «Gastos vs Ingresos»: incluye los gráficos de todos los bloques.
 ## 0.5.2
 - Navegación fluida: al elegir una opción, la pantalla se desplaza sola (con suavidad) para mostrar lo que aparece: fecha y categorías al elegir Gasto/Ingreso, subcategorías y detalle al elegir una categoría, y el formulario con el botón Registrar al terminar. Al registrar o cancelar, vuelve arriba para ver la confirmación.
 - Reportes: al elegir tipo o categoría se muestran las siguientes opciones (o el reporte, si no hay más); los botones rápidos (Este mes, etc.) llevan al reporte.

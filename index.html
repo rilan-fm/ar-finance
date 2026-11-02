@@ -3,7 +3,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Ar_Finance</title><meta name="theme-color" content="#0b1130">
 <link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icons/icon-192.png">
-<link rel="stylesheet" href="css/styles.css?v=0.5.2">
+<link rel="stylesheet" href="css/styles.css?v=0.6.0">
 </head><body>
 <section id="login" class="card login">
   <picture><source media="(prefers-color-scheme:dark)" srcset="img/logo-full-dark.png"><img src="img/logo-full-light.png" alt="Ar_Finance" class="logo-l"></picture>
@@ -17,11 +17,12 @@
 <div class="top"><button id="burger" class="btn ghost sm">☰</button><picture><source media="(prefers-color-scheme:dark)" srcset="img/logo-full-dark.png"><img src="img/logo-full-light.png" alt="Ar_Finance" height="38"></picture></div>
 <div id="scrim"></div>
 <aside id="side">
-  <picture><source media="(prefers-color-scheme:dark)" srcset="img/logo-full-dark.png"><img src="img/logo-full-light.png" alt="Ar_Finance" class="logo"></picture>
-  <nav id="menu"><button class="mi on" data-t="gen">🏠 General</button><button class="mi" data-t="reg">➕ Registrar</button><button class="mi" data-t="rep">📊 Reportes</button><button class="mi" data-t="his">🧾 Historial</button><button class="mi" data-t="not">📝 Notas</button><button class="mi" data-t="cfg">⚙️ Configuración</button></nav>
+  <div class="sb-top"><picture><source media="(prefers-color-scheme:dark)" srcset="img/logo-full-dark.png"><img src="img/logo-full-light.png" alt="Ar_Finance" class="logo"></picture><button id="sb-hide" class="sb-tg" title="Ocultar menú" aria-label="Ocultar menú">‹</button></div>
+  <nav id="menu"><button class="mi on" data-t="gen">🏠 General</button><button class="mi" data-t="reg">➕ Registrar</button><button class="mi" data-t="rep">📊 Reportes</button><button class="mi" data-t="his">🧾 Historial y notas</button><button class="mi" data-t="cfg">⚙️ Configuración</button></nav>
   <div class="grow"></div><small id="who" class="muted"></small><button id="out" class="btn ghost sm">Salir</button>
 </aside>
 <main>
+<button id="sb-show" class="sb-tg" title="Mostrar menú" aria-label="Mostrar menú">☰</button>
 <section id="t-gen" class="tab"><h2 id="g-tit"></h2><div id="g-out"></div></section>
 <section id="t-reg" class="tab card" hidden><div id="reg-body" class="col"></div></section>
 <section id="t-rep" class="tab" hidden>
@@ -34,13 +35,13 @@
   </div>
   <div id="rep-out"></div><button id="pdf" class="btn">⬇ Descargar PDF</button>
 </section>
-<section id="t-his" class="tab card" hidden>
-  <div class="row"><input id="h-q" placeholder="Buscar…"><select id="h-tipo"><option value="">Todos</option><option value="gasto">Gastos</option><option value="ingreso">Ingresos</option></select></div>
-  <ul id="h-list" class="list"></ul>
-</section>
-<section id="t-not" class="tab card" hidden>
-  <textarea id="n-txt" rows="12" placeholder="Escribe tus notas…"></textarea>
-  <div class="row"><small id="n-st" class="muted"></small></div>
+<section id="t-his" class="tab" hidden>
+  <div class="hn">
+    <div class="card hn-l"><h3>🧾 Historial <small class="muted">(del más reciente al más antiguo, según cuándo lo registraste)</small></h3>
+      <div class="hbar"><input id="h-q" placeholder="Buscar…"><select id="h-tipo"><option value="">Todos</option><option value="gasto">Gastos</option><option value="ingreso">Ingresos</option></select></div>
+      <ul id="h-list" class="list"></ul><button id="h-mas" class="btn ghost sm" hidden>Mostrar más</button></div>
+    <div class="hn-r"><div class="card"><h3>📝 Notas</h3><textarea id="n-txt" rows="14" placeholder="Escribe tus notas…"></textarea><div class="row"><small id="n-st" class="muted"></small></div></div></div>
+  </div>
 </section>
 <section id="t-cfg" class="tab" hidden>
   <h2>⚙️ Configuración</h2>
@@ -63,13 +64,14 @@
   <div class="card"><h3>Acerca de</h3><p class="muted lab">Ar_Finance versión <span id="c-ver"></span></p></div>
 </section>
 </main></div>
+<div id="ed-back" hidden><div id="ed-box" class="card" role="dialog" aria-modal="true" aria-labelledby="ed-t"><h3 id="ed-t">Editar movimiento</h3><div id="ed-f" class="col"></div><p id="ed-m" class="warn lab"></p><div class="row acts"><button id="ed-ok" class="btn">Guardar cambios</button><button id="ed-no" class="btn ghost">Cancelar</button></div></div></div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js"></script>
 <script src="js/config.js"></script>
-<script src="js/data.js?v=0.5.2"></script>
-<script src="js/reports.js?v=0.5.2"></script>
-<script src="js/icons.js?v=0.5.2"></script>
-<script src="js/pdf.js?v=0.5.2"></script>
-<script src="js/app.js?v=0.5.2"></script>
+<script src="js/data.js?v=0.6.0"></script>
+<script src="js/reports.js?v=0.6.0"></script>
+<script src="js/icons.js?v=0.6.0"></script>
+<script src="js/pdf.js?v=0.6.0"></script>
+<script src="js/app.js?v=0.6.0"></script>
 </body></html>
