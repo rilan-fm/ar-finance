@@ -1,4 +1,9 @@
 # Changelog
+## 0.5.2
+- Navegación fluida: al elegir una opción, la pantalla se desplaza sola (con suavidad) para mostrar lo que aparece: fecha y categorías al elegir Gasto/Ingreso, subcategorías y detalle al elegir una categoría, y el formulario con el botón Registrar al terminar. Al registrar o cancelar, vuelve arriba para ver la confirmación.
+- Reportes: al elegir tipo o categoría se muestran las siguientes opciones (o el reporte, si no hay más); los botones rápidos (Este mes, etc.) llevan al reporte.
+- Configuración: al abrir «Importar desde Excel» y al revisar o importar, se muestra el resultado.
+- Al cambiar de pestaña, la página siempre empieza arriba.
 ## 0.5.1
 - Registrar: usa todo el ancho en pantallas grandes (centrado, iconos y textos más grandes, descripción/cantidad/monto en una fila).
 - Registrar: Gasto e Ingreso ahora son una ilustración (monitor con gráfico, moneda y flecha) con un botón debajo: contorno cuando está inactivo; relleno, elevación y brillo al pasar el cursor o al estar activo. Gasto en naranja, Ingreso en celeste.
