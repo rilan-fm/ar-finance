@@ -1,4 +1,11 @@
 # Changelog
+## 0.8.0
+- Reportes: «TIPO DE REPORTE» encabeza la pestaña (título en mayúsculas). Tarjetas de tipo más angostas y altas, con ilustración grande, contorno celeste fijo, mini zoom y brillo neón sutil al pasar el mouse; al seleccionar se queda el color del tipo.
+- Reportes, filtros: botones Año / Mes / Rango centrados y fijos al desplazarse (siempre visibles arriba). Año en curso activado por defecto; Año y Mes despliegan solo los valores con datos; Rango muestra las casillas Desde/Hasta solo cuando está activo (y desactiva Año y Mes). Se quitan los botones rápidos; queda «Limpiar».
+- Gastos vs Ingresos, categorías: animación de entrada; casilla «Seleccionar varios» por tipo. Con la casilla apagada, al elegir una categoría las demás se esconden detrás de ella y la elegida queda ampliada; pulsarla de nuevo las devuelve. Con la casilla activa se eligen varias y aparece «Analizar» (pliega) / «Añadir o quitar categorías» (despliega). Gastos e Ingresos funcionan de forma independiente.
+- Gastos vs Ingresos, solo categorías de gasto: un bloque por categoría con 3 tarjetas (gastos totales, promedio flexible diario/semanal/mensual según el periodo, subcategoría más frecuente) y 3 gráficos (barras horizontales por subcategoría, anillo de participación y tendencia en el tiempo) con colores de mapa de calor (morado, naranja, turquesa). 1 categoría: gráficos en una fila; 2 o más: bloques en 2 columnas, cada uno con su color de contorno.
+- PDF de ese reporte: una hoja horizontal por categoría con tarjetas y gráficos en alta definición, sin listas, con los montos escritos en las barras.
+- Sin cambios en la base de datos.
 ## 0.7.0
 - Notas: el cuadro es ahora una sola línea delgada y crece solo al escribir (hasta el 70 % de la altura de la pantalla).
 - Presupuestos por categoría (Historial y notas): fijas un límite mensual por categoría de gasto; barra de avance con colores (normal, naranja desde el 80 %, rojo al pasarte). Si una categoría se acerca o supera el límite, aparece un aviso en General.
