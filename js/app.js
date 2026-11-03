@@ -1,6 +1,6 @@
 (function(){
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],R=Reports,esc=R.esc,F=R.fmt;
-const VERSION='0.9.0';
+const VERSION='0.10.1';
 let D,movs=[],custom=[],pres=[],rec=[],metas=[],prOk=false,metOk=false,ch={},st,userEmail='';
 const NUEVA='Nueva categoría',hoy=()=>new Date().toLocaleDateString('sv');
 const tree=()=>R.GASTO.concat(custom.map(c=>({n:c.nombre,s:c.subs||[],d:{},id:c.id})));
@@ -227,7 +227,7 @@ const filtros=()=>({anio:fs.rango?'':fs.anio,mes:fs.rango?'':fs.mes,desde:fs.ran
 const NOM={gastos:'Gastos',ingresos:'Ingresos'},chico=()=>window.innerWidth<=760,recorta=(s,n)=>s.length>n?s.slice(0,n-1)+'…':s;
 let PDFM=false;
 const tema=()=>{const osc=!PDFM&&matchMedia('(prefers-color-scheme:dark)').matches,cv=getComputedStyle(document.documentElement).getPropertyValue('--c').trim();
- return osc?{mu:'#dbe1ff',tx:'#f4f6ff',bd:'rgba(200,210,255,.14)',c:cv,gastos:'#c75bff',ingresos:'#00f8ff',osc,rampa:['#2AFAE9','#00C0F5','#4254FF','#8708E8','#D604FF','#FF0851']}:{mu:'#3b4466',tx:'#0b1130',bd:'rgba(11,17,48,.10)',c:PDFM?'#ffffff':cv,gastos:'#9a17dc',ingresos:'#0a86a8',osc,rampa:['#24D0C8','#02A1D2','#3848DA','#710AC7','#B206DA','#D30A4B']}};
+ return osc?{mu:'#dbe1ff',tx:'#f4f6ff',bd:'rgba(200,210,255,.14)',c:cv,gastos:'#c75bff',ingresos:'#00f8ff',osc,rampa:['#2AFAE9','#00C0F5','#4254FF','#8708E8','#D604FF','#fe9900']}:{mu:'#3b4466',tx:'#0b1130',bd:'rgba(11,17,48,.10)',c:PDFM?'#ffffff':cv,gastos:'#9a17dc',ingresos:'#0a86a8',osc,rampa:['#24D0C8','#02A1D2','#3848DA','#710AC7','#B206DA','#e07b00']}};
 let TM=tema();
 const DPR0=()=>Math.max(2,window.devicePixelRatio||1);
 if(window.Chart){Chart.defaults.devicePixelRatio=DPR0();Chart.defaults.font.family='system-ui,-apple-system,"Segoe UI",Roboto,sans-serif'}
@@ -261,17 +261,7 @@ function renderRep(){
  if(tipoR==='vs'){
   if(!vsSel.length){o.innerHTML='<div class="card vacio"><b>Activa categorías para comparar</b><span class="muted">Usa los interruptores de Gastos (izquierda) e Ingresos (derecha). Si activas la misma categoría en ambos lados (por ejemplo Rilan) se comparan en un mismo bloque.</span></div>';return}
   if(soloTipo()){gastosBloques(l,a,b,o,soloTipo());return}
-  const bl=R.bloquesVs(l,vsSel),jobs=[],gN=vsSel.filter(x=>x.t==='gasto').map(x=>x.c),iN=vsSel.filter(x=>x.t==='ingreso').map(x=>x.c),
-   perv=`<div class="perio">📅 ${R.fechaCorta(a)} – ${R.fechaCorta(b)} · ${R.enSeleccion(l,vsSel).length} movimientos en tu selección</div>`;
-  const sec=(k,tit,tag,mov,g,i)=>{const h=`<section class="vs-b"><h2>${esc(tit)}</h2><p class="vs-tag">${tag}</p>`;
-   if(!mov.length)return h+'<div class="card vacio"><b>Sin movimientos en este periodo</b><span class="muted">No hay registros de esta selección con el filtro actual.</span></div></section>';
-   const tt=R.totales(mov,a,b),amb=g&&i,keys=[i&&'ingresos',g&&'gastos'].filter(Boolean),bal=tt.balance,
-    vd=amb?`<div class="vd${bal<0?' mal':''}"><b>${bal<0?'⚠ Los gastos superan a los ingresos':bal>0?'✔ Los ingresos superan a los gastos':'Ingresos y gastos están igualados'}</b>${bal?' por '+F(Math.abs(bal)):''} en «${esc(tit)}».</div>`:`<div class="vd neu">Solo activaste ${g?'gastos':'ingresos'} aquí. Activa también ${g?'los ingresos':'los gastos'} para compararlos.</div>`;
-   jobs.push(()=>{ch['v'+k+'a']=lineEvo('#v'+k+'a',R.serie(mov,gr[0],a,b),keys);ch['v'+k+'b']=barS('#v'+k+'b',R.serie(mov,gr[1],a,b),keys)});
-   return h+`<div class="grid">${K('Ingresos',i?F(tt.ingresos):'—',i?'ingreso':'','a','up')}${K('Gastos',g?F(tt.gastos):'—',g?'gasto':'','a','down')}${K('Balance',amb?F(bal):'—',amb?(bal<0?'gasto':'ingreso'):'','a','scale')}${K('Gastos sobre ingresos',amb&&tt.ingresos>0?R.fmtPct(R.pct(tt.gastos,tt.ingresos))+sub('de lo que ingresa se gasta'):'—','','o','coin')}${K('Movimientos',tt.n,'','p','list')}</div>${vd}<div class="duo">${card(e1,'v'+k+'a',1)}${card(e2,'v'+k+'b')}</div></section>`};
-  let h=perv+bl.map((x,k)=>sec(k,x.nombre,(x.g?'Gastos de «'+esc(x.nombre)+'»':'')+(x.g&&x.i?' vs ':'')+(x.i?'Ingresos de «'+esc(x.nombre)+'»':''),x.mov,x.g,x.i)).join('');
-  if(bl.length>1)h+=sec(bl.length,'Total de la selección','Gastos: '+(gN.map(esc).join(', ')||'—')+' · Ingresos: '+(iN.map(esc).join(', ')||'—'),R.enSeleccion(l,vsSel),gN.length>0,iN.length>0);
-  o.innerHTML=h;jobs.forEach(j=>j());return}
+  mezclaBloque(l,a,b,o);return}
  const gk=tipoR==='gasto'?'gastos':'ingresos',tot=t[gk],W=tipoR==='gasto'?'Gasto':'Ingreso',ev=card(e1+' '+badge(s1.map(x=>x[gk])),'c2');
  if(!f.cats.length){const pc=R.porCategoria(l,tipoR),p0=pc[0];
   o.innerHTML=per+`<div class="grid">${K(W+' total',F(tot),tipoR,'a',tipoR)}${K(W+' promedio por mes',F(t[gk==='gastos'?'gMes':'iMes']),'','o','calendar')}${K(W+' promedio por semana',F(tot/sem),'','p','calweek')}${K(W+' promedio diario',F(tot/R.dias(a,b)),'','a','sun')}${K('Movimientos',t.n,'','a','list')}${K(tipoR==='gasto'?'Categoría más fuerte':'Fuente más fuerte',p0?F(p0.total)+sub(esc(p0.cat)+' · '+R.fmtPct(R.pct(p0.total,tot))+' del total'):'—','','p','trophy')}</div>
@@ -309,6 +299,24 @@ function gastosBloques(l,a,b,o,tp){const g=tp==='gasto',gk=g?'gastos':'ingresos'
   jobs.push(()=>{ch[id('a')]=barSub('#'+id('a'),ps,tt);ch[id('b')]=anillo('#'+id('b'),ps,tt);ch[id('c')]=lineaHeat('#'+id('c'),sr,gk)});
   return `<section class="gb" style="--bc:${bc}">${ti}<div class="grid">${cards.map(x=>K(x.l,esc(x.v)+sub(esc(x.s)),x.c,x.cl,x.ic)).join('')}</div><div class="gb-ch${solo?' solo':''}">${card(pn+' por monto',id('a'),0,ht)}${card('Participación por '+pn.slice(0,-1).toLowerCase().replace('categorí','categoría').replace('categoríaa','categoría'),id('b'),0,ht)}${card('Evolución por '+UNP[un]+' '+badge(sr.map(x=>x[gk])),id('c'),0,ht)}</div></section>`}).join('');
  o.innerHTML=per+`<div class="gb-wrap${solo?'':' dos'}">${html}</div>`;jobs.forEach(j=>j())}
+const rotDif={id:'rotDif',afterDatasetsDraw(c,_a,o){if(!o||!o.on)return;const x=c.ctx,m=c.getDatasetMeta(0),d=c.data.datasets[0].data;x.save();x.fillStyle=o.color;x.font='600 '+o.size+'px system-ui,sans-serif';x.textBaseline='middle';
+ m.data.forEach((b,i)=>{const v=d[i],n=v<0;x.textAlign=n?'right':'left';x.fillText((n?'−':'+')+'Bs '+R.fmtCorto(Math.abs(v)),b.x+(n?-6:6),b.y)});x.restore()}};
+const rotV={id:'rotV',afterDatasetsDraw(c,_a,o){if(!o||!o.on)return;const x=c.ctx,m=c.getDatasetMeta(0),d=c.data.datasets[0].data;x.save();x.fillStyle=o.color;x.font='700 '+o.size+'px system-ui,sans-serif';x.textAlign='center';
+ m.data.forEach((b,i)=>{const n=d[i]<0;x.textBaseline=n?'top':'bottom';x.fillText('Bs '+R.fmtCorto(d[i]),b.x,b.y+(n?6:-6))});x.restore()}};
+const difBars=(id,it)=>new Chart($(id),{type:'bar',plugins:[rotDif],data:{labels:it.map(x=>x.cat),datasets:[{data:it.map(x=>x.total),backgroundColor:it.map(x=>x.total<0?TM.gastos:TM.ingresos),borderRadius:6,maxBarThickness:26}]},
+ options:{indexAxis:'y',maintainAspectRatio:false,animation:false,layout:{padding:{right:PDFM?(chico()?80:96):8,left:PDFM?(chico()?80:96):0}},plugins:{legend:{display:false},tooltip:{callbacks:{label:q=>{const x=it[q.dataIndex];return[' Ingresos: '+F(x.i),' Gastos: '+F(x.g),' Diferencia: '+F(x.total)]}}},rotDif:{on:PDFM,color:TM.tx,size:chico()?11:12}},
+  scales:{x:gy(),y:{grid:{display:false},ticks:{callback(v){return recorta(this.getLabelForValue(v),chico()?16:24)}}}}}});
+const barras3=(id,t)=>new Chart($(id),{type:'bar',plugins:[rotV],data:{labels:['Ingresos','Gastos','Balance'],datasets:[{data:[t.ingresos,t.gastos,t.balance],backgroundColor:[TM.ingresos,TM.gastos,TM.rampa[2]],borderRadius:8,maxBarThickness:70}]},
+ options:{maintainAspectRatio:false,animation:false,layout:{padding:{top:28,bottom:10}},plugins:{legend:{display:false},tooltip:{callbacks:{label:q=>' '+F(q.parsed.y)}},rotV:{on:true,color:TM.tx,size:chico()?11:12}},scales:{x:gx(),y:gy()}}});
+const acumulado=(id,s)=>{let c=0;const v=s.map(x=>(c+=x.ingresos-x.gastos,Math.round(c*100)/100));return new Chart($(id),{type:'line',data:{labels:s.map(x=>x.label),datasets:[{label:'Balance acumulado',data:v,borderColor:TM.ingresos,segment:{borderColor:q=>(q.p0.parsed.y+q.p1.parsed.y)/2<0?TM.gastos:TM.ingresos},fill:{target:'origin',above:TM.ingresos+'26',below:TM.gastos+'26'},tension:.3,borderWidth:3,borderCapStyle:'round',pointBackgroundColor:v.map(y=>y<0?TM.gastos:TM.ingresos),pointBorderColor:TM.c,pointBorderWidth:2,pointRadius:s.length>40?0:3.5,pointHoverRadius:6}]},options:opt({plugins:{legend:{display:false},tooltip:tip}})})};
+function mezclaBloque(l,a,b,o){const gN=vsDe('gasto'),iN=vsDe('ingreso'),mov=R.enSeleccion(l,vsSel),un=R.unidadProm(a,b),nm=(t,N)=>V[t].todos?'(todas)':N.join(' + '),titulo='Gasto '+nm('gasto',gN)+' vs Ingreso '+nm('ingreso',iN);vsInfo=[];
+ const per=`<div class="perio">📅 ${R.fechaCorta(a)} – ${R.fechaCorta(b)} · ${mov.length} movimiento${mov.length===1?'':'s'} en tu selección · análisis por ${UNP[un]}</div>`,ti=`<h2 class="gb-t"><span class="kic">${Icons.svg('vs')}</span>${esc(titulo)}</h2>`;
+ if(!mov.length){vsInfo.push({c:titulo,vacio:true});o.innerHTML=per+`<div class="gb-wrap"><section class="gb" style="--bc:var(--ac)">${ti}<div class="card vacio"><b>Sin movimientos en este periodo</b><span class="muted">No hay registros de esta selección con el filtro actual.</span></div></section></div>`;return}
+ const t=R.totales(mov,a,b),nI=mov.filter(m=>m.tipo==='ingreso').length,rg=n=>n+' registro'+(n===1?'':'s'),d0=R.difPorSubcat(mov),dif=d0.length>12?d0.slice(0,12).concat([(q=>({cat:'Otras ('+(d0.length-12)+')',i:q.i,g:q.g,total:q.i-q.g}))(d0.slice(12).reduce((p,x)=>({i:p.i+x.i,g:p.g+x.g}),{i:0,g:0}))]):d0,s=R.serie(mov,un,a,b),ratio=t.ingresos>0?R.pct(t.gastos,t.ingresos):null,
+  cards=[{l:'Ingresos',v:F(t.ingresos),s:rg(nI),cl:'a',ic:'up',c:'ingreso'},{l:'Gastos',v:F(t.gastos),s:rg(mov.length-nI),cl:'a',ic:'down',c:'gasto'},{l:'Balance',v:F(t.balance),s:'ingresos − gastos',cl:'p',ic:'scale',c:t.balance<0?'gasto':'ingreso'},{l:'Gasto sobre ingreso',v:ratio==null?'—':R.fmtPct(ratio),s:ratio==null?'Sin ingresos en la selección':ratio>100?'Gastas más de lo que ingresa':'Tasa de ahorro: '+R.fmtPct(100-ratio),cl:'o',ic:'coin',c:''}],ht=Math.max(300,dif.length*30+60);
+ vsInfo.push({c:titulo,bc:COLH[0],cards,ids:['m0a','m0b','m0c']});
+ o.innerHTML=per+`<div class="gb-wrap"><section class="gb" style="--bc:var(--ac)">${ti}<p class="vs-tag">Ingresos = suma de las categorías de ingreso activas · Gastos = suma de las de gasto activas · Balance = Ingresos − Gastos · Gasto sobre ingreso = Gastos ÷ Ingresos</p><div class="grid">${cards.map(x=>K(x.l,esc(x.v)+sub(esc(x.s)),x.c,x.cl,x.ic)).join('')}</div><div class="gb-ch solo">${card('Diferencia por subcategoría (la suma de las barras = Balance)','m0a',0,ht)}${card('Ingresos vs gastos','m0b',0,ht)}${card('Balance acumulado por '+UNP[un],'m0c',0,ht)}</div></section></div>`;
+ ch.m0a=difBars('#m0a',dif);ch.m0b=barras3('#m0b',t);ch.m0c=acumulado('#m0c',s)}
 const rr=(g,x,y,w,h,r)=>{g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath()};
 function texto(g,t,x,y,max,px,peso,col){let p=px;g.font=peso+' '+p+'px system-ui,sans-serif';while(g.measureText(t).width>max&&p>16){p-=2;g.font=peso+' '+p+'px system-ui,sans-serif'}g.fillStyle=col;g.fillText(t,x,y)}
 function componer(x){const W=2400,P=60,gap=30,cw=(W-2*P-2*gap)/3,sh=Math.round(cw*.9),H=P+120+230+40+sh+P,cv=document.createElement('canvas');cv.width=W;cv.height=H;const g=cv.getContext('2d');
@@ -320,8 +328,8 @@ function pdfGastos(){const f=filtros(),l=R.filtrar(movs,f);if(!l.length)return a
  PDFM=true;Chart.defaults.devicePixelRatio=3;
  try{renderRep();pags=vsInfo.filter(x=>!x.vacio).map(componer)}finally{PDFM=false;Chart.defaults.devicePixelRatio=DPR0();renderRep()}
  if(!pags.length)return alert('No hay datos para exportar.');
- PDF.generarBloques({titulo:(soloTipo()==='gasto'?'Gastos':'Ingresos')+' por categoria',archivo:soloTipo()==='gasto'?'reporte-gastos.pdf':'reporte-ingresos.pdf',periodo:'Periodo: '+R.fechaCorta(a)+' a '+R.fechaCorta(b),paginas:pags})}
-function pdf(){if(!tipoR)return alert('Elige un tipo de reporte.');if(tipoR==='vs'&&soloTipo())return pdfGastos();const f=filtros();let l0=R.filtrar(movs,f);if(tipoR==='vs')l0=R.enSeleccion(l0,vsSel);const l=R.ordenar(l0);if(!l.length)return alert('No hay datos para exportar.');const[a,b]=R.rango(f,l,hoy());let imgs=[];
+ const tp=soloTipo();PDF.generarBloques({titulo:tp==='gasto'?'Gastos por categoria':tp==='ingreso'?'Ingresos por categoria':'Gastos vs Ingresos',archivo:tp==='gasto'?'reporte-gastos.pdf':tp==='ingreso'?'reporte-ingresos.pdf':'reporte-gastos-vs-ingresos.pdf',periodo:'Periodo: '+R.fechaCorta(a)+' a '+R.fechaCorta(b),paginas:pags})}
+function pdf(){if(!tipoR)return alert('Elige un tipo de reporte.');if(tipoR==='vs'&&vsSel.length)return pdfGastos();const f=filtros();let l0=R.filtrar(movs,f);if(tipoR==='vs')l0=R.enSeleccion(l0,vsSel);const l=R.ordenar(l0);if(!l.length)return alert('No hay datos para exportar.');const[a,b]=R.rango(f,l,hoy());let imgs=[];
  PDFM=true;Chart.defaults.devicePixelRatio=3;
  try{renderRep();imgs=Object.values(ch).slice(0,tipoR==='vs'?40:2).map(x=>({img:x.toBase64Image('image/png',1),w:x.canvas.width,h:x.canvas.height}))}finally{PDFM=false;Chart.defaults.devicePixelRatio=DPR0();renderRep()}
  if(imgs.length<2)return alert('No hay datos para exportar.');

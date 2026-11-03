@@ -39,7 +39,7 @@ function rango(f,l,hoy){const fe=l.map(m=>m.fecha).sort();let a=f.desde,b=f.hast
  if(!a)a=f.anio&&f.mes?`${f.anio}-${f.mes}-01`:f.anio?f.anio+'-01-01':fe[0];
  if(!b){if(f.anio&&f.mes)b=`${f.anio}-${f.mes}-${String(new Date(Date.UTC(+f.anio,+f.mes,0)).getUTCDate()).padStart(2,'0')}`;
   else if(f.anio){b=f.anio+'-12-31';if(hoy&&hoy<b&&hoy>=a)b=hoy}else b=fe[fe.length-1]}
- return[a,b]}
+ if(fe.length&&b<fe[fe.length-1])b=fe[fe.length-1];return[a,b]}
 function granularidad(f,a,b){const d=dias(a,b);if((f.anio&&!f.mes&&!f.desde&&!f.hasta)||d>330)return['mes','semana'];return d<=31?['dia','semana']:['semana','dia']}
 function serie(l,g,a,b){const key=s=>g==='dia'?s:g==='semana'?lunes(s):s.slice(0,7),ks=[];
  const lab=k=>g==='mes'?MESES[+k.slice(5,7)-1].slice(0,3)+' '+k.slice(2,4):(g==='semana'?'Sem ':'')+k.slice(8)+'/'+k.slice(5,7);
@@ -123,9 +123,11 @@ function estadoMetas(ms,hoy){return ms.map(m=>{const o=+m.objetivo,a=+m.ahorrado
  return{...m,objetivo:o,ahorrado:a,faltan:fal,pct:pct(a,o),lograda,vencida,mesesRest:meses,porMes:meses?Math.ceil(fal/meses*100)/100:0}}).sort((x,y)=>(x.lograda-y.lograda)||y.pct-x.pct)}
 const mesesEntre=(a,b)=>(+b.slice(0,4)-+a.slice(0,4))*12+(+b.slice(5,7)-+a.slice(5,7))+1;
 const unidadProm=(a,b)=>{const d=dias(a,b);return d<14?'dia':d<=100?'semana':'mes'};
-function promedioFlex(total,a,b){const u=unidadProm(a,b),n=u==='dia'?dias(a,b):u==='semana'?Math.max(1,dias(a,b)/7):mesesEntre(a,b);return{unidad:u,n,valor:total/n}}
+function promedioFlex(total,a,b){const u=unidadProm(a,b),n=u==='dia'?dias(a,b):u==='semana'?Math.max(1,dias(a,b)/7):Math.max(1,dias(a,b)/30.4375);return{unidad:u,n,valor:total/n}}
 const porSubcat=l=>agrupar(l,m=>m.subcategoria||'(general)');
 function masFrecuente(l,campo){const o={};l.forEach(m=>{const k=(campo==='categoria'?m.categoria:m.subcategoria)||'(general)',e=o[k]=o[k]||{k,n:0,total:0};e.n++;e.total+=+m.monto});return Object.values(o).sort((a,b)=>b.n-a.n||b.total-a.total)[0]||null}
-const api={mesesEntre,unidadProm,promedioFlex,porSubcat,masFrecuente,estadoMetas,estadoPresupuestos,estadoRecurrentes,ordenarReg,bloquesVs,enSeleccion,diasEntre,anioResumen,pct,fmtPct,fmtCorto,fechaCorta,mesCorto,periodoRapido,validarFilas,norm,paraImportar,MESES,rango,granularidad,serie,tendencia,frecuentes,GASTO,INGRESO,esc,fmt,etiquetaMes,dias,ordenar,filtrar,mesesConDatos,aniosConDatos,totales,porCategoria,porSub,porMes,topProducto};
+function difPorSubcat(l){const o={};l.forEach(m=>{const k=m.subcategoria||m.categoria,e=o[k]=o[k]||{cat:k,i:0,g:0};e[m.tipo==='ingreso'?'i':'g']+= +m.monto});
+ return Object.values(o).map(e=>({...e,total:e.i-e.g})).sort((x,y)=>Math.abs(y.total)-Math.abs(x.total))}
+const api={difPorSubcat,mesesEntre,unidadProm,promedioFlex,porSubcat,masFrecuente,estadoMetas,estadoPresupuestos,estadoRecurrentes,ordenarReg,bloquesVs,enSeleccion,diasEntre,anioResumen,pct,fmtPct,fmtCorto,fechaCorta,mesCorto,periodoRapido,validarFilas,norm,paraImportar,MESES,rango,granularidad,serie,tendencia,frecuentes,GASTO,INGRESO,esc,fmt,etiquetaMes,dias,ordenar,filtrar,mesesConDatos,aniosConDatos,totales,porCategoria,porSub,porMes,topProducto};
 if(typeof module!=='undefined')module.exports=api;else root.Reports=api;
 })(typeof window!=='undefined'?window:globalThis);

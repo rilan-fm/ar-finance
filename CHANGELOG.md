@@ -1,4 +1,15 @@
 # Changelog
+## 0.10.1
+- Fix de coherencia en Reportes: el periodo ahora siempre cubre todos los movimientos incluidos (antes, un movimiento con fecha posterior a hoy entraba en las tarjetas pero no en los gráficos de evolución).
+- Promedio mensual: se calcula con los meses transcurridos reales (días ÷ 30,44) en lugar de contar el mes en curso completo, que bajaba el promedio.
+- Gastos vs Ingresos (gasto e ingreso a la vez): el gráfico de diferencias ya no omite subcategorías (las menores se agrupan en «Otras (n)»), de modo que la suma de sus barras es igual al Balance de la tarjeta. La tarjeta «Gasto sobre ingreso» indica además la tasa de ahorro, o avisa si se gasta más de lo que ingresa. Se muestra en una línea cómo se calcula cada valor.
+- Sin cambios en la base de datos.
+## 0.10.0
+- Reportes › Gastos vs Ingresos con gasto e ingreso a la vez: ahora es UN solo reporte unificado. Suma los gastos de todas las categorías de gasto activas y los ingresos de todas las de ingreso activas (por ejemplo «Gasto Rilan vs Ingreso Rilan + Hospedaje»).
+- 4 tarjetas: Ingresos, Gastos, Balance y Gasto sobre ingreso (%). 3 gráficos: diferencia (ingresos − gastos) por subcategoría, barras de ingresos vs gastos vs balance, y balance acumulado en el tiempo (por día, semana o mes según el periodo). PDF horizontal de una hoja (reporte-gastos-vs-ingresos.pdf).
+- Mapa de calor: el dato de mayor monto o participación va en naranja #fe9900 (la rampa ahora termina en ese color).
+- Menú lateral: el botón activo usa el azul #114df2.
+- Sin cambios en la base de datos.
 ## 0.9.0
 - Reportes › Gastos vs Ingresos: nueva casilla «Todos» junto a «Seleccionar varios» (en Gastos y en Ingresos). Marca todas las categorías del tipo y muestra un «Resumen global» (3 tarjetas y 3 gráficos agrupados por categoría).
 - Reportes › Ingresos: si solo hay categorías de ingreso activas (ninguna de gasto), se muestran las mismas tarjetas y gráficos que en Gastos (ingresos totales, promedio flexible, ingreso más frecuente; barras, anillo y tendencia). También en PDF (reporte-ingresos.pdf).
