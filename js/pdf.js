@@ -10,9 +10,9 @@ function generar({rango,tot,porCat,filas,imgs}){
  lin('Movimientos',14,12,true);
  filas.forEach(m=>lin(m.fecha+'  '+(m.tipo==='ingreso'?'+':'-')+F(m.monto)+'  '+m.categoria+(m.subcategoria?' > '+m.subcategoria:'')+'  '+(m.descripcion||'').slice(0,45),16,9));
  d.save('reporte-finanzas.pdf');}
-function generarBloques({titulo,periodo,paginas}){const{jsPDF}=root.jspdf,d=new jsPDF({orientation:'landscape'});
+function generarBloques({titulo,periodo,paginas,archivo}){const{jsPDF}=root.jspdf,d=new jsPDF({orientation:'landscape'});
  paginas.forEach((p,i)=>{if(i)d.addPage();d.setFont('helvetica','bold');d.setFontSize(15);d.text('Ar_Finance - '+titulo,10,12);d.setFont('helvetica','normal');d.setFontSize(10);d.text(periodo,10,18);
   let w=277,h=w*p.h/p.w;if(h>180){h=180;w=h*p.w/p.h}d.addImage(p.img,'PNG',10,22,w,h,undefined,'FAST')});
- d.save('reporte-gastos.pdf')}
+ d.save(archivo||'reporte-gastos.pdf')}
 root.PDF={generar,generarBloques};
 })(window);

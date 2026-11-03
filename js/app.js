@@ -1,6 +1,6 @@
 (function(){
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],R=Reports,esc=R.esc,F=R.fmt;
-const VERSION='0.8.0';
+const VERSION='0.9.0';
 let D,movs=[],custom=[],pres=[],rec=[],metas=[],prOk=false,metOk=false,ch={},st,userEmail='';
 const NUEVA='Nueva categoría',hoy=()=>new Date().toLocaleDateString('sv');
 const tree=()=>R.GASTO.concat(custom.map(c=>({n:c.nombre,s:c.subs||[],d:{},id:c.id})));
@@ -179,12 +179,12 @@ async function guardarEd(){if(!ed)return;const bad=t=>msg('#ed-m',t),monto=Math.
  try{$('#ed-ok').disabled=true;const r=await D.actualizar(id,x);movs=movs.map(m=>m.id===id?{...m,...x,...(r||{})}:m);cerrarEd();todo()}catch(e){bad('Error: '+e.message)}finally{$('#ed-ok').disabled=false}}
 /* ---------- Reportes ---------- */
 const TIPOS=[['vs','Gastos vs Ingresos'],['gasto','Gastos'],['ingreso','Ingresos']],GN={dia:'día',semana:'semana',mes:'mes'},PL={dia:'días',semana:'semanas',mes:'meses'};
-let tipoR='',vsSel=[],rs={cat:'',sub:'',det:'',a:''},fs={anio:'',mes:'',rango:false,desde:'',hasta:''},fopen='',V={gasto:{multi:false,fold:false},ingreso:{multi:false,fold:false}},vsInfo=[];
+let tipoR='',vsSel=[],rs={cat:'',sub:'',det:'',a:''},fs={anio:'',mes:'',rango:false,desde:'',hasta:''},fopen='',V={gasto:{multi:false,fold:false,todos:false},ingreso:{multi:false,fold:false,todos:false}},vsInfo=[];
 function pintaTipos(){$('#f-t').innerHTML=TIPOS.map(([k,n])=>`<button type="button" class="rtc ${k}${k===tipoR?' sel':''}" data-k="${k}" aria-pressed="${k===tipoR}"><span class="rti">${Icons.rtype(k)}</span><span class="rtl">${n}</span></button>`).join('')}
 const vsOn=(t,c)=>vsSel.some(x=>x.t===t&&x.c===c),vsDe=t=>vsSel.filter(x=>x.t===t).map(x=>x.c);
 const ingNom=()=>R.INGRESO.map(c=>c.n).concat([...new Set(movs.filter(m=>m.tipo==='ingreso').map(m=>m.categoria))].filter(x=>!R.INGRESO.some(c=>c.n===x)));
 const vsItem=(t,n)=>{const on=vsOn(t,n),f=V[t].fold?(on?' zoom':' away gone'):'';return `<button type="button" class="vs-it ${t}${on?' on':''}${f}" role="switch" aria-checked="${on}" data-vs="${t}" data-v="${esc(n)}" style="--ik:${Icons.col(n)}"><span class="ic">${Icons.svg(n)}</span><span class="tl">${esc(n)}</span><span class="sw" aria-hidden="true"><i></i></span></button>`};
-function panelVs(){const col=(t,tit,ic,l)=>`<div class="vs-col ${t}" data-col="${t}"><div class="vs-h"><h3><span class="kic ${t==='gasto'?'neg':'pos'}">${Icons.svg(ic)}</span>${tit}</h3><label class="vs-chk"><input type="checkbox" data-vsm="${t}"${V[t].multi?' checked':''}><span>Seleccionar varios</span></label></div><div class="vs-g">${l.map(n=>vsItem(t,n)).join('')}</div><div class="vs-foot" data-foot="${t}"></div></div>`;
+function panelVs(){const col=(t,tit,ic,l)=>`<div class="vs-col ${t}" data-col="${t}"><div class="vs-h"><h3><span class="kic ${t==='gasto'?'neg':'pos'}">${Icons.svg(ic)}</span>${tit}</h3><div class="vs-chks"><label class="vs-chk"><input type="checkbox" data-vsm="${t}"${V[t].multi?' checked':''}><span>Seleccionar varios</span></label><label class="vs-chk"><input type="checkbox" data-vst="${t}"${V[t].todos?' checked':''}><span>Todos</span></label></div></div><div class="vs-g">${l.map(n=>vsItem(t,n)).join('')}</div><div class="vs-foot" data-foot="${t}"></div></div>`;
  return `<div class="vs-cols">${col('gasto','Gastos','down',tree().map(c=>c.n))}${col('ingreso','Ingresos','up',ingNom())}</div>`}
 function vsFoot(t){const el=$('[data-foot="'+t+'"]');if(!el)return;el.innerHTML=V[t].multi&&vsDe(t).length>=2?`<button type="button" class="btn sm${V[t].fold?' ghost':''}" data-vsgo="${t}">${V[t].fold?'Añadir o quitar categorías':'Analizar'}</button>`:''}
 function vsPlegar(c,plegar){if(!c)return;const its=[...c.querySelectorAll('.vs-it')],on=its.filter(x=>x.classList.contains('on')),off=its.filter(x=>!x.classList.contains('on'));
@@ -192,6 +192,7 @@ function vsPlegar(c,plegar){if(!c)return;const its=[...c.querySelectorAll('.vs-i
  if(plegar){hacia();on.forEach(x=>x.classList.add('zoom'));setTimeout(()=>{if(V[c.dataset.col].fold)off.forEach(x=>x.classList.add('gone'))},400)}
  else{its.forEach(x=>{x.classList.remove('gone','away','zoom');x.classList.add('nt')});hacia();void c.offsetWidth;its.forEach(x=>x.classList.remove('nt','away'))}}
 function vsToggle(t,c,btn){const v=V[t],col=btn.closest('.vs-col'),nuevo=!vsSel.length,i=vsSel.findIndex(x=>x.t===t&&x.c===c),marca=on=>{btn.classList.toggle('on',on);btn.setAttribute('aria-checked',on)};
+ if(v.todos&&!(v.fold&&v.multi)){v.todos=false;const q=col.querySelector('[data-vst]');if(q)q.checked=false}
  if(v.fold){if(v.multi)return;vsSel.splice(i,1);marca(false);v.fold=false;vsPlegar(col,false)}
  else if(v.multi){if(i>=0)vsSel.splice(i,1);else vsSel.push({t,c});marca(i<0);vsFoot(t)}
  else if(i>=0){vsSel.splice(i,1);marca(false)}
@@ -199,8 +200,14 @@ function vsToggle(t,c,btn){const v=V[t],col=btn.closest('.vs-col'),nuevo=!vsSel.
  renderRep();if(nuevo&&vsSel.length)setTimeout(irRes,v.fold?450:0)}
 function vsMulti(t,on){const v=V[t],c=$('.vs-col[data-col="'+t+'"]');v.multi=on;
  if(on){if(v.fold){v.fold=false;vsPlegar(c,false)}}
- else{const s=vsDe(t);if(s.length){const k=s[0];vsSel=vsSel.filter(x=>x.t!==t||x.c===k);c.querySelectorAll('.vs-it.on').forEach(x=>{if(x.dataset.v!==k){x.classList.remove('on','zoom');x.setAttribute('aria-checked','false')}});v.fold=true;vsPlegar(c,true);renderRep()}}
+ else{if(v.todos){v.todos=false;const q=c.querySelector('[data-vst]');if(q)q.checked=false}const s=vsDe(t);if(s.length){const k=s[0];vsSel=vsSel.filter(x=>x.t!==t||x.c===k);c.querySelectorAll('.vs-it.on').forEach(x=>{if(x.dataset.v!==k){x.classList.remove('on','zoom');x.setAttribute('aria-checked','false')}});v.fold=true;vsPlegar(c,true);renderRep()}}
  vsFoot(t)}
+function vsTodos(t,on){const v=V[t],c=$('.vs-col[data-col="'+t+'"]'),nuevo=!vsSel.length,todas=t==='gasto'?tree().map(x=>x.n):ingNom();
+ vsSel=vsSel.filter(x=>x.t!==t);v.todos=on;
+ if(on){v.multi=true;todas.forEach(n=>vsSel.push({t,c:n}));const m=c.querySelector('[data-vsm]');if(m)m.checked=true;c.querySelectorAll('.vs-it').forEach(x=>{x.classList.add('on');x.setAttribute('aria-checked','true')})}
+ else c.querySelectorAll('.vs-it').forEach(x=>{x.classList.remove('on','zoom');x.setAttribute('aria-checked','false')});
+ if(v.fold){v.fold=false;vsPlegar(c,false)}
+ vsFoot(t);renderRep();if(nuevo&&vsSel.length)setTimeout(irRes,0)}
 function vsAnalizar(t){const v=V[t];v.fold=!v.fold;vsPlegar($('.vs-col[data-col="'+t+'"]'),v.fold);vsFoot(t);if(v.fold)setTimeout(irRes,450)}
 function armarCats(){const a=rs.a;rs.a='';if(!tipoR){$('#f-cats').innerHTML='';return}if(tipoR==='vs'){$('#f-cats').innerHTML=panelVs();vsFoot('gasto');vsFoot('ingreso');return}
  const g=tipoR==='gasto',n=(g?tree():R.INGRESO).find(c=>c.n===rs.cat),subs=n?n.s:[],dets=n&&n.d[rs.sub],leg=[...new Set(movs.filter(m=>m.tipo==='ingreso').map(m=>m.categoria))].filter(x=>!R.INGRESO.some(c=>c.n===x));
@@ -215,12 +222,12 @@ function pintaFil(){const as=R.aniosConDatos(movs),base=fs.anio?movs.filter(x=>x
  $('#f-btns').innerHTML=b('anio','Año'+(fs.anio?': '+fs.anio:''),!!fs.anio&&!fs.rango)+b('mes','Mes'+(fs.mes?': '+mn(fs.mes):''),!!fs.mes&&!fs.rango)+b('rango','Rango',fs.rango);
  const p=$('#f-pan');p.hidden=!pk;
  p.innerHTML=pk==='anio'?cp('data-fy','','Todos',!fs.anio)+as.map(y=>cp('data-fy',y,y,fs.anio===y)).join(''):pk==='mes'?cp('data-fm','','Todos',!fs.mes)+ms.map(k=>cp('data-fm',k,R.MESES[+k-1],fs.mes===k)).join(''):pk==='rango'?`<label>Desde<input id="f-d" type="date" value="${esc(fs.desde)}"></label><label>Hasta<input id="f-h" type="date" value="${esc(fs.hasta)}"></label>`:''}
-function limpiaFil(){fs={anio:R.anioResumen(hoy(),movs),mes:'',rango:false,desde:'',hasta:''};fopen='';tipoR='';vsSel=[];V={gasto:{multi:false,fold:false},ingreso:{multi:false,fold:false}};rs={cat:'',sub:'',det:'',a:''};pintaFil();pintaTipos();armarCats();renderRep()}
+function limpiaFil(){fs={anio:R.anioResumen(hoy(),movs),mes:'',rango:false,desde:'',hasta:''};fopen='';tipoR='';vsSel=[];V={gasto:{multi:false,fold:false,todos:false},ingreso:{multi:false,fold:false,todos:false}};rs={cat:'',sub:'',det:'',a:''};pintaFil();pintaTipos();armarCats();renderRep()}
 const filtros=()=>({anio:fs.rango?'':fs.anio,mes:fs.rango?'':fs.mes,desde:fs.rango?fs.desde:'',hasta:fs.rango?fs.hasta:'',tipo:tipoR==='vs'?'':tipoR,cats:rs.cat?[rs.cat]:[],sub:rs.sub,det:rs.det});
 const NOM={gastos:'Gastos',ingresos:'Ingresos'},chico=()=>window.innerWidth<=760,recorta=(s,n)=>s.length>n?s.slice(0,n-1)+'…':s;
 let PDFM=false;
 const tema=()=>{const osc=!PDFM&&matchMedia('(prefers-color-scheme:dark)').matches,cv=getComputedStyle(document.documentElement).getPropertyValue('--c').trim();
- return osc?{mu:'#dbe1ff',tx:'#f4f6ff',bd:'rgba(200,210,255,.14)',c:cv,gastos:'#c75bff',ingresos:'#00f8ff',osc,rampa:['#c75bff','#fe9900','#00f8ff']}:{mu:'#3b4466',tx:'#0b1130',bd:'rgba(11,17,48,.10)',c:PDFM?'#ffffff':cv,gastos:'#9a17dc',ingresos:'#0a86a8',osc,rampa:['#9a17dc','#e07b00','#0a86a8']}};
+ return osc?{mu:'#dbe1ff',tx:'#f4f6ff',bd:'rgba(200,210,255,.14)',c:cv,gastos:'#c75bff',ingresos:'#00f8ff',osc,rampa:['#2AFAE9','#00C0F5','#4254FF','#8708E8','#D604FF','#FF0851']}:{mu:'#3b4466',tx:'#0b1130',bd:'rgba(11,17,48,.10)',c:PDFM?'#ffffff':cv,gastos:'#9a17dc',ingresos:'#0a86a8',osc,rampa:['#24D0C8','#02A1D2','#3848DA','#710AC7','#B206DA','#D30A4B']}};
 let TM=tema();
 const DPR0=()=>Math.max(2,window.devicePixelRatio||1);
 if(window.Chart){Chart.defaults.devicePixelRatio=DPR0();Chart.defaults.font.family='system-ui,-apple-system,"Segoe UI",Roboto,sans-serif'}
@@ -253,7 +260,7 @@ function renderRep(){
  const e1=`Evolución por ${GN[gr[0]]}`,e2=`Por ${GN[gr[1]]}`,per=`<div class="perio">📅 ${R.fechaCorta(a)} – ${R.fechaCorta(b)} · ${t.n} movimiento${t.n===1?'':'s'}</div>`;
  if(tipoR==='vs'){
   if(!vsSel.length){o.innerHTML='<div class="card vacio"><b>Activa categorías para comparar</b><span class="muted">Usa los interruptores de Gastos (izquierda) e Ingresos (derecha). Si activas la misma categoría en ambos lados (por ejemplo Rilan) se comparan en un mismo bloque.</span></div>';return}
-  if(vsSel.every(x=>x.t==='gasto')){gastosBloques(l,a,b,o);return}
+  if(soloTipo()){gastosBloques(l,a,b,o,soloTipo());return}
   const bl=R.bloquesVs(l,vsSel),jobs=[],gN=vsSel.filter(x=>x.t==='gasto').map(x=>x.c),iN=vsSel.filter(x=>x.t==='ingreso').map(x=>x.c),
    perv=`<div class="perio">📅 ${R.fechaCorta(a)} – ${R.fechaCorta(b)} · ${R.enSeleccion(l,vsSel).length} movimientos en tu selección</div>`;
   const sec=(k,tit,tag,mov,g,i)=>{const h=`<section class="vs-b"><h2>${esc(tit)}</h2><p class="vs-tag">${tag}</p>`;
@@ -278,28 +285,29 @@ function renderRep(){
 }
 /* ---------- Gastos vs Ingresos: solo categorías de gasto (0.8.0) ---------- */
 const hx=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16)),mezcla=(a,b,t)=>{const x=hx(a),y=hx(b);return '#'+x.map((v,i)=>Math.round(v+(y[i]-v)*t).toString(16).padStart(2,'0')).join('')},
- heat=f=>{const r=TM.rampa,p=(1-Math.max(0,Math.min(1,f)))*2;return p<=1?mezcla(r[0],r[1],p):mezcla(r[1],r[2],p-1)},fv=(v,mn,mx)=>mx>mn?(v-mn)/(mx-mn):1;
-const pctAnillo={id:'pctAnillo',afterDatasetsDraw(c,_a,o){if(!o||!o.on)return;const x=c.ctx,m=c.getDatasetMeta(0),d=c.data.datasets[0].data,s=d.reduce((p,q)=>p+q,0);x.save();x.font='700 '+o.size+'px system-ui,sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillStyle=o.color;
+ heat=f=>{const r=TM.rampa,p=Math.max(0,Math.min(1,f))*(r.length-1),i=Math.min(r.length-2,Math.floor(p));return mezcla(r[i],r[i+1],p-i)},fv=(v,mn,mx)=>mx>mn?(v-mn)/(mx-mn):1;
+const pctAnillo={id:'pctAnillo',afterDatasetsDraw(c,_a,o){if(!o||!o.on)return;const x=c.ctx,m=c.getDatasetMeta(0),d=c.data.datasets[0].data,s=d.reduce((p,q)=>p+q,0);x.save();x.font='700 '+o.size+'px system-ui,sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillStyle=o.color;x.shadowColor='rgba(0,0,0,.6)';x.shadowBlur=4;
  m.data.forEach((a,i)=>{const p=R.pct(d[i],s);if(p<5)return;const q=a.getCenterPoint();x.fillText(R.fmtPct(p,0),q.x,q.y)});x.restore()}};
 const barSub=(id,l,suma)=>{const v=l.map(x=>x.total),mn=Math.min(...v),mx=Math.max(...v);return new Chart($(id),{type:'bar',plugins:[rotulos],data:{labels:l.map(x=>x.cat),datasets:[{data:v,backgroundColor:v.map(x=>heat(fv(x,mn,mx))),borderRadius:6,maxBarThickness:28}]},
  options:{indexAxis:'y',maintainAspectRatio:false,animation:false,layout:{padding:{right:PDFM?(chico()?100:124):8}},plugins:{legend:{display:false},tooltip:{callbacks:{label:q=>' '+F(q.parsed.x)+' · '+R.fmtPct(R.pct(q.parsed.x,suma))}},rotulos:{on:PDFM,color:TM.tx,size:chico()?11:12,suma}},
   scales:{x:gy(),y:{grid:{display:false},ticks:{callback(v){return recorta(this.getLabelForValue(v),chico()?16:24)}}}}}})};
 const anillo=(id,l,suma)=>{const v=l.map(x=>x.total),mn=Math.min(...v),mx=Math.max(...v),lg=ley();lg.labels={...lg.labels,padding:8,font:{size:11}};return new Chart($(id),{type:'doughnut',plugins:[pctAnillo],data:{labels:l.map(x=>x.cat),datasets:[{data:v,backgroundColor:v.map(x=>heat(fv(x,mn,mx))),borderColor:TM.c,borderWidth:2,spacing:1,borderRadius:4,hoverOffset:6}]},
- options:{maintainAspectRatio:false,animation:false,cutout:'50%',plugins:{legend:lg,tooltip:{callbacks:{label:q=>' '+q.label+': '+F(q.parsed)+' · '+R.fmtPct(R.pct(q.parsed,suma))}},pctAnillo:{on:true,size:chico()?12:13,color:TM.osc?'#0b1130':'#fff'}}}})};
-const lineaHeat=(id,s)=>{const v=s.map(x=>x.gastos),mn=Math.min(...v),mx=Math.max(...v),col=y=>heat(fv(y,mn,mx));return new Chart($(id),{type:'line',data:{labels:s.map(x=>x.label),datasets:[
- {label:'Gastos',data:v,borderColor:TM.gastos,segment:{borderColor:q=>col((q.p0.parsed.y+q.p1.parsed.y)/2)},backgroundColor:'transparent',tension:.35,borderWidth:3,borderCapStyle:'round',pointBackgroundColor:v.map(col),pointBorderColor:TM.c,pointBorderWidth:2,pointRadius:s.length>40?0:4,pointHoverRadius:6},
+ options:{maintainAspectRatio:false,animation:false,cutout:'50%',plugins:{legend:lg,tooltip:{callbacks:{label:q=>' '+q.label+': '+F(q.parsed)+' · '+R.fmtPct(R.pct(q.parsed,suma))}},pctAnillo:{on:true,size:chico()?12:13,color:'#fff'}}}})};
+const lineaHeat=(id,s,gk)=>{const v=s.map(x=>x[gk]),mn=Math.min(...v),mx=Math.max(...v),col=y=>heat(fv(y,mn,mx));return new Chart($(id),{type:'line',data:{labels:s.map(x=>x.label),datasets:[
+ {label:NOM[gk],data:v,borderColor:TM[gk],segment:{borderColor:q=>col((q.p0.parsed.y+q.p1.parsed.y)/2)},backgroundColor:'transparent',tension:.35,borderWidth:3,borderCapStyle:'round',pointBackgroundColor:v.map(col),pointBorderColor:TM.c,pointBorderWidth:2,pointRadius:s.length>40?0:4,pointHoverRadius:6},
  {label:'Tendencia',data:R.tendencia(v).linea,borderColor:TM.mu,borderDash:[6,5],pointRadius:0,borderWidth:1.75,fill:false}]},options:opt()})};
 const COLH=['#0891b2','#af11f2','#e07b00','#16a34a'],COLV=['var(--ac)','var(--hl)','#fe9900','var(--c-gr)'],UNN={dia:'diario',semana:'semanal',mes:'mensual'},UNP={dia:'día',semana:'semana',mes:'mes'};
-function gastosBloques(l,a,b,o){const cats=vsSel.map(x=>x.c),un=R.unidadProm(a,b),solo=cats.length===1,jobs=[];vsInfo=[];
+const soloTipo=()=>vsSel.length&&vsSel.every(x=>x.t==='gasto')?'gasto':vsSel.length&&vsSel.every(x=>x.t==='ingreso')?'ingreso':'';
+function gastosBloques(l,a,b,o,tp){const g=tp==='gasto',gk=g?'gastos':'ingresos',Wp=g?'Gastos':'Ingresos',W=g?'Gasto':'Ingreso',glob=!!V[tp].todos,cats=glob?['']:vsSel.map(x=>x.c),un=R.unidadProm(a,b),solo=cats.length===1,jobs=[];vsInfo=[];
  const per=`<div class="perio">📅 ${R.fechaCorta(a)} – ${R.fechaCorta(b)} · análisis por ${UNP[un]}</div>`;
- const html=cats.map((c,k)=>{const mov=l.filter(m=>m.tipo==='gasto'&&m.categoria===c),bc=COLV[k%4],ti=`<h2 class="gb-t"><span class="kic neg">${Icons.svg(c)}</span>${esc(c)}</h2>`;
-  if(!mov.length){vsInfo.push({c,vacio:true});return `<section class="gb" style="--bc:${bc}">${ti}<div class="card vacio"><b>Sin gastos en este periodo</b><span class="muted">No hay registros de «${esc(c)}» con el filtro actual.</span></div></section>`}
-  const tt=R.totales(mov,a,b).gastos,pf=R.promedioFlex(tt,a,b),mf=R.masFrecuente(mov),ps=R.porSubcat(mov),sr=R.serie(mov,un,a,b),rg=n=>n+' registro'+(n===1?'':'s'),
-   cards=[{l:'Gastos totales',v:F(tt),s:rg(mov.length),cl:'a',ic:'down',c:'gasto'},{l:'Gasto promedio '+UNN[un],v:F(pf.valor),s:'por '+UNP[un],cl:'o',ic:'calendar',c:''},{l:'Gasto más frecuente',v:mf.k,s:rg(mf.n)+' · '+F(mf.total),cl:'p',ic:'repeat',c:''}],
-   ht=Math.max(300,ps.length*30+60),id=x=>'g'+k+x;
-  vsInfo.push({c,bc:COLH[k%4],cards,ids:[id('a'),id('b'),id('c')]});
-  jobs.push(()=>{ch[id('a')]=barSub('#'+id('a'),ps,tt);ch[id('b')]=anillo('#'+id('b'),ps,tt);ch[id('c')]=lineaHeat('#'+id('c'),sr)});
-  return `<section class="gb" style="--bc:${bc}">${ti}<div class="grid">${cards.map(x=>K(x.l,esc(x.v)+sub(esc(x.s)),x.c,x.cl,x.ic)).join('')}</div><div class="gb-ch${solo?' solo':''}">${card('Subcategorías por monto',id('a'),0,ht)}${card('Participación por subcategoría',id('b'),0,ht)}${card('Evolución por '+UNP[un]+' '+badge(sr.map(x=>x.gastos)),id('c'),0,ht)}</div></section>`}).join('');
+ const html=cats.map((c,k)=>{const mov=l.filter(m=>m.tipo===tp&&(glob||m.categoria===c)),bc=COLV[k%4],nom=glob?'Resumen global de '+Wp.toLowerCase():c,ti=`<h2 class="gb-t"><span class="kic ${g?'neg':'pos'}">${Icons.svg(glob?tp:c)}</span>${esc(nom)}</h2>`;
+  if(!mov.length){vsInfo.push({c:nom,vacio:true});return `<section class="gb" style="--bc:${bc}">${ti}<div class="card vacio"><b>Sin ${Wp.toLowerCase()} en este periodo</b><span class="muted">No hay registros con el filtro actual.</span></div></section>`}
+  const tt=R.totales(mov,a,b)[gk],pf=R.promedioFlex(tt,a,b),mf=R.masFrecuente(mov,glob?'categoria':'subcategoria'),ps=glob?R.porCategoria(mov,tp):R.porSubcat(mov),sr=R.serie(mov,un,a,b),rg=n=>n+' registro'+(n===1?'':'s'),
+   cards=[{l:Wp+' totales',v:F(tt),s:rg(mov.length),cl:'a',ic:g?'down':'up',c:tp},{l:W+' promedio '+UNN[un],v:F(pf.valor),s:'por '+UNP[un],cl:'o',ic:'calendar',c:''},{l:W+' más frecuente',v:mf.k,s:rg(mf.n)+' · '+F(mf.total),cl:'p',ic:'repeat',c:''}],
+   ht=Math.max(300,ps.length*30+60),id=x=>'g'+k+x,pn=glob?'Categorías':'Subcategorías';
+  vsInfo.push({c:nom,bc:COLH[k%4],cards,ids:[id('a'),id('b'),id('c')]});
+  jobs.push(()=>{ch[id('a')]=barSub('#'+id('a'),ps,tt);ch[id('b')]=anillo('#'+id('b'),ps,tt);ch[id('c')]=lineaHeat('#'+id('c'),sr,gk)});
+  return `<section class="gb" style="--bc:${bc}">${ti}<div class="grid">${cards.map(x=>K(x.l,esc(x.v)+sub(esc(x.s)),x.c,x.cl,x.ic)).join('')}</div><div class="gb-ch${solo?' solo':''}">${card(pn+' por monto',id('a'),0,ht)}${card('Participación por '+pn.slice(0,-1).toLowerCase().replace('categorí','categoría').replace('categoríaa','categoría'),id('b'),0,ht)}${card('Evolución por '+UNP[un]+' '+badge(sr.map(x=>x[gk])),id('c'),0,ht)}</div></section>`}).join('');
  o.innerHTML=per+`<div class="gb-wrap${solo?'':' dos'}">${html}</div>`;jobs.forEach(j=>j())}
 const rr=(g,x,y,w,h,r)=>{g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath()};
 function texto(g,t,x,y,max,px,peso,col){let p=px;g.font=peso+' '+p+'px system-ui,sans-serif';while(g.measureText(t).width>max&&p>16){p-=2;g.font=peso+' '+p+'px system-ui,sans-serif'}g.fillStyle=col;g.fillText(t,x,y)}
@@ -312,8 +320,8 @@ function pdfGastos(){const f=filtros(),l=R.filtrar(movs,f);if(!l.length)return a
  PDFM=true;Chart.defaults.devicePixelRatio=3;
  try{renderRep();pags=vsInfo.filter(x=>!x.vacio).map(componer)}finally{PDFM=false;Chart.defaults.devicePixelRatio=DPR0();renderRep()}
  if(!pags.length)return alert('No hay datos para exportar.');
- PDF.generarBloques({titulo:'Gastos por categoria',periodo:'Periodo: '+R.fechaCorta(a)+' a '+R.fechaCorta(b),paginas:pags})}
-function pdf(){if(!tipoR)return alert('Elige un tipo de reporte.');if(tipoR==='vs'&&vsSel.length&&vsSel.every(x=>x.t==='gasto'))return pdfGastos();const f=filtros();let l0=R.filtrar(movs,f);if(tipoR==='vs')l0=R.enSeleccion(l0,vsSel);const l=R.ordenar(l0);if(!l.length)return alert('No hay datos para exportar.');const[a,b]=R.rango(f,l,hoy());let imgs=[];
+ PDF.generarBloques({titulo:(soloTipo()==='gasto'?'Gastos':'Ingresos')+' por categoria',archivo:soloTipo()==='gasto'?'reporte-gastos.pdf':'reporte-ingresos.pdf',periodo:'Periodo: '+R.fechaCorta(a)+' a '+R.fechaCorta(b),paginas:pags})}
+function pdf(){if(!tipoR)return alert('Elige un tipo de reporte.');if(tipoR==='vs'&&soloTipo())return pdfGastos();const f=filtros();let l0=R.filtrar(movs,f);if(tipoR==='vs')l0=R.enSeleccion(l0,vsSel);const l=R.ordenar(l0);if(!l.length)return alert('No hay datos para exportar.');const[a,b]=R.rango(f,l,hoy());let imgs=[];
  PDFM=true;Chart.defaults.devicePixelRatio=3;
  try{renderRep();imgs=Object.values(ch).slice(0,tipoR==='vs'?40:2).map(x=>({img:x.toBase64Image('image/png',1),w:x.canvas.width,h:x.canvas.height}))}finally{PDFM=false;Chart.defaults.devicePixelRatio=DPR0();renderRep()}
  if(imgs.length<2)return alert('No hay datos para exportar.');
@@ -376,7 +384,7 @@ function estadoResp(){let f=null;try{f=localStorage.getItem(kResp())}catch(e){}c
 /* ---------- Eventos ---------- */
 function menu(t){const cur=$('.mi.on');if(!cur||cur.dataset.t!==t)window.scrollTo(0,0);$$('.mi').forEach(x=>x.classList.toggle('on',x.dataset.t===t));$$('.tab').forEach(s=>s.hidden=s.id!=='t-'+t);$('#side').classList.remove('open');$('#scrim').classList.remove('on');if(t==='rep')renderRep();if(t==='gen')general();if(t==='cfg')pintaCfg();if(t==='his')crece()}
 document.addEventListener('DOMContentLoaded',()=>{
- $$('.mi').forEach(b=>b.onclick=()=>menu(b.dataset.t));
+ $$('.mi').forEach(b=>{b.insertAdjacentHTML('afterbegin','<span class="mi-ic">'+Icons.svg(b.dataset.ic)+'</span>');b.onclick=()=>menu(b.dataset.t)});
  const app=$('#app'),setMenu=o=>{app.classList.toggle('colapsado',!o);try{localStorage.setItem('ar_menu',o?'1':'0')}catch(e){}window.dispatchEvent(new Event('resize'))};
  try{if(localStorage.getItem('ar_menu')==='0')app.classList.add('colapsado')}catch(e){}
  $('#sb-hide').onclick=()=>setMenu(false);$('#sb-show').onclick=()=>setMenu(true);
@@ -418,7 +426,7 @@ document.addEventListener('DOMContentLoaded',()=>{
  $('#f-cats').onclick=e=>{const vi=e.target.closest('.vs-it');if(vi)return vsToggle(vi.dataset.vs,vi.dataset.v,vi);const vg=e.target.closest('[data-vsgo]');if(vg)return vsAnalizar(vg.dataset.vsgo);const t=e.target.closest('.tile[data-lv]');
   if(t)return behind(t,()=>{const lv=t.dataset.lv;rs[lv]=t.dataset.v;if(lv==='cat')rs.sub=rs.det='';if(lv==='sub')rs.det='';rs.a=lv;armarCats();renderRep();irCats()});
   const b=e.target.closest('[data-undo]');if(b){const lv=b.dataset.undo;rs[lv]='';if(lv==='cat')rs.sub=rs.det='';if(lv==='sub')rs.det='';armarCats();renderRep();irCats()}};
- $('#f-cats').onchange=e=>{const c=e.target.closest('[data-vsm]');if(c)vsMulti(c.dataset.vsm,c.checked)};
+ $('#f-cats').onchange=e=>{const d=e.target.closest('[data-vst]');if(d)return vsTodos(d.dataset.vst,d.checked);const c=e.target.closest('[data-vsm]');if(c)vsMulti(c.dataset.vsm,c.checked)};
  matchMedia('(prefers-color-scheme:dark)').addEventListener('change',()=>{{if(!$('#t-rep').hidden)renderRep();if(!$('#t-gen').hidden)general()}});
  $('#pdf').onclick=pdf;$('#n-xl').onclick=()=>{const p=$('#xl-panel');p.hidden=false;revelar(p)};$('#xl-x').onclick=()=>{$('#xl-panel').hidden=true};$('#xl-rev').onclick=revisarXL;$('#xl-res').onclick=e=>{if(e.target.id==='xl-go')importarXL()};$('#n-txt').oninput=nota;$('#n-exp').onclick=respaldo;$('#n-imp').onclick=()=>$('#n-file').click();$('#n-file').onchange=e=>{const f=e.target.files[0];if(f)importar(f);e.target.value=''};
  $('#c-cats').onclick=e=>{const b=e.target.closest('[data-ce]');if(!b)return;const k=b.dataset.ce;

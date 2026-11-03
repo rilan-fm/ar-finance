@@ -1,4 +1,10 @@
 # Changelog
+## 0.9.0
+- Reportes › Gastos vs Ingresos: nueva casilla «Todos» junto a «Seleccionar varios» (en Gastos y en Ingresos). Marca todas las categorías del tipo y muestra un «Resumen global» (3 tarjetas y 3 gráficos agrupados por categoría).
+- Reportes › Ingresos: si solo hay categorías de ingreso activas (ninguna de gasto), se muestran las mismas tarjetas y gráficos que en Gastos (ingresos totales, promedio flexible, ingreso más frecuente; barras, anillo y tendencia). También en PDF (reporte-ingresos.pdf).
+- Mapa de calor con nueva paleta: turquesa #2AFAE9, celeste #00C0F5, azul #4254FF, violeta #8708E8, magenta #D604FF y rojo #FF0851 (de menor a mayor monto; en modo claro, tonos algo más oscuros). Porcentajes del anillo en blanco con sombra.
+- Menú lateral rediseñado: iconos SVG de la app (en vez de emojis), texto e iconos más grandes, elemento activo con degradado y brillo, hover con desplazamiento suave.
+- Sin cambios en la base de datos. Pendiente: flujo al combinar gastos e ingresos.
 ## 0.8.0
 - Reportes: «TIPO DE REPORTE» encabeza la pestaña (título en mayúsculas). Tarjetas de tipo más angostas y altas, con ilustración grande, contorno celeste fijo, mini zoom y brillo neón sutil al pasar el mouse; al seleccionar se queda el color del tipo.
 - Reportes, filtros: botones Año / Mes / Rango centrados y fijos al desplazarse (siempre visibles arriba). Año en curso activado por defecto; Año y Mes despliegan solo los valores con datos; Rango muestra las casillas Desde/Hasta solo cuando está activo (y desactiva Año y Mes). Se quitan los botones rápidos; queda «Limpiar».

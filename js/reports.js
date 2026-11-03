@@ -125,7 +125,7 @@ const mesesEntre=(a,b)=>(+b.slice(0,4)-+a.slice(0,4))*12+(+b.slice(5,7)-+a.slice
 const unidadProm=(a,b)=>{const d=dias(a,b);return d<14?'dia':d<=100?'semana':'mes'};
 function promedioFlex(total,a,b){const u=unidadProm(a,b),n=u==='dia'?dias(a,b):u==='semana'?Math.max(1,dias(a,b)/7):mesesEntre(a,b);return{unidad:u,n,valor:total/n}}
 const porSubcat=l=>agrupar(l,m=>m.subcategoria||'(general)');
-function masFrecuente(l){const o={};l.forEach(m=>{const k=m.subcategoria||'(general)',e=o[k]=o[k]||{k,n:0,total:0};e.n++;e.total+=+m.monto});return Object.values(o).sort((a,b)=>b.n-a.n||b.total-a.total)[0]||null}
+function masFrecuente(l,campo){const o={};l.forEach(m=>{const k=(campo==='categoria'?m.categoria:m.subcategoria)||'(general)',e=o[k]=o[k]||{k,n:0,total:0};e.n++;e.total+=+m.monto});return Object.values(o).sort((a,b)=>b.n-a.n||b.total-a.total)[0]||null}
 const api={mesesEntre,unidadProm,promedioFlex,porSubcat,masFrecuente,estadoMetas,estadoPresupuestos,estadoRecurrentes,ordenarReg,bloquesVs,enSeleccion,diasEntre,anioResumen,pct,fmtPct,fmtCorto,fechaCorta,mesCorto,periodoRapido,validarFilas,norm,paraImportar,MESES,rango,granularidad,serie,tendencia,frecuentes,GASTO,INGRESO,esc,fmt,etiquetaMes,dias,ordenar,filtrar,mesesConDatos,aniosConDatos,totales,porCategoria,porSub,porMes,topProducto};
 if(typeof module!=='undefined')module.exports=api;else root.Reports=api;
 })(typeof window!=='undefined'?window:globalThis);
