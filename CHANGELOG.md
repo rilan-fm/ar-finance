@@ -1,4 +1,11 @@
 # Changelog
+## 0.11.0
+- Registrar › Fecha: nuevo botón «📌 Fijar mes». Eliges un mes una sola vez (por ejemplo Julio) y todos los registros nuevos usan ese mes, sin tener que cambiarlo en cada uno. Mientras está fijado se ve una etiqueta «Mes fijo: Julio 2026» y el recuadro de fecha brilla para que no lo olvides. Botones «Cambiar mes» y «Quitar» (quitar vuelve a la fecha de hoy). El mes fijo no se guarda: al recargar la página vuelve a hoy.
+- Con el mes fijo, el calendario solo muestra ese mes (flechas bloqueadas) y se recuerda el último día usado: el siguiente registro empieza en ese mismo día.
+- Calendario propio, más grande (≈ 25–30 % más que el nativo), minimalista, con contorno naranja y esquinas redondeadas, en modo claro y oscuro: flechas de mes, toque en el título para cambiar mes o año, botones «Hoy» y «Cerrar», se cierra con Esc.
+- Al registrar, el mensaje confirma la fecha usada (ej. «✔ Gasto registrado · 15/07/2026»).
+- Seguridad extra: no deja guardar si la fecha queda fuera del mes fijado.
+- Sin cambios en la base de datos. «Editar movimiento» (Historial) sigue con el selector de fecha nativo.
 ## 0.10.1
 - Fix de coherencia en Reportes: el periodo ahora siempre cubre todos los movimientos incluidos (antes, un movimiento con fecha posterior a hoy entraba en las tarjetas pero no en los gráficos de evolución).
 - Promedio mensual: se calcula con los meses transcurridos reales (días ÷ 30,44) en lugar de contar el mes en curso completo, que bajaba el promedio.
