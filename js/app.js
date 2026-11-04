@@ -1,6 +1,6 @@
 (function(){
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],R=Reports,esc=R.esc,F=R.fmt;
-const VERSION='0.10.1';
+const VERSION='0.11.0';
 let D,movs=[],custom=[],pres=[],rec=[],metas=[],prOk=false,metOk=false,ch={},st,userEmail='';
 const NUEVA='Nueva categoría',hoy=()=>new Date().toLocaleDateString('sv');
 const tree=()=>R.GASTO.concat(custom.map(c=>({n:c.nombre,s:c.subs||[],d:{},id:c.id})));
@@ -60,7 +60,7 @@ const irArriba=()=>window.scrollTo({top:0,behavior:'smooth'});
 function irRes(){const o=$('#rep-out');requestAnimationFrame(()=>window.scrollTo({top:o.getBoundingClientRect().top+window.scrollY-offTop(),behavior:'smooth'}))}
 function irCats(){const c=$('#f-cats'),t=c.querySelector('.tiles');if(t)revelar(c.querySelector('.chosen')||t,c);else if(c.firstElementChild)revelar(c.firstElementChild,c);else irRes()}
 /* ---------- Registrar ---------- */
-function resetReg(tipo,m='',a=''){st={tipo,fecha:hoy(),cat:'',sub:'',det:'',desc:'',cant:'1',monto:'',m,a};drawReg()}
+function resetReg(tipo,m='',a=''){st={tipo,fecha:fechaInicial(),cat:'',sub:'',det:'',desc:'',cant:'1',monto:'',m,a};drawReg()}
 function nuevaCat(){const full=custom.length>=3;
  return `<div class="box"><b>Nueva categoría</b>`+(full?`<p class="warn">Ya tienes 3 categorías propias (el máximo). Elimina una para poder crear otra.</p>`:
  `<label>Nombre<input id="nc-n" maxlength="30"></label><label>Subcategorías (separadas por coma)<textarea id="nc-s" rows="2" placeholder="Ej.: Mascotas, Veterinario"></textarea></label><button class="btn" data-act="nc-ok">Crear categoría</button>`)+
@@ -70,7 +70,8 @@ const tile=(lv,n,i=0)=>`<button class="tile lv-${lv}" data-lv="${lv}" data-v="${
 const LV={cat:'Categoría',sub:'Subcategoría',det:'Detalle'},LVI={cat:'Origen del ingreso',sub:'Categoría',det:'Detalle'};
 const lvl=(lv,list,v,a,ing)=>v?`<div class="chosen${a===lv?' pop':''}"><div class="tile big lv-${lv}"><span class="ic">${Icons.svg(v)}</span><span class="tl">${esc(v)}</span></div><button class="btn ghost sm" data-undo="${lv}">↺ Cambiar ${(ing?LVI:LV)[lv].toLowerCase()}</button></div>`
  :`<p class="muted lab">${(ing?LVI:LV)[lv]}</p><div class="tiles${a?' sweep':''}">${list.map((n,i)=>tile(lv,n,i)).join('')}</div>`;
-let busy=false;
+let busy=false,mesFijo='',diaFijo=1,cal=null;
+const fechaInicial=()=>mesFijo?R.fechaEnMes(mesFijo,diaFijo):hoy();
 function behind(t,cb){if(busy)return;busy=true;const r=t.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;
  [...t.parentElement.children].forEach(x=>{if(x===t)return x.classList.add('zoom');const q=x.getBoundingClientRect();
   x.style.setProperty('--dx',cx-(q.left+q.width/2)+'px');x.style.setProperty('--dy',cy-(q.top+q.height/2)+'px');x.classList.add('away')});
@@ -81,7 +82,7 @@ function drawReg(sc){
  let h=`<div class="tipos${st.tipo?' c':''}">${colTipo('gasto','Gasto')}${colTipo('ingreso','Ingreso')}</div>`;
  if(st.m)h+=`<p class="ok">${esc(st.m)}</p>`;
  if(st.tipo){
-  h+=`<div class="fecha-box"><span class="fecha-ttl">📅 Fecha del registro</span><input type="date" id="g-fecha" class="fecha-in" value="${esc(st.fecha)}"><small id="g-fecha-txt" class="fecha-txt">${fechaLarga(st.fecha)}</small></div>`+lvl('cat',g?tree().map(c=>c.n).concat(NUEVA):R.INGRESO.map(c=>c.n),st.cat,a,!g);
+  h+=`<div class="fecha-box${mesFijo?' fijo':''}"><span class="fecha-ttl">📅 Fecha del registro</span><button type="button" id="g-fecha" class="fecha-btn" data-cal="dia" aria-haspopup="dialog">${esc(fechaLarga(st.fecha))}</button><div class="fecha-fila">${mesFijo?`<span class="mes-fijo-chip">📌 Mes fijo: ${esc(R.etiquetaMes(mesFijo))}</span><button type="button" class="btn g ghost sm" data-cal="mes">Cambiar mes</button><button type="button" class="btn ghost sm" data-cal="quitar">Quitar</button>`:`<button type="button" class="btn g ghost sm" data-cal="mes">📌 Fijar mes</button>`}</div><small class="fecha-txt">${mesFijo?'Los registros nuevos usarán este mes hasta que lo quites.':'¿Varios datos de otro mes? Fíjalo una sola vez.'}</small></div>`+lvl('cat',g?tree().map(c=>c.n).concat(NUEVA):R.INGRESO.map(c=>c.n),st.cat,a,!g);
   if(st.cat===NUEVA)h+=nuevaCat();
   else if(st.cat){
    const n=(g?tree():R.INGRESO).find(c=>c.n===st.cat),subs=n?n.s:[],dets=n&&n.d[st.sub];
@@ -97,8 +98,9 @@ function drawReg(sc){
 async function guardar(){
  const monto=Math.round(parseFloat(st.monto)*100)/100,cant=parseFloat(st.cant);
  if(!(monto>0))return alert('Ingresa un monto mayor a 0.');if(!st.fecha)return alert('Elige una fecha.');
+ if(mesFijo&&!st.fecha.startsWith(mesFijo))return alert('La fecha no está en el mes fijado ('+R.etiquetaMes(mesFijo)+'). Elige un día de ese mes o quita el mes fijo.');
  try{movs.push(await D.agregar({tipo:st.tipo,monto,fecha:st.fecha,categoria:st.cat,subcategoria:st.sub||null,detalle:st.det||null,descripcion:st.desc.trim(),cantidad:cant>0?cant:1}));
-  resetReg('',`✔ ${st.tipo==='gasto'?'Gasto':'Ingreso'} registrado`);todo();irArriba()}catch(e){alert('Error: '+e.message)}
+  resetReg('',`✔ ${st.tipo==='gasto'?'Gasto':'Ingreso'} registrado · ${R.fechaCorta(st.fecha)}`);todo();irArriba()}catch(e){alert('Error: '+e.message)}
 }
 async function crearCat(){
  const n=$('#nc-n').value.trim(),subs=[...new Set($('#nc-s').value.split(/[,;\n]/).map(x=>x.trim()).filter(Boolean))].slice(0,15);
@@ -108,6 +110,33 @@ async function crearCat(){
 }
 async function borrarCat(id){if(!confirm('¿Eliminar esta categoría? Los movimientos ya registrados se conservan.'))return;
  try{await D.eliminarCat(id);custom=custom.filter(c=>c.id!==id);st.cat='';rs.cat=rs.sub=rs.det='';armarCats();drawReg();pintaCfgCats()}catch(e){alert(e.message)}}
+/* ---------- Calendario propio y mes fijo (0.11.0) ---------- */
+const p2=n=>String(n).padStart(2,'0');
+function accionCal(k){
+ if(k==='quitar'){mesFijo='';st.fecha=hoy();drawReg();return}
+ const ym=mesFijo||((k==='dia'&&st.fecha)||hoy()).slice(0,7);
+ cal=k==='dia'?{modo:'dia',vista:'dias',ym,anio:+ym.slice(0,4)}:{modo:'mes',vista:'meses',ym,anio:+ym.slice(0,4)};
+ pintaCal();$('#cal-back').hidden=false;document.body.style.overflow='hidden';
+ const f=$('#cal-box .cal-d.sel')||$('#cal-box .cal-mm.sel')||$('#cal-box .cal-d:not(.vacio)');if(f)f.focus()}
+function cerrarCal(){cal=null;$('#cal-back').hidden=true;document.body.style.overflow='';const b=$('#g-fecha');if(b)b.focus()}
+function pintaCal(){const hy=hoy(),pie=(extra='')=>`<div class="cal-f">${extra}<button type="button" class="btn ghost" data-c="x">Cerrar</button></div>`;let h;
+ if(cal.vista==='meses'){const act=cal.modo==='mes'?mesFijo:(st.fecha||'').slice(0,7);
+  h=`<div class="cal-hint" id="cal-t">${cal.modo==='mes'?'Fijar mes para varios registros':'Elige el mes'}</div><div class="cal-h"><button type="button" class="cal-nav" data-c="ya" aria-label="Año anterior">‹</button><span class="cal-ttl">${cal.anio}</span><button type="button" class="cal-nav" data-c="ys" aria-label="Año siguiente">›</button></div><div class="cal-m">${R.MESES.map((n,i)=>{const ym=cal.anio+'-'+p2(i+1);return `<button type="button" class="cal-mm${ym===act?' sel':''}${ym===hy.slice(0,7)?' hoy':''}" data-c="m" data-ym="${ym}">${n.slice(0,3)}</button>`}).join('')}</div>`+pie(cal.modo==='mes'?'<button type="button" class="btn g" data-c="mact">Mes actual</button>':'')}
+ else{const{n,off}=R.matrizMes(cal.ym),bloq=!!mesFijo,tit=R.MESES[+cal.ym.slice(5,7)-1]+' '+cal.ym.slice(0,4),
+   dias=Array.from({length:off},()=>'<span class="cal-d vacio"></span>').join('')+Array.from({length:n},(_,i)=>{const f=cal.ym+'-'+p2(i+1);return `<button type="button" class="cal-d${f===st.fecha?' sel':''}${f===hy?' hoy':''}" data-c="d" data-f="${f}">${i+1}</button>`}).join('');
+  h=`<div class="cal-hint" id="cal-t">${bloq?'📌 Mes fijo · elige el día':'Elige el día'}</div><div class="cal-h"><button type="button" class="cal-nav" data-c="pm" aria-label="Mes anterior"${bloq?' disabled':''}>‹</button>${bloq?`<span class="cal-ttl">${esc(tit)}</span>`:`<button type="button" class="cal-ttl" data-c="vm" title="Cambiar mes o año">${esc(tit)} ▾</button>`}<button type="button" class="cal-nav" data-c="nm" aria-label="Mes siguiente"${bloq?' disabled':''}>›</button></div><div class="cal-w">${['L','M','M','J','V','S','D'].map(x=>`<span>${x}</span>`).join('')}</div><div class="cal-g">${dias}</div>`+pie(!bloq||hy.startsWith(mesFijo)?'<button type="button" class="btn g" data-c="hoy">Hoy</button>':'')}
+ $('#cal-box').innerHTML=h}
+function elegirMes(ym){if(!mesFijo)diaFijo=1;mesFijo=ym;st.fecha=R.fechaEnMes(ym,diaFijo);cerrarCal();drawReg()}
+function elegirDia(f){st.fecha=f;if(mesFijo)diaFijo=+f.slice(8,10);cerrarCal();drawReg()}
+function clicCal(e){const b=e.target.closest('[data-c]');if(!b||!cal)return;const k=b.dataset.c;
+ if(k==='x')return cerrarCal();
+ if(k==='pm'||k==='nm'){cal.ym=R.sumaMes(cal.ym,k==='pm'?-1:1);return pintaCal()}
+ if(k==='vm'){cal.vista='meses';cal.anio=+cal.ym.slice(0,4);return pintaCal()}
+ if(k==='ya'||k==='ys'){cal.anio+=k==='ya'?-1:1;return pintaCal()}
+ if(k==='m'){if(cal.modo==='mes')return elegirMes(b.dataset.ym);cal.ym=b.dataset.ym;cal.vista='dias';return pintaCal()}
+ if(k==='mact')return elegirMes(hoy().slice(0,7));
+ if(k==='d')return elegirDia(b.dataset.f);
+ if(k==='hoy')return elegirDia(hoy())}
 /* ---------- Historial ---------- */
 const fila=m=>`<li><div>${esc(m.categoria)}${m.subcategoria?' › '+esc(m.subcategoria):''}${m.detalle?' › '+esc(m.detalle):''}<small>${esc(m.fecha)} · ${esc(m.descripcion)}${m.cantidad&&+m.cantidad!==1?' · x'+esc(+m.cantidad):''}</small></div><div><b class="${esc(m.tipo)}">${m.tipo==='ingreso'?'+':'−'}${F(m.monto)}</b>${m.id?` <button class="edt" data-ed="${esc(m.id)}" title="Editar" aria-label="Editar">${Icons.svg('pencil')}</button> <button class="del" data-id="${esc(m.id)}" title="Eliminar" aria-label="Eliminar">${Icons.svg('trash')}</button>`:''}</div></li>`;
 let hLim=50;
@@ -398,13 +427,14 @@ document.addEventListener('DOMContentLoaded',()=>{
  $('#sb-hide').onclick=()=>setMenu(false);$('#sb-show').onclick=()=>setMenu(true);
  $('#burger').onclick=()=>{$('#side').classList.add('open');$('#scrim').classList.add('on')};$('#scrim').onclick=()=>menu($('.mi.on').dataset.t);
  const rb=$('#reg-body');
- rb.addEventListener('change',e=>{if(e.target.id==='g-fecha'){st.fecha=e.target.value;$('#g-fecha-txt').textContent=fechaLarga(st.fecha)}});
+ $('#cal-box').onclick=clicCal;$('#cal-back').onclick=e=>{if(e.target.id==='cal-back')cerrarCal()};
  rb.addEventListener('input',e=>{const k={'g-desc':'desc','g-cant':'cant','g-monto':'monto'}[e.target.id];if(k)st[k]=e.target.value});
  rb.addEventListener('click',e=>{
   const t=e.target.closest('.tile[data-lv]');
   if(t)return behind(t,()=>{const lv=t.dataset.lv;st[lv]=t.dataset.v;if(lv==='cat')st.sub=st.det='';if(lv==='sub')st.det='';st.m='';st.a=lv;drawReg()});
   const b=e.target.closest('button');if(!b)return;
-  if(b.dataset.tipo)resetReg(b.dataset.tipo,'','tipo');
+  if(b.dataset.cal)accionCal(b.dataset.cal);
+  else if(b.dataset.tipo)resetReg(b.dataset.tipo,'','tipo');
   else if(b.dataset.undo){const lv=b.dataset.undo;st[lv]='';if(lv==='cat')st.sub=st.det='';if(lv==='sub')st.det='';drawReg(1)}
   else if(b.dataset.q){const v=Math.max(1,Math.round((parseFloat(st.cant)||1)+ +b.dataset.q));st.cant=String(v);$('#g-cant').value=st.cant}
   else if(b.dataset.act==='ok')guardar();else if(b.dataset.act==='no'){resetReg('');irArriba()}else if(b.dataset.act==='nc-ok')crearCat();else if(b.dataset.del)borrarCat(b.dataset.del)});
@@ -420,7 +450,7 @@ document.addEventListener('DOMContentLoaded',()=>{
  $('#rc-list').onclick=e=>{const d=e.target.closest('[data-rd]'),p=e.target.closest('[data-rp]');if(d)borrarRec(d.dataset.rd);else if(p)pagarRec(p.dataset.rp)};
  $('#g-av').onclick=e=>{const g=e.target.closest('[data-go]');if(g)menu(g.dataset.go)};window.addEventListener('resize',()=>{if(!$('#t-his').hidden)crece()});
  $('#ed-no').onclick=cerrarEd;$('#ed-back').onclick=e=>{if(e.target.id==='ed-back')cerrarEd()};$('#ed-ok').onclick=guardarEd;
- document.addEventListener('keydown',e=>{if(e.key==='Escape'&&ed)cerrarEd()});
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(cal)cerrarCal();else if(ed)cerrarEd()}});
  $('#f-bar').onclick=e=>{if(e.target.closest('#f-todo'))return limpiaFil();const b=e.target.closest('[data-fb]'),y=e.target.closest('[data-fy]'),m=e.target.closest('[data-fm]');
   if(b){const k=b.dataset.fb;
    if(k==='rango'){if(fs.rango){fs.rango=false;fs.anio=fs.anio||R.anioResumen(hoy(),movs);fopen=''}else{fs.rango=true;fs.anio=fs.mes='';fopen='rango'}}

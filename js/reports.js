@@ -128,6 +128,9 @@ const porSubcat=l=>agrupar(l,m=>m.subcategoria||'(general)');
 function masFrecuente(l,campo){const o={};l.forEach(m=>{const k=(campo==='categoria'?m.categoria:m.subcategoria)||'(general)',e=o[k]=o[k]||{k,n:0,total:0};e.n++;e.total+=+m.monto});return Object.values(o).sort((a,b)=>b.n-a.n||b.total-a.total)[0]||null}
 function difPorSubcat(l){const o={};l.forEach(m=>{const k=m.subcategoria||m.categoria,e=o[k]=o[k]||{cat:k,i:0,g:0};e[m.tipo==='ingreso'?'i':'g']+= +m.monto});
  return Object.values(o).map(e=>({...e,total:e.i-e.g})).sort((x,y)=>Math.abs(y.total)-Math.abs(x.total))}
-const api={difPorSubcat,mesesEntre,unidadProm,promedioFlex,porSubcat,masFrecuente,estadoMetas,estadoPresupuestos,estadoRecurrentes,ordenarReg,bloquesVs,enSeleccion,diasEntre,anioResumen,pct,fmtPct,fmtCorto,fechaCorta,mesCorto,periodoRapido,validarFilas,norm,paraImportar,MESES,rango,granularidad,serie,tendencia,frecuentes,GASTO,INGRESO,esc,fmt,etiquetaMes,dias,ordenar,filtrar,mesesConDatos,aniosConDatos,totales,porCategoria,porSub,porMes,topProducto};
+function matrizMes(ym){const y=+ym.slice(0,4),m=+ym.slice(5,7);return{n:new Date(Date.UTC(y,m,0)).getUTCDate(),off:(new Date(Date.UTC(y,m-1,1)).getUTCDay()+6)%7}}
+function sumaMes(ym,d){let y=+ym.slice(0,4),m=+ym.slice(5,7)-1+d;y+=Math.floor(m/12);m=((m%12)+12)%12;return y+'-'+String(m+1).padStart(2,'0')}
+function fechaEnMes(ym,dia){const n=matrizMes(ym).n;return ym+'-'+String(Math.min(Math.max(1,Math.round(+dia)||1),n)).padStart(2,'0')}
+const api={matrizMes,sumaMes,fechaEnMes,difPorSubcat,mesesEntre,unidadProm,promedioFlex,porSubcat,masFrecuente,estadoMetas,estadoPresupuestos,estadoRecurrentes,ordenarReg,bloquesVs,enSeleccion,diasEntre,anioResumen,pct,fmtPct,fmtCorto,fechaCorta,mesCorto,periodoRapido,validarFilas,norm,paraImportar,MESES,rango,granularidad,serie,tendencia,frecuentes,GASTO,INGRESO,esc,fmt,etiquetaMes,dias,ordenar,filtrar,mesesConDatos,aniosConDatos,totales,porCategoria,porSub,porMes,topProducto};
 if(typeof module!=='undefined')module.exports=api;else root.Reports=api;
 })(typeof window!=='undefined'?window:globalThis);

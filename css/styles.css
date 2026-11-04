@@ -253,7 +253,6 @@ label{display:flex;flex-direction:column;gap:4px;font-size:.85rem;color:var(--mu
  .fbar{top:56px;padding:8px}.fbtns{flex:1;flex-wrap:nowrap;gap:6px}.fbtn{flex:1;min-width:0;padding:10px 4px;font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}
 
 /* ---- 0.9.0 Menú lateral, Todos ---- */
-:root{--g1:#0e7490;--g2:#4254FF}@media(prefers-color-scheme:dark){:root{--g1:#0a9bd6}}
 @media(min-width:761px){#app{grid-template-columns:262px 1fr}}
 aside{padding:18px 12px;gap:6px}#menu{display:flex;flex-direction:column;gap:7px}
 .mi{align-items:center;gap:14px;padding:10px 14px 10px 10px;border-radius:14px;border:1.5px solid transparent;font-size:1.1rem;font-weight:600;letter-spacing:.01em;transition:background .2s,transform .2s,box-shadow .2s,border-color .2s}
@@ -261,8 +260,33 @@ aside{padding:18px 12px;gap:6px}#menu{display:flex;flex-direction:column;gap:7px
 .mi-ic svg{width:25px;height:25px}
 .mi:hover{background:color-mix(in srgb,var(--ac) 9%,transparent);border-color:color-mix(in srgb,var(--ac) 45%,transparent);transform:translateX(3px)}
 .mi:hover .mi-ic{background:var(--ac);color:var(--onac)}
-.mi.on{background:linear-gradient(135deg,var(--g1),var(--g2));color:#fff;font-weight:700;border-color:transparent;box-shadow:0 6px 18px color-mix(in srgb,var(--g2) 45%,transparent)}
+.mi.on{background:#114df2;color:#fff;font-weight:700;border-color:transparent;box-shadow:0 6px 18px rgba(17,77,242,.45)}
 .mi.on .mi-ic{background:rgba(255,255,255,.22);color:#fff}
 .mi:focus-visible{outline:3px solid var(--tx);outline-offset:2px}
 @media(max-width:760px){aside{width:274px}}
 .vs-chks{display:flex;gap:16px;flex-wrap:wrap;align-items:center}
+
+/* ---- 0.11.0 Fecha: calendario propio y mes fijo ---- */
+.fecha-btn{display:flex;align-items:center;justify-content:center;width:100%;min-height:60px;padding:14px;border:2px solid #fe9900;border-radius:12px;background:var(--c);color:var(--tx);font:inherit;font-size:clamp(1.05rem,2.4vw,1.4rem);font-weight:700;text-align:center;cursor:pointer;transition:box-shadow .2s,transform .15s}
+.fecha-btn:hover,.fecha-btn:focus-visible{box-shadow:0 0 0 4px #fe990040;outline:none}.fecha-btn:active{transform:scale(.99)}
+.fecha-fila{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;align-items:center}
+.mes-fijo-chip{display:inline-flex;align-items:center;gap:8px;padding:7px 14px;border-radius:99px;border:2px solid #fe9900;background:#fe990022;font-weight:700;font-size:.95rem}
+.fecha-box.fijo{box-shadow:0 0 0 4px #fe990055,0 0 18px #fe990040}
+#cal-back{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.55);display:grid;place-items:center;padding:12px;overflow:auto}
+#cal-box{--cc:#fe9900;width:min(100%,380px);display:flex;flex-direction:column;gap:12px;padding:18px;background:var(--c);color:var(--tx);border:3px solid var(--cc);border-radius:22px;box-shadow:0 0 0 5px #fe990030,0 24px 60px rgba(0,0,0,.45);animation:calin .18s ease both}
+@keyframes calin{from{opacity:0;transform:translateY(10px) scale(.97)}to{opacity:1;transform:none}}
+.cal-hint{text-align:center;font-size:.85rem;font-weight:600;color:var(--mu)}
+.cal-h{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.cal-nav{width:46px;height:46px;flex:none;padding:0;border:2px solid var(--cc);border-radius:12px;background:transparent;color:var(--c-or);font:inherit;font-size:1.5rem;font-weight:700;line-height:1;cursor:pointer}
+.cal-nav:hover:not(:disabled),.cal-nav:focus-visible{background:var(--cc);color:#0b1130;outline:none}.cal-nav:disabled{opacity:.25;cursor:default}
+.cal-ttl{flex:1;padding:8px;border:0;border-radius:10px;background:none;color:var(--tx);font:inherit;font-size:1.2rem;font-weight:800;text-align:center}
+button.cal-ttl{cursor:pointer}button.cal-ttl:hover,button.cal-ttl:focus-visible{background:color-mix(in srgb,var(--cc) 16%,transparent);outline:none}
+.cal-w,.cal-g{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal-w span{text-align:center;font-size:.8rem;font-weight:700;color:var(--mu);padding:4px 0}
+.cal-d{aspect-ratio:1;min-height:42px;padding:0;border:2px solid transparent;border-radius:12px;background:transparent;color:var(--tx);font:inherit;font-size:1.05rem;font-weight:600;cursor:pointer}
+.cal-d:hover,.cal-d:focus-visible{border-color:var(--cc);outline:none}.cal-d.hoy{border-color:var(--mu)}
+.cal-d.sel,.cal-mm.sel{background:var(--cc);border-color:var(--cc);color:#0b1130;font-weight:800}.cal-d.vacio{visibility:hidden;pointer-events:none}
+.cal-m{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.cal-mm{min-height:54px;border:2px solid var(--bd);border-radius:12px;background:transparent;color:var(--tx);font:inherit;font-size:1.05rem;font-weight:600;cursor:pointer}
+.cal-mm:hover,.cal-mm:focus-visible{border-color:var(--cc);outline:none}.cal-mm.hoy:not(.sel){border-color:var(--mu)}
+.cal-f{display:flex;gap:8px}.cal-f .btn{flex:1;min-height:46px}
