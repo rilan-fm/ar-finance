@@ -1,4 +1,4 @@
-# Ar_Finance 0.11.0
+# Ar_Finance 0.11.1
 App estática (HTML/CSS/JS) con Supabase. Despliegue: ver guía de la sección 5 del documento del proyecto.
 - Pruebas: `node test/test.js` y `for f in js/*.js; do node --check $f; done`
 - Configura `js/config.js` con la URL y clave **anon** de Supabase (nunca service_role).

@@ -1,4 +1,9 @@
 # Changelog
+## 0.11.1
+- Gastos › Hogar: nueva subcategoría «Ropa y zapatos hijos».
+- Gastos › Ingrid: nuevas subcategorías «Ayuda a familia» y «Otros».
+- Gastos › Rilan › «Ropa» ya existía; no se cambió.
+- Los movimientos ya registrados no se tocan. Sin cambios en la base de datos.
 ## 0.11.0
 - Registrar › Fecha: nuevo botón «📌 Fijar mes». Eliges un mes una sola vez (por ejemplo Julio) y todos los registros nuevos usan ese mes, sin tener que cambiarlo en cada uno. Mientras está fijado se ve una etiqueta «Mes fijo: Julio 2026» y el recuadro de fecha brilla para que no lo olvides. Botones «Cambiar mes» y «Quitar» (quitar vuelve a la fecha de hoy). El mes fijo no se guarda: al recargar la página vuelve a hoy.
 - Con el mes fijo, el calendario solo muestra ese mes (flechas bloqueadas) y se recuerda el último día usado: el siguiente registro empieza en ese mismo día.

@@ -2,10 +2,10 @@
 const T=(n,s,d)=>({n,s,d:d||{}});
 const GASTO=[
 T('Víveres Alimentos',['Abarrotes','Verduras','Lácteos','Carne de res','Carne de pollo','Pan/Masitas','Frutas','Huevo','Otro']),
-T('Hogar',['Servicios básicos','Aseo/Higiene personal','Comida fuera de casa','Mantenimiento','Otro'],{'Servicios básicos':['Luz','Agua','Internet','Gas']}),
+T('Hogar',['Servicios básicos','Aseo/Higiene personal','Comida fuera de casa','Mantenimiento','Ropa y zapatos hijos','Otro'],{'Servicios básicos':['Luz','Agua','Internet','Gas']}),
 T('Colegio hijos',['Recreos','Materiales','Pensiones','Cuotas/Aportes','Refrigerios','Uniformes','Otros']),
 T('Rilan',['Banco','Coca/Extras','Ocio','Ayuda a familia','Refrigerios','Ropa','Herramientas','Otro']),
-T('Ingrid',['Yanbal','Higiene personal','Transporte','Ropa']),
+T('Ingrid',['Yanbal','Higiene personal','Transporte','Ropa','Ayuda a familia','Otros']),
 T('Auto',['Combustible','Mantenimiento','Repuestos','Parqueo/Peajes','Otro']),
 T('Iglesia',['Diezmo/Ofrenda','Refrigerio','Transporte','Otro']),
 T('Universidad hijos',['Pasajes','Materiales','Matrículas/Inscripciones','Otro']),
