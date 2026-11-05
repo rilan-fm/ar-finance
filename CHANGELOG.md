@@ -1,4 +1,13 @@
 # Changelog
+## 0.12.0
+- General (escritorio): los números de las tarjetas son mucho más grandes (hasta 27 px). Las 5 tarjetas van en una sola fila solo en pantallas muy anchas (≥1750 px); en las demás, 3 arriba y 2 abajo para que no se corten.
+- General, gráficos con estilo «reporte empresarial/tecnológico»: anillo fino con degradados, brillo neón en modo oscuro y el balance al centro; barras redondeadas con degradado y cuadrícula punteada; tarjetas con fondo degradado y acento de color. (Pendiente de tu decisión si se aplica al resto de la app.)
+- Historial: muestra solo los últimos 7 registros; el botón «Mostrar más» es grande y suma 10 cada vez.
+- Historial y notas: se reemplazan «Presupuestos del mes» y «Pagos recurrentes» por **Pagos mensuales del año**. Pulsa «Configurar pago mensual», se abre una ventana y eliges categoría › subcategoría › detalle (ej. Hogar › Servicios básicos › Luz, Rilan › Banco, Colegio hijos › Pensiones) y cuántos pagos al año (12, o 10 para la pensión). Cada pago muestra «7/12 pagos realizados en la gestión 2026», barra de progreso y los 12 meses marcados. Un mes cuenta como pagado si registraste un gasto de ese concepto en ese mes. Estado: En curso, Sin margen, Atrasado o Completo. Botón «Registrar pago». Metas de ahorro se mantiene.
+- Reportes: cuarta opción **Presupuesto**. Izquierda: «Presupuesto real promedio» (promedio mensual por categoría y subcategoría, según el periodo). Derecha: «Presupuesto asignado» (tú escribes los Bs al mes por categoría o subcategoría; botón «Rellenar con el promedio real»). Abajo, análisis asignado vs real: tarjetas, avisos por categoría (dentro del presupuesto, cerca del límite con su %, sobrepasado), 3 gráficos (asignado vs real, % usado con línea de 100 %, evolución vs presupuesto) y proyección de cierre si miras el mes actual. Usa los mismos filtros Año / Mes / Rango. El promedio mensual divide entre «meses equivalentes» (los meses parciales cuentan por días). PDF reporte-presupuesto.pdf.
+- Reportes › Gastos y Presupuesto muestran el apartado «Pagos mensuales · gestión 20XX» con barras de progreso.
+- General › Avisos: usa el presupuesto asignado del mes y los pagos mensuales atrasados.
+- Base de datos: migración 003 (tablas plan_presupuesto y pagos_anuales; traslada lo que tenías en presupuestos y recurrentes, que no se borran). Respaldo JSON incluye plan y pagos.
 ## 0.11.1
 - Gastos › Hogar: nueva subcategoría «Ropa y zapatos hijos».
 - Gastos › Ingrid: nuevas subcategorías «Ayuda a familia» y «Otros».

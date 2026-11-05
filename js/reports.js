@@ -131,6 +131,30 @@ function difPorSubcat(l){const o={};l.forEach(m=>{const k=m.subcategoria||m.cate
 function matrizMes(ym){const y=+ym.slice(0,4),m=+ym.slice(5,7);return{n:new Date(Date.UTC(y,m,0)).getUTCDate(),off:(new Date(Date.UTC(y,m-1,1)).getUTCDay()+6)%7}}
 function sumaMes(ym,d){let y=+ym.slice(0,4),m=+ym.slice(5,7)-1+d;y+=Math.floor(m/12);m=((m%12)+12)%12;return y+'-'+String(m+1).padStart(2,'0')}
 function fechaEnMes(ym,dia){const n=matrizMes(ym).n;return ym+'-'+String(Math.min(Math.max(1,Math.round(+dia)||1),n)).padStart(2,'0')}
-const api={matrizMes,sumaMes,fechaEnMes,difPorSubcat,mesesEntre,unidadProm,promedioFlex,porSubcat,masFrecuente,estadoMetas,estadoPresupuestos,estadoRecurrentes,ordenarReg,bloquesVs,enSeleccion,diasEntre,anioResumen,pct,fmtPct,fmtCorto,fechaCorta,mesCorto,periodoRapido,validarFilas,norm,paraImportar,MESES,rango,granularidad,serie,tendencia,frecuentes,GASTO,INGRESO,esc,fmt,etiquetaMes,dias,ordenar,filtrar,mesesConDatos,aniosConDatos,totales,porCategoria,porSub,porMes,topProducto};
+function mesesEquiv(a,b){if(b<a)return 1;const fin=b.slice(0,7);let ym=a.slice(0,7),t=0;
+ for(let g=0;g<600;g++){const n=matrizMes(ym).n,i=ym===a.slice(0,7)?+a.slice(8,10):1,f=ym===fin?+b.slice(8,10):n;t+=Math.max(0,f-i+1)/n;if(ym===fin)break;ym=sumaMes(ym,1)}
+ return Math.max(t,1/31)}
+function presupuestoReal(l,a,b){const g=l.filter(m=>m.tipo==='gasto'),n=mesesEquiv(a,b),cs={};
+ g.forEach(m=>{const c=cs[m.categoria]=cs[m.categoria]||{cat:m.categoria,total:0,subs:{}},k=m.subcategoria||'(general)';c.total+= +m.monto;c.subs[k]=(c.subs[k]||0)+ +m.monto});
+ const lista=Object.values(cs).map(c=>({cat:c.cat,total:c.total,prom:c.total/n,subs:Object.entries(c.subs).map(([sub,t])=>({sub,total:t,prom:t/n})).sort((x,y)=>y.total-x.total)})).sort((x,y)=>y.total-x.total),total=lista.reduce((s,c)=>s+c.total,0);
+ return{meses:n,lista,total,prom:total/n}}
+function planEfectivo(plan){const o={};plan.forEach(p=>{const c=o[p.categoria]=o[p.categoria]||{cat:p.categoria,directo:0,subs:{},sumaSubs:0};if(p.subcategoria){c.subs[p.subcategoria]=+p.monto;c.sumaSubs+= +p.monto}else c.directo=+p.monto});
+ return Object.values(o).map(c=>({...c,efectivo:c.directo>0?c.directo:c.sumaSubs}))}
+const nivelPres=p=>p>100?'excedido':p>=80?'cerca':'ok';
+const r1=x=>Math.round(x*10)/10;
+function analisisPresupuesto(real,plan){const pe=planEfectivo(plan),rc=Object.fromEntries(real.lista.map(c=>[c.cat,c]));
+ const filas=pe.filter(c=>c.efectivo>0).map(c=>{const r=rc[c.cat],prom=r?r.prom:0,pc=prom/c.efectivo*100,
+  subs=Object.entries(c.subs).filter(([,m])=>m>0).map(([s,m])=>{const sr=r&&r.subs.find(x=>x.sub===s),sp=sr?sr.prom:0,pp=sp/m*100;return{sub:s,asignado:m,real:sp,pct:r1(pp),nivel:nivelPres(pp),dif:m-sp}});
+  return{cat:c.cat,asignado:c.efectivo,real:prom,total:r?r.total:0,pct:r1(pc),nivel:nivelPres(pc),dif:c.efectivo-prom,subs,sumaSubs:c.sumaSubs,desajuste:c.directo>0&&c.sumaSubs>c.directo}}).sort((x,y)=>y.pct-x.pct);
+ const asignado=filas.reduce((s,f)=>s+f.asignado,0),realCon=filas.reduce((s,f)=>s+f.real,0),con=new Set(filas.map(f=>f.cat)),sinPres=real.lista.filter(c=>!con.has(c.cat));
+ return{filas,asignado,real:realCon,dif:asignado-realCon,pct:asignado?r1(realCon/asignado*100):0,excedidas:filas.filter(f=>f.nivel==='excedido').length,cercanas:filas.filter(f=>f.nivel==='cerca').length,sinPres,sinProm:sinPres.reduce((s,c)=>s+c.prom,0),meses:real.meses}}
+const proyeccionMes=(gastado,hoy)=>gastado/(+hoy.slice(8,10))*matrizMes(hoy.slice(0,7)).n;
+function estadoPagos(l,items,anio,hoy){const hy=hoy.slice(0,4),mA=+hoy.slice(5,7),rk={vencido:0,pronto:1,ok:2,pagado:3};
+ return items.map(it=>{const tot=Math.max(1,Math.min(12,Math.round(+it.pagos_anio)||12)),meses=Array(12).fill(false);
+  l.forEach(m=>{if(m.tipo==='gasto'&&m.fecha.slice(0,4)===anio&&m.categoria===it.categoria&&(!it.subcategoria||m.subcategoria===it.subcategoria)&&(!it.detalle||m.detalle===it.detalle))meses[+m.fecha.slice(5,7)-1]=true});
+  const hechos=meses.filter(Boolean).length,faltan=Math.max(0,tot-hechos),lograda=hechos>=tot;let nivel=lograda?'pagado':'ok',restan=0;
+  if(!lograda){if(anio<hy)nivel='vencido';else if(anio===hy){restan=12-mA+(meses[mA-1]?0:1);nivel=faltan>restan?'vencido':faltan===restan?'pronto':'ok'}}
+  return{...it,pagos_anio:tot,meses,hechos,faltan,lograda,pct:Math.min(100,r1(hechos/tot*100)),nivel,restan,pagadoMes:anio===hy&&meses[mA-1]}}).sort((a,b)=>rk[a.nivel]-rk[b.nivel])}
+const api={mesesEquiv,presupuestoReal,planEfectivo,nivelPres,analisisPresupuesto,proyeccionMes,estadoPagos,matrizMes,sumaMes,fechaEnMes,difPorSubcat,mesesEntre,unidadProm,promedioFlex,porSubcat,masFrecuente,estadoMetas,estadoPresupuestos,estadoRecurrentes,ordenarReg,bloquesVs,enSeleccion,diasEntre,anioResumen,pct,fmtPct,fmtCorto,fechaCorta,mesCorto,periodoRapido,validarFilas,norm,paraImportar,MESES,rango,granularidad,serie,tendencia,frecuentes,GASTO,INGRESO,esc,fmt,etiquetaMes,dias,ordenar,filtrar,mesesConDatos,aniosConDatos,totales,porCategoria,porSub,porMes,topProducto};
 if(typeof module!=='undefined')module.exports=api;else root.Reports=api;
 })(typeof window!=='undefined'?window:globalThis);
