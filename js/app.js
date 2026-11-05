@@ -1,6 +1,6 @@
 (function(){
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],R=Reports,esc=R.esc,F=R.fmt;
-const VERSION='0.12.0';
+const VERSION='0.13.0';
 let D,movs=[],custom=[],plan=[],pagos=[],metas=[],plOk=false,metOk=false,ch={},st,userEmail='';
 const NUEVA='Nueva categoría',hoy=()=>new Date().toLocaleDateString('sv');
 const tree=()=>R.GASTO.concat(custom.map(c=>({n:c.nombre,s:c.subs||[],d:{},id:c.id})));
@@ -47,15 +47,15 @@ function general(){
  <div class="duo">${card('Ingresos vs. gastos (%)','g1')}${card('Las 3 categorías más fuertes de ingresos y de gastos','g2')}</div>
  <div class="card"><h3>Últimos movimientos</h3><ul class="list">${u.map(fila).join('')}</ul></div>
  <div class="go2"><button class="btn" data-go="reg">${Icons.svg('plus')}<span>Añadir registro</span></button><button class="btn ghost" data-go="his">${Icons.svg('list')}<span>Ver historial</span></button></div>`;
- TM=tema();Chart.defaults.color=TM.mu;Chart.defaults.font.size=chico()?13:12;
+ TM=tema(true);Chart.defaults.color=TM.mu;Chart.defaults.font.size=chico()?13:12;
  const osc=matchMedia('(prefers-color-scheme:dark)').matches;
  const gi=TM.gi,gg=TM.gg,tot=t.ingresos+t.gastos;
- chg.g1=new Chart($('#g1'),{type:'doughnut',plugins:[centroDona,neon],data:{labels:['Ingresos · '+R.fmtPct(R.pct(t.ingresos,tot)),'Gastos · '+R.fmtPct(R.pct(t.gastos,tot))],datasets:[{data:[t.ingresos,t.gastos],backgroundColor:[gradD(gi[0],gi[1]),gradD(gg[0],gg[1])],borderColor:'transparent',borderWidth:0,spacing:4,borderRadius:12,hoverOffset:8}]},
-  options:{maintainAspectRatio:false,animation:false,cutout:'72%',plugins:{fondo:false,legend:ley(),tooltip:{callbacks:{label:q=>' '+q.label.split(' · ')[0]+': '+F(q.parsed)}},neon:{on:osc,blur:18,color:'#6d8bff'},centroDona:{label:'Balance',valor:'Bs '+R.fmtCorto(t.balance),color:TM.tx,mu:TM.mu,size:chico()?20:26}}}});
+ chg.g1=new Chart($('#g1'),{type:'doughnut',plugins:[centroDona,neon],data:{labels:['Ingresos · '+R.fmtPct(R.pct(t.ingresos,tot)),'Gastos · '+R.fmtPct(R.pct(t.gastos,tot))],datasets:[{data:[t.ingresos,t.gastos],backgroundColor:['#13dbf3','#fe9900'],borderColor:'transparent',borderWidth:0,spacing:0,borderRadius:0,hoverOffset:8}]},
+  options:{color:TM.mu,maintainAspectRatio:false,animation:false,cutout:'72%',plugins:{fondo:false,legend:ley(),tooltip:{callbacks:{label:q=>' '+q.label.split(' · ')[0]+': '+F(q.parsed)}},neon:{on:false},centroDona:{label:'Balance',valor:'Bs '+R.fmtCorto(t.balance),color:t.balance<0?'#ff3b6b':'#00ff54',mu:TM.mu,size:chico()?20:26}}}});
  chg.g2=new Chart($('#g2'),{type:'bar',plugins:[rotulos2,neon],data:{labels:todos.map(x=>x.cat),datasets:[
-  {label:'Ingresos',data:todos.map((x,i)=>i<ti.length?x.total:null),backgroundColor:gradBar(gi[0],gi[1]),borderRadius:10,borderSkipped:false,maxBarThickness:22},
-  {label:'Gastos',data:todos.map((x,i)=>i>=ti.length?x.total:null),backgroundColor:gradBar(gg[0],gg[1]),borderRadius:10,borderSkipped:false,maxBarThickness:22}]},
-  options:{indexAxis:'y',maintainAspectRatio:false,animation:false,layout:{padding:{right:chico()?100:124}},plugins:{fondo:false,legend:ley(),tooltip:{callbacks:{label:q=>' '+q.dataset.label+': '+F(q.parsed.x)}},neon:{on:osc,blur:12,color:'#6d8bff'},rotulos2:{on:true,color:TM.tx,size:chico()?11:12,s0:t.ingresos,s1:t.gastos}},
+  {label:'Ingresos',data:todos.map((x,i)=>i<ti.length?x.total:null),backgroundColor:'#13dbf3',borderRadius:10,borderSkipped:false,maxBarThickness:22},
+  {label:'Gastos',data:todos.map((x,i)=>i>=ti.length?x.total:null),backgroundColor:'#fe9900',borderRadius:10,borderSkipped:false,maxBarThickness:22}]},
+  options:{color:TM.mu,indexAxis:'y',maintainAspectRatio:false,animation:false,layout:{padding:{right:chico()?100:124}},plugins:{fondo:false,legend:ley(),tooltip:{callbacks:{label:q=>' '+q.dataset.label+': '+F(q.parsed.x)}},neon:{on:false},rotulos2:{on:true,color:TM.tx,size:chico()?11:12,s0:t.ingresos,s1:t.gastos}},
    scales:{x:{...gy(),stacked:true,grid:{color:TM.bd,lineWidth:1,borderDash:[4,5],drawTicks:false}},y:{stacked:true,grid:{display:false},ticks:{callback(v){return recorta(this.getLabelForValue(v),chico()?16:28)}}}}}});
 }
 /* ---------- Desplazamiento suave: muestra lo nuevo sin que el usuario tenga que bajar ---------- */
@@ -155,6 +155,7 @@ async function cargaPlan(){try{plan=await D.listarPlan();pagos=await D.listarPag
 const FALTA='<li class="warn lab">Falta activar esta función en la base de datos (migración 003). Revisa las instrucciones de la actualización.</li>';
 const nivTxt={excedido:'Sobrepasado',cerca:'Cerca del límite',ok:'Dentro del presupuesto'},pgTxt={pagado:'✔ Completo',vencido:'Atrasado',pronto:'Sin margen',ok:'En curso'},MI=['E','F','M','A','M','J','J','A','S','O','N','D'];
 const anioPagos=()=>hoy().slice(0,4),mesesTxt=n=>n+(n===1?' mes':' meses');
+const ico=n=>`<span class="pr-ic" style="--ik:${Icons.col(n)}">${Icons.svg(n)}</span>`;
 const pgMeses=m=>`<div class="pg-m">${m.map((x,i)=>`<span class="${x?'on':''}" title="${R.MESES[i]}">${MI[i]}</span>`).join('')}</div>`;
 function pgFila(p,an,acc){const ruta=[p.categoria,p.subcategoria,p.detalle].filter(Boolean).map(esc).join(' › '),actual=an===anioPagos(),
  aviso=p.nivel==='vencido'&&actual?`Faltan ${p.faltan} pago${p.faltan===1?'':'s'} y solo quedan ${mesesTxt(p.restan)}.`:p.nivel==='pronto'?`Debes pagar todos los meses que quedan (${p.restan}).`:p.nivel==='vencido'?`Gestión cerrada con ${p.faltan} pago${p.faltan===1?'':'s'} pendiente${p.faltan===1?'':'s'}.`:'';
@@ -263,7 +264,7 @@ function limpiaFil(){fs={anio:R.anioResumen(hoy(),movs),mes:'',rango:false,desde
 const filtros=()=>({anio:fs.rango?'':fs.anio,mes:fs.rango?'':fs.mes,desde:fs.rango?fs.desde:'',hasta:fs.rango?fs.hasta:'',tipo:(tipoR==='vs'||tipoR==='presupuesto')?'':tipoR,cats:rs.cat?[rs.cat]:[],sub:rs.sub,det:rs.det});
 const NOM={gastos:'Gastos',ingresos:'Ingresos'},chico=()=>window.innerWidth<=760,recorta=(s,n)=>s.length>n?s.slice(0,n-1)+'…':s;
 let PDFM=false;
-const tema=()=>{const osc=!PDFM&&matchMedia('(prefers-color-scheme:dark)').matches,cv=getComputedStyle(document.documentElement).getPropertyValue('--c').trim();
+const tema=fo=>{const osc=fo||(!PDFM&&matchMedia('(prefers-color-scheme:dark)').matches),cv=getComputedStyle(document.documentElement).getPropertyValue('--c').trim();
  return osc?{mu:'#dbe1ff',tx:'#f4f6ff',bd:'rgba(200,210,255,.14)',c:cv,gastos:'#c75bff',ingresos:'#00f8ff',osc,gi:['#00f8ff','#3b82ff'],gg:['#c75bff','#ff4fd8'],gb:['#4254FF','#00C0F5'],okc:'#22c55e',rampa:['#2AFAE9','#00C0F5','#4254FF','#8708E8','#D604FF','#fe9900']}:{mu:'#3b4466',tx:'#0b1130',bd:'rgba(11,17,48,.10)',c:PDFM?'#ffffff':cv,gastos:'#9a17dc',ingresos:'#0a86a8',osc,gi:['#0a86a8','#2563eb'],gg:['#9a17dc','#d6249f'],gb:['#3848DA','#02A1D2'],okc:'#16a34a',rampa:['#24D0C8','#02A1D2','#3848DA','#710AC7','#B206DA','#e07b00']}};
 let TM=tema();
 const DPR0=()=>Math.max(2,window.devicePixelRatio||1);
@@ -322,9 +323,9 @@ function presupuestoVista(lg,f){const o=$('#rep-out'),[a,b]=rangoPres(f,lg),real
  const per=`<div class="perio">📅 ${R.fechaCorta(a)} – ${R.fechaCorta(b)} · ${real.meses.toFixed(1).replace('.',',')} meses equivalentes · ${lg.length} gasto${lg.length===1?'':'s'}</div>`;
  if(!plOk){o.innerHTML=per+'<div class="card vacio"><b>Falta activar esta función en la base de datos</b><span class="muted">Ejecuta la migración 003 (ver README) y recarga la página.</span></div>';return}
  const vr=x=>{const e=plan.find(p=>p.categoria===x.c&&(p.subcategoria||null)===(x.s||null));return e?e.monto:''},
-  izq=real.lista.length?`<ul class="list">${real.lista.map(c=>`<li class="pr-r"><details><summary><span>${esc(c.cat)} <small class="muted">▾</small></span><b>${F(c.prom)}</b></summary><ul class="pr-subl">${c.subs.map(x=>`<li><span>${esc(x.sub)}</span><span>${F(x.prom)}</span></li>`).join('')}</ul></details></li>`).join('')}<li class="pr-tot"><span>Total mensual promedio</span><b>${F(real.prom)}</b></li></ul>`:'<p class="muted">Sin gastos en este periodo.</p>',
+  izq=real.lista.length?`<ul class="list">${real.lista.map(c=>`<li class="pr-r"><details><summary><span class="pr-n">${ico(c.cat)}${esc(c.cat)} <small class="muted">▾</small></span><b>${F(c.prom)}</b></summary><ul class="pr-subl">${c.subs.map(x=>`<li><span class="pr-n">${ico(x.sub)}${esc(x.sub)}</span><span>${F(x.prom)}</span></li>`).join('')}</ul></details></li>`).join('')}<li class="pr-tot"><span>Total mensual promedio</span><b>${F(real.prom)}</b></li></ul>`:'<p class="muted">Sin gastos en este periodo.</p>',
   der=tree().map(c=>{const rc=real.lista.find(x=>x.cat===c.n),ph=x=>x?Math.round(x.prom):0,tieneS=plan.some(p=>p.categoria===c.n&&p.subcategoria);
-   return `<label class="pr-row"><span>${esc(c.n)}</span><input type="number" min="0" step="0.01" inputmode="decimal" data-pc="${esc(c.n)}" data-ps="" value="${vr({c:c.n})}" placeholder="${ph(rc)}"></label>`+(c.s.length?`<details class="pr-sd" data-od="${esc(c.n)}"${tieneS||prOpen.has(c.n)?' open':''}><summary>Subcategorías de ${esc(c.n)}</summary>${c.s.map(s2=>{const sr=rc&&rc.subs.find(x=>x.sub===s2);return `<label class="pr-row s"><span>${esc(s2)}</span><input type="number" min="0" step="0.01" inputmode="decimal" data-pc="${esc(c.n)}" data-ps="${esc(s2)}" value="${vr({c:c.n,s:s2})}" placeholder="${ph(sr)}"></label>`}).join('')}</details>`:'')}).join('');
+   return `<label class="pr-row"><span class="pr-n">${ico(c.n)}${esc(c.n)}</span><input type="number" min="0" step="0.01" inputmode="decimal" data-pc="${esc(c.n)}" data-ps="" value="${vr({c:c.n})}" placeholder="${ph(rc)}"></label>`+(c.s.length?`<details class="pr-sd" data-od="${esc(c.n)}"${tieneS||prOpen.has(c.n)?' open':''}><summary>Subcategorías de ${esc(c.n)}</summary>${c.s.map(s2=>{const sr=rc&&rc.subs.find(x=>x.sub===s2);return `<label class="pr-row s"><span class="pr-n">${ico(s2)}${esc(s2)}</span><input type="number" min="0" step="0.01" inputmode="decimal" data-pc="${esc(c.n)}" data-ps="${esc(s2)}" value="${vr({c:c.n,s:s2})}" placeholder="${ph(sr)}"></label>`}).join('')}</details>`:'')}).join('');
  o.innerHTML=per+`<div class="pr-cols"><section class="card pr-col"><h3>📊 Presupuesto real promedio</h3><p class="muted lab">Promedio mensual de lo que realmente gastaste en el periodo (total ÷ meses equivalentes). Toca una categoría para ver sus subcategorías.</p>${izq}</section>
  <section class="card pr-col"><h3>🎯 Presupuesto asignado</h3><p class="muted lab">Escribe cuánto quieres gastar al mes (Bs). Deja vacío para quitarlo. Lo gris es tu promedio real, como referencia. Si fijas la categoría y también subcategorías, el análisis usa el monto de la categoría.</p>${der}<div class="pr-acts"><button class="btn ghost sm" type="button" data-pa="1">Rellenar con el promedio real</button><small id="pr-st" class="muted"></small></div></section></div>
  <h2 class="pr-an-h">Análisis: presupuesto asignado vs real promedio</h2><div id="pr-an"></div>`;
@@ -336,7 +337,7 @@ function analisisPres(){const el=$('#pr-an');if(!el||!PRV)return;['p1','p2','p3'
  let proy='';if(mesAct){const pj=R.proyeccionMes(lp.reduce((x,m)=>x+ +m.monto,0),hy);proy=K('Proyección de cierre del mes',F(pj)+sub('vs '+F(an.asignado)+' · '+(pj>an.asignado?'te pasarías por '+F(pj-an.asignado):'quedarías '+F(an.asignado-pj)+' por debajo')),pj>an.asignado?'gasto':'ingreso','p','trend')}
  const vd=an.excedidas?`⛔ ${an.excedidas} de ${an.filas.length} categoría${an.filas.length===1?'':'s'} sobrepasa${an.excedidas===1?'':'n'} su presupuesto.`+(an.cercanas?` Además ${an.cercanas} está${an.cercanas===1?'':'n'} cerca del límite.`:''):an.cercanas?`🟠 Ninguna categoría se pasó, pero ${an.cercanas} está${an.cercanas===1?'':'n'} cerca del límite (80 % o más).`:'✅ Estás dentro del presupuesto en todas tus categorías.',
   vcl=an.excedidas?'mal':an.cercanas?'neu':'',
-  filas=an.filas.map(x=>`<li class="pr-${x.nivel}"><div><b>${esc(x.cat)}</b> <small class="badge nv-${x.nivel}">${nivTxt[x.nivel]}</small><small>${msgPres(x,mens)}</small><div class="bar"><i style="width:${Math.min(100,x.pct)}%"></i></div>${x.desajuste?`<small class="warn">Ojo: las subcategorías suman ${F(x.sumaSubs)}, más que el presupuesto de la categoría.</small>`:''}${x.subs.length?`<ul class="pr-subl">${x.subs.map(q=>`<li><span>${esc(q.sub)}: ${F(q.real)} de ${F(q.asignado)}</span><b class="${q.nivel==='excedido'?'gasto':q.nivel==='cerca'?'':'ingreso'}">${R.fmtPct(q.pct,0)}</b></li>`).join('')}</ul>`:''}</div><b>${R.fmtPct(x.pct,0)}</b></li>`).join(''),
+  filas=an.filas.map(x=>`<li class="pr-${x.nivel}"><div><span class="pr-n">${ico(x.cat)}<b>${esc(x.cat)}</b></span> <small class="badge nv-${x.nivel}">${nivTxt[x.nivel]}</small><small>${msgPres(x,mens)}</small><div class="bar"><i style="width:${Math.min(100,x.pct)}%"></i></div>${x.desajuste?`<small class="warn">Ojo: las subcategorías suman ${F(x.sumaSubs)}, más que el presupuesto de la categoría.</small>`:''}${x.subs.length?`<ul class="pr-subl">${x.subs.map(q=>`<li><span class="pr-n">${ico(q.sub)}${esc(q.sub)}: ${F(q.real)} de ${F(q.asignado)}</span><b class="${q.nivel==='excedido'?'gasto':q.nivel==='cerca'?'':'ingreso'}">${R.fmtPct(q.pct,0)}</b></li>`).join('')}</ul>`:''}</div><b>${R.fmtPct(x.pct,0)}</b></li>`).join(''),
   sinp=an.sinPres.length?`<p class="muted lab">Sin presupuesto asignado: ${an.sinPres.slice(0,6).map(c=>esc(c.cat)+' ('+F(c.prom)+')').join(' · ')}${an.sinPres.length>6?' …':''}. Total ${F(an.sinProm)} al mes.</p>`:'',
   ht=Math.max(300,an.filas.length*50+80);
  el.innerHTML=`<div class="vd ${vcl}">${vd}</div><div class="grid">${K('Presupuesto asignado',F(an.asignado)+sub('por mes · '+an.filas.length+' categoría'+(an.filas.length===1?'':'s')),'','a','coin')}${K('Real promedio'+(mens?' mensual':' del mes'),F(an.real)+sub('en esas categorías'),'gasto','p','down')}${K('Diferencia',F(an.dif)+sub(an.dif>=0?'te sobra al mes':'te excedes al mes'),an.dif>=0?'ingreso':'gasto','o','scale')}${K('Uso del presupuesto',R.fmtPct(an.pct)+sub(an.excedidas?an.excedidas+' sobrepasada'+(an.excedidas===1?'':'s'):'ninguna sobrepasada'),'','a','trophy')}${proy}</div>
@@ -453,6 +454,10 @@ async function revisarXL(){const f=$('#xl-file').files[0],o=$('#xl-res');pend=[]
    (r.errores.length?`<ul class="list">${r.errores.slice(0,15).map(e=>`<li><span>${e.fila?'Fila '+e.fila+': ':''}${esc(e.msg)}</span></li>`).join('')}</ul>${r.errores.length>15?`<p class="muted">… y ${r.errores.length-15} más.</p>`:''}`:'')+
    (pend.length?`<button id="xl-go" class="btn">Importar ${pend.length} movimientos</button>`:'');revelar(o)}
  catch(e){o.textContent='Error: '+e.message}}
+async function exportarXL(){if(!movs.length)return alert('Aún no hay movimientos para exportar.');const b=$('#n-xlx');b.disabled=true;msg('#c-st','Preparando el Excel…');
+ try{await cargaXL();const wb=R.libroExcel(ExcelJS,movs,hoy()),buf=await wb.xlsx.writeBuffer(),bl=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}),a=document.createElement('a');
+  a.href=URL.createObjectURL(bl);a.download='ar-finance-registros-'+hoy()+'.xlsx';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);msg('#c-st','✔ Excel descargado ('+movs.length+' movimientos)')}
+ catch(e){msg('#c-st','Error al crear el Excel: '+e.message)}finally{b.disabled=false}}
 async function importarXL(){const b=$('#xl-go');b.disabled=true;let n=0;
  try{for(let i=0;i<pend.length;i+=200){const g=pend.slice(i,i+200);movs.push(...await D.agregarVarios(g));n+=g.length;b.textContent=`Importando ${n}/${pend.length}…`}
   pend=[];todo();$('#xl-res').innerHTML=`<p class="ok">✔ ${n} movimientos importados.</p>`;revelar($('#xl-res'))}
@@ -531,7 +536,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   const b=e.target.closest('[data-undo]');if(b){const lv=b.dataset.undo;rs[lv]='';if(lv==='cat')rs.sub=rs.det='';if(lv==='sub')rs.det='';armarCats();renderRep();irCats()}};
  $('#f-cats').onchange=e=>{const d=e.target.closest('[data-vst]');if(d)return vsTodos(d.dataset.vst,d.checked);const c=e.target.closest('[data-vsm]');if(c)vsMulti(c.dataset.vsm,c.checked)};
  matchMedia('(prefers-color-scheme:dark)').addEventListener('change',()=>{{if(!$('#t-rep').hidden)renderRep();if(!$('#t-gen').hidden)general()}});
- $('#pdf').onclick=pdf;$('#n-xl').onclick=()=>{const p=$('#xl-panel');p.hidden=false;revelar(p)};$('#xl-x').onclick=()=>{$('#xl-panel').hidden=true};$('#xl-rev').onclick=revisarXL;$('#xl-res').onclick=e=>{if(e.target.id==='xl-go')importarXL()};$('#n-txt').oninput=nota;$('#n-exp').onclick=respaldo;$('#n-imp').onclick=()=>$('#n-file').click();$('#n-file').onchange=e=>{const f=e.target.files[0];if(f)importar(f);e.target.value=''};
+ $('#pdf').onclick=pdf;$('#n-xlx').onclick=exportarXL;$('#n-xl').onclick=()=>{const p=$('#xl-panel');p.hidden=false;revelar(p)};$('#xl-x').onclick=()=>{$('#xl-panel').hidden=true};$('#xl-rev').onclick=revisarXL;$('#xl-res').onclick=e=>{if(e.target.id==='xl-go')importarXL()};$('#n-txt').oninput=nota;$('#n-exp').onclick=respaldo;$('#n-imp').onclick=()=>$('#n-file').click();$('#n-file').onchange=e=>{const f=e.target.files[0];if(f)importar(f);e.target.value=''};
  $('#c-cats').onclick=e=>{const b=e.target.closest('[data-ce]');if(!b)return;const k=b.dataset.ce;
   if(k==='ed'){cfgEd=b.dataset.id;pintaCfgCats()}else if(k==='no'){cfgEd='';pintaCfgCats()}else if(k==='ok')editarCat(b.dataset.id);else if(k==='del')borrarCat(b.dataset.id)};
  $('#c-pwb').onclick=async()=>{const a=$('#c-pw').value,b=$('#c-pw2').value,m=$('#c-pwm'),bad=t=>{m.className='warn lab';m.textContent=t};

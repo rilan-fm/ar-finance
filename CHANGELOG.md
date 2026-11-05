@@ -1,4 +1,14 @@
 # Changelog
+## 0.13.0
+- Configuración › Respaldo y datos: nuevo botón «📤 Exportar a Excel». Descarga `ar-finance-registros-AAAA-MM-DD.xlsx` con TODOS tus registros. Hoja «Movimientos»: Fecha, Tipo, Categoría, Subcategoría, Detalle, Descripción, Cantidad y Monto (Bs), de la más antigua a la más reciente, con filtros y encabezado fijo; tiene el mismo formato de la plantilla, así que se puede volver a importar. Hoja «Resumen»: totales por mes (ingresos, gastos y balance) y por categoría de gasto y de ingreso, con fórmulas.
+- Sin cambios en la base de datos. (La librería de Excel se descarga solo al usar el botón: necesita internet.)
+## 0.12.2
+- General › anillo: sin bordes redondeados ni separación entre sectores (corte recto, estilo limpio). Sin cambios en la base de datos.
+## 0.12.1
+- General › anillo «Ingresos vs. gastos»: colores sólidos (ingresos #13dbf3, gastos #fe9900), sin degradado ni brillo, y el balance al centro en #00ff54 (rojo si es negativo). Las barras de las 3 categorías usan los mismos colores.
+- General › tarjetas de los dos gráficos: fondo sólido #000b3e (sin degradado ni efectos), también en modo claro; los gráficos usan siempre texto claro sobre ese fondo.
+- Reportes › Presupuesto: cada categoría y subcategoría lleva su icono (el mismo del resto de la app), en «Presupuesto real promedio», «Presupuesto asignado» y «Estado por categoría».
+- Sin cambios en la base de datos.
 ## 0.12.0
 - General (escritorio): los números de las tarjetas son mucho más grandes (hasta 27 px). Las 5 tarjetas van en una sola fila solo en pantallas muy anchas (≥1750 px); en las demás, 3 arriba y 2 abajo para que no se corten.
 - General, gráficos con estilo «reporte empresarial/tecnológico»: anillo fino con degradados, brillo neón en modo oscuro y el balance al centro; barras redondeadas con degradado y cuadrícula punteada; tarjetas con fondo degradado y acento de color. (Pendiente de tu decisión si se aplica al resto de la app.)

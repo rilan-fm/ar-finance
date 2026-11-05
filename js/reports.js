@@ -155,6 +155,24 @@ function estadoPagos(l,items,anio,hoy){const hy=hoy.slice(0,4),mA=+hoy.slice(5,7
   const hechos=meses.filter(Boolean).length,faltan=Math.max(0,tot-hechos),lograda=hechos>=tot;let nivel=lograda?'pagado':'ok',restan=0;
   if(!lograda){if(anio<hy)nivel='vencido';else if(anio===hy){restan=12-mA+(meses[mA-1]?0:1);nivel=faltan>restan?'vencido':faltan===restan?'pronto':'ok'}}
   return{...it,pagos_anio:tot,meses,hechos,faltan,lograda,pct:Math.min(100,r1(hechos/tot*100)),nivel,restan,pagadoMes:anio===hy&&meses[mA-1]}}).sort((a,b)=>rk[a.nivel]-rk[b.nivel])}
-const api={mesesEquiv,presupuestoReal,planEfectivo,nivelPres,analisisPresupuesto,proyeccionMes,estadoPagos,matrizMes,sumaMes,fechaEnMes,difPorSubcat,mesesEntre,unidadProm,promedioFlex,porSubcat,masFrecuente,estadoMetas,estadoPresupuestos,estadoRecurrentes,ordenarReg,bloquesVs,enSeleccion,diasEntre,anioResumen,pct,fmtPct,fmtCorto,fechaCorta,mesCorto,periodoRapido,validarFilas,norm,paraImportar,MESES,rango,granularidad,serie,tendencia,frecuentes,GASTO,INGRESO,esc,fmt,etiquetaMes,dias,ordenar,filtrar,mesesConDatos,aniosConDatos,totales,porCategoria,porSub,porMes,topProducto};
+function filasExport(l){return l.slice().sort((a,b)=>a.fecha.localeCompare(b.fecha)||String(a.creado_en||'').localeCompare(String(b.creado_en||''))).map(m=>({fecha:m.fecha,tipo:m.tipo==='ingreso'?'Ingreso':'Gasto',categoria:m.categoria,subcategoria:m.subcategoria||'',detalle:m.detalle||'',descripcion:m.descripcion||'',cantidad:m.tipo==='gasto'?(m.cantidad>0?+m.cantidad:1):null,monto:Math.round(+m.monto*100)/100}))}
+function libroExcel(EJS,l,hoy){const wb=new EJS.Workbook();wb.creator='Ar_Finance';wb.created=new Date();
+ const ws=wb.addWorksheet('Movimientos',{views:[{state:'frozen',ySplit:1}]}),H=['Fecha','Tipo','Categoría','Subcategoría','Detalle','Descripción','Cantidad','Monto (Bs)'],W=[13,10,22,24,18,36,10,15];
+ ws.columns=H.map((h,i)=>({header:h,key:'c'+i,width:W[i]}));
+ const hd=row=>{row.eachCell(c=>{c.font={bold:true,color:{argb:'FFFFFFFF'}};c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF114DF2'}}})};
+ hd(ws.getRow(1));
+ filasExport(l).forEach(f=>{const[y,m,d]=f.fecha.split('-').map(Number),row=ws.addRow([new Date(Date.UTC(y,m-1,d)),f.tipo,f.categoria,f.subcategoria,f.detalle,f.descripcion,f.cantidad,f.monto]);row.getCell(1).numFmt='dd/mm/yyyy';row.getCell(8).numFmt='#,##0.00'});
+ ws.autoFilter='A1:H1';
+ const rs=wb.addWorksheet('Resumen');rs.columns=[{width:30},{width:18},{width:18},{width:18}];
+ let r=0;const add=a=>{r++;return rs.addRow(a)},nf=(row,f)=>f.forEach((x,i)=>{if(x)row.getCell(i+1).numFmt=x});
+ add(['Ar_Finance – Resumen de movimientos']).font={bold:true,size:16};add(['Generado el '+fechaCorta(hoy)+' · '+l.length+' movimientos']);add(['']);
+ const tabla=(titulo,cab,filas,f,sumar)=>{add([titulo]).font={bold:true,size:13};hd(add(cab));const r0=r+1;filas.forEach(x=>nf(add(x(r+1)),f));const r1=r;
+  if(filas.length&&sumar){const t=add(['Total'].concat(sumar.map(c=>({formula:'SUM('+c+r0+':'+c+r1+')'}))));t.font={bold:true};nf(t,f)}add([''])};
+ const mn='#,##0.00',pm=porMes(l);
+ tabla('Por mes',['Mes','Ingresos','Gastos','Balance'],pm.map(m=>n=>[etiquetaMes(m.mes),m.ingresos,m.gastos,{formula:'B'+n+'-C'+n,result:m.ingresos-m.gastos}]),[null,mn,mn,mn],['B','C','D']);
+ [['gasto','Gastos por categoría'],['ingreso','Ingresos por categoría']].forEach(([t,tit])=>{const pc=porCategoria(l,t),tot=pc.reduce((s,c)=>s+c.total,0);
+  tabla(tit,['Categoría','Total (Bs)','% del total'],pc.map(c=>()=>[c.cat,c.total,tot?c.total/tot:0]),[null,mn,'0.0%'],['B','C'])});
+ return wb}
+const api={filasExport,libroExcel,mesesEquiv,presupuestoReal,planEfectivo,nivelPres,analisisPresupuesto,proyeccionMes,estadoPagos,matrizMes,sumaMes,fechaEnMes,difPorSubcat,mesesEntre,unidadProm,promedioFlex,porSubcat,masFrecuente,estadoMetas,estadoPresupuestos,estadoRecurrentes,ordenarReg,bloquesVs,enSeleccion,diasEntre,anioResumen,pct,fmtPct,fmtCorto,fechaCorta,mesCorto,periodoRapido,validarFilas,norm,paraImportar,MESES,rango,granularidad,serie,tendencia,frecuentes,GASTO,INGRESO,esc,fmt,etiquetaMes,dias,ordenar,filtrar,mesesConDatos,aniosConDatos,totales,porCategoria,porSub,porMes,topProducto};
 if(typeof module!=='undefined')module.exports=api;else root.Reports=api;
 })(typeof window!=='undefined'?window:globalThis);
