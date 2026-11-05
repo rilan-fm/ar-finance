@@ -1,4 +1,6 @@
 # Changelog
+## 0.13.1
+- Reportes › Presupuesto: los iconos de categorías y subcategorías ahora tienen el mismo tamaño y estilo que los de «Gastos vs Ingresos», Gastos e Ingresos (círculo de 42 px con icono de 22 px; en subcategorías 34 px / 18 px). Mismos dibujos y colores que el resto de la app. Solo CSS; sin cambios en la base de datos.
 ## 0.13.0
 - Configuración › Respaldo y datos: nuevo botón «📤 Exportar a Excel». Descarga `ar-finance-registros-AAAA-MM-DD.xlsx` con TODOS tus registros. Hoja «Movimientos»: Fecha, Tipo, Categoría, Subcategoría, Detalle, Descripción, Cantidad y Monto (Bs), de la más antigua a la más reciente, con filtros y encabezado fijo; tiene el mismo formato de la plantilla, así que se puede volver a importar. Hoja «Resumen»: totales por mes (ingresos, gastos y balance) y por categoría de gasto y de ingreso, con fórmulas.
 - Sin cambios en la base de datos. (La librería de Excel se descarga solo al usar el botón: necesita internet.)
