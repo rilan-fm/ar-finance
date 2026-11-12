@@ -1,7 +1,8 @@
 (function(){
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],R=Reports,esc=R.esc,F=R.fmt;
-const VERSION='0.13.2';
+const VERSION='0.14.0';
 let D,movs=[],custom=[],plan=[],pagos=[],metas=[],plOk=false,metOk=false,ch={},st,userEmail='';
+let chartOK=false,chartP=null,pdfP=null,gTok=0,notaTocada=false,ultSig='';
 const NUEVA='Nueva categoría',hoy=()=>new Date().toLocaleDateString('sv');
 const tree=()=>R.GASTO.concat(custom.map(c=>({n:c.nombre,s:c.subs||[],d:{},id:c.id})));
 const nomCats=()=>tree().map(c=>c.n).concat(R.INGRESO.map(c=>c.n));
@@ -11,20 +12,36 @@ const msg=(e,t)=>$(e).textContent=t;
 function iniciar(){
  const c=window.MF_CONFIG||{};
  if(c.allowSignup===false&&!window.MF_PREVIEW)$('#l-up').hidden=true;
- D=window.MF_PREVIEW?Data.memoria(window.MF_SEED,window.MF_SEED_PRES,window.MF_SEED_REC,window.MF_SEED_MET,window.MF_SEED_PLAN,window.MF_SEED_PAG):(c.url&&!/^TU-/.test(c.url)?Data.supabase(c.url,c.anonKey):null);
+ D=window.MF_PREVIEW?Data.memoria(window.MF_SEED,window.MF_SEED_PRES,window.MF_SEED_REC,window.MF_SEED_MET,window.MF_SEED_PLAN,window.MF_SEED_PAG):(c.url&&!/^TU-/.test(c.url)?Data.conCola(Data.supabase(c.url,c.anonKey),Data.almacenIDB()):null);
  if(!D)return msg('#login-msg','Configura js/config.js con la URL y clave anon de Supabase (ver README).');
  $('#l-in').onclick=()=>acceso('entrar');$('#l-up').onclick=()=>acceso('registrar');
  if(window.MF_PREVIEW){$('#l-mail').value='demo@local';$('#l-pass').value='demo123';msg('#login-msg','Vista previa con datos de ejemplo (adaptador memoria).')}
- D.sesion().then(u=>u&&entrar(u)).catch(e=>msg('#login-msg',e.message));
+ if(!window.MF_PREVIEW&&hayRastroSesion()){$('#login').hidden=true;$('#app').hidden=false}
+ cargaChart().catch(()=>{});
+ D.sesion().then(u=>u?entrar(u):mostrarLogin()).catch(e=>{mostrarLogin();msg('#login-msg',e.message)});
 }
 async function acceso(m){try{msg('#login-msg','…');await entrar(await D[m]($('#l-mail').value.trim(),$('#l-pass').value))}catch(e){msg('#login-msg',e.message)}}
+const hayRastroSesion=()=>{try{return Object.keys(localStorage).some(k=>/^sb-.+-auth-token$/.test(k))}catch(e){return false}};
+const mostrarLogin=()=>{$('#app').hidden=true;$('#login').hidden=false};
+const cargaJS=u=>new Promise((ok,no)=>{const s=document.createElement('script');s.src=u;s.onload=ok;s.onerror=()=>no(new Error('No se pudo cargar '+u));document.head.appendChild(s)});
+const JSPDF='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+function cargaChart(){if(chartOK)return Promise.resolve();if(window.Chart){iniChart();chartOK=true;return Promise.resolve()}
+ return chartP||(chartP=cargaJS('https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js').then(()=>{iniChart();chartOK=true}).catch(e=>{chartP=null;throw e}))}
+const precargaPDF=()=>{if(!window.jspdf&&!pdfP)pdfP=cargaJS(JSPDF).catch(()=>{pdfP=null})};
+function aplicaDatos(d){movs=d.movs||[];custom=d.custom||[];plan=d.plan||[];pagos=d.pagos||[];plOk=d.plOk!==false;metas=d.metas||[];metOk=d.metOk!==false;if(d.nota!=null&&!notaTocada)$('#n-txt').value=d.nota}
+async function cargaTodo(){const P=f=>f().then(v=>[v,true],()=>[[],false]);
+ const[m,cu,pl,pg,mt,no]=await Promise.all([D.listar(),D.listarCats(),P(()=>D.listarPlan()),P(()=>D.listarPagos()),P(()=>D.listarMetas()),D.leerNota()]);
+ return{movs:m,custom:cu,plan:pl[0],pagos:pg[0],plOk:pl[1]&&pg[1],metas:mt[0],metOk:mt[1],nota:no}}
+const sigDatos=d=>JSON.stringify([d.movs,d.custom,d.plan,d.pagos,d.metas]);
+function primerPintado(){resetReg('');fs.anio=R.anioResumen(hoy(),movs);pintaTipos();armarCats();todo()}
 async function entrar(u){
- $('#login').hidden=true;$('#app').hidden=false;armarAtras();$('#who').textContent=u.email;userEmail=u.email;$('#c-mail').textContent=u.email;
- movs=await D.listar();custom=await D.listarCats();await cargaPlan();await cargaMetas();$('#n-txt').value=await D.leerNota();
- const a=R.aniosConDatos(movs),y=String(new Date().getFullYear());
- resetReg('');fs.anio=R.anioResumen(hoy(),movs);pintaTipos();armarCats();todo();
+ $('#login').hidden=true;$('#app').hidden=false;armarAtras();$('#who').textContent=u.email;userEmail=u.email;$('#c-mail').textContent=u.email;conectaRed();
+ let pintado=false;const c=D.leerCache?await D.leerCache():null;
+ if(c&&c.movs){aplicaDatos(c);ultSig=sigDatos(c);pintado=true;primerPintado()}   // pantalla al instante con lo guardado en el teléfono
+ try{const d=await cargaTodo(),s=sigDatos(d);aplicaDatos(d);if(!pintado)primerPintado();else if(s!==ultSig){armarCats();todo()}ultSig=s}
+ catch(e){if(!pintado){mostrarLogin();msg('#login-msg','No se pudieron cargar los datos: '+e.message)}}
 }
-function todo(){general();historial();pintaFil();renderRep();pintaPagos();pintaMetas();avisos()}
+function todo(){if(!$('#t-gen').hidden)general();historial();pintaFil();if(!$('#t-rep').hidden)renderRep();pintaPagos();pintaMetas();avisos()}
 /* ---------- General ---------- */
 let chg={};
 const gradBar=(c1,c2)=>q=>{const a=q.chart.chartArea;if(!a)return c1;const g=q.chart.ctx.createLinearGradient(a.left,0,a.right,0);g.addColorStop(0,c1);g.addColorStop(1,c2);return g};
@@ -36,7 +53,7 @@ const pctDona={id:'pctDona',afterDatasetsDraw(c,_a,o){if(!o||!o.on)return;const 
  m.data.forEach((a,i)=>{if(!d[i])return;const p=a.getCenterPoint();x.fillStyle=i?o.c1:o.c0;x.fillText(R.fmtPct(R.pct(d[i],s)),p.x,p.y)});x.restore()}};
 const rotulos2={id:'rotulos2',afterDatasetsDraw(c,_a,o){if(!o||!o.on)return;const x=c.ctx;x.save();x.fillStyle=o.color;x.font='600 '+o.size+'px system-ui,sans-serif';x.textBaseline='middle';x.textAlign='left';
  c.data.datasets.forEach((s,k)=>c.getDatasetMeta(k).data.forEach((b,i)=>{const v=s.data[i];if(v==null)return;x.fillText('Bs '+R.fmtCorto(v)+' · '+R.fmtPct(R.pct(v,k?o.s1:o.s0),0),b.x+6,b.y)}));x.restore()}};
-function general(){
+function general(){gTok++;
  Object.values(chg).forEach(c=>c.destroy());chg={};
  const y=R.anioResumen(hoy(),movs),l=movs.filter(m=>m.fecha.startsWith(y)),t=R.totales(l),c=R.porCategoria(l)[0],p=R.topProducto(l);
  $('#g-tit').textContent='Resumen del año '+y;
@@ -47,6 +64,7 @@ function general(){
  <div class="duo">${card('Ingresos vs. gastos (%)','g1')}${card('Las 3 categorías más fuertes de ingresos y de gastos','g2')}</div>
  <div class="card"><h3>Últimos movimientos</h3><ul class="list">${u.map(fila).join('')}</ul></div>
  <div class="go2"><button class="btn" data-go="reg">${Icons.svg('plus')}<span>Añadir registro</span></button><button class="btn ghost" data-go="his">${Icons.svg('list')}<span>Ver historial</span></button></div>`;
+ const tk=gTok,dib=()=>{if(tk!==gTok||$('#t-gen').hidden)return;
  TM=tema(true);Chart.defaults.color=TM.mu;Chart.defaults.font.size=chico()?13:12;
  const osc=matchMedia('(prefers-color-scheme:dark)').matches;
  const gi=TM.gi,gg=TM.gg,tot=t.ingresos+t.gastos;
@@ -57,6 +75,7 @@ function general(){
   {label:'Gastos',data:todos.map((x,i)=>i>=ti.length?x.total:null),backgroundColor:'#fe9900',borderRadius:10,borderSkipped:false,maxBarThickness:22}]},
   options:{color:TM.mu,indexAxis:'y',maintainAspectRatio:false,animation:false,layout:{padding:{right:chico()?100:124}},plugins:{fondo:false,legend:ley(),tooltip:{callbacks:{label:q=>' '+q.dataset.label+': '+F(q.parsed.x)}},neon:{on:false},rotulos2:{on:true,color:TM.tx,size:chico()?11:12,s0:t.ingresos,s1:t.gastos}},
    scales:{x:{...gy(),stacked:true,grid:{color:TM.bd,lineWidth:1,borderDash:[4,5],drawTicks:false}},y:{stacked:true,grid:{display:false},ticks:{callback(v){return recorta(this.getLabelForValue(v),chico()?16:28)}}}}}});
+};if(chartOK)dib();else cargaChart().then(dib).catch(()=>{});
 }
 /* ---------- Desplazamiento suave: muestra lo nuevo sin que el usuario tenga que bajar ---------- */
 const offTop=()=>(window.innerWidth<=760?72:16)+(!$('#t-rep').hidden&&$('#f-bar')?$('#f-bar').offsetHeight+8:0);
@@ -106,7 +125,7 @@ async function guardar(){
  if(!(monto>0))return alert('Ingresa un monto mayor a 0.');if(!st.fecha)return alert('Elige una fecha.');
  if(mesFijo&&!st.fecha.startsWith(mesFijo))return alert('La fecha no está en el mes fijado ('+R.etiquetaMes(mesFijo)+'). Elige un día de ese mes o quita el mes fijo.');
  try{movs.push(await D.agregar({tipo:st.tipo,monto,fecha:st.fecha,categoria:st.cat,subcategoria:st.sub||null,detalle:st.det||null,descripcion:st.desc.trim(),cantidad:cant>0?cant:1}));
-  resetReg('',`✔ ${st.tipo==='gasto'?'Gasto':'Ingreso'} registrado · ${R.fechaCorta(st.fecha)}`);todo();irArriba()}catch(e){alert('Error: '+e.message)}
+  resetReg('',`✔ ${st.tipo==='gasto'?'Gasto':'Ingreso'} registrado · ${R.fechaCorta(st.fecha)}${navigator.onLine===false?' (sin conexión: se sincronizará solo)':''}`);todo();irArriba()}catch(e){alert('Error: '+e.message)}
 }
 async function crearCat(){
  const n=$('#nc-n').value.trim(),subs=[...new Set($('#nc-s').value.split(/[,;\n]/).map(x=>x.trim()).filter(Boolean))].slice(0,15);
@@ -153,13 +172,13 @@ async function borrar(id){if(!confirm('¿Eliminar este movimiento?'))return;try{
 /* ---------- Pagos mensuales del año (0.12.0) ---------- */
 async function cargaPlan(){try{plan=await D.listarPlan();pagos=await D.listarPagos();plOk=true}catch(e){plan=[];pagos=[];plOk=false}}
 const FALTA='<li class="warn lab">Falta activar esta función en la base de datos (migración 003). Revisa las instrucciones de la actualización.</li>';
-const nivTxt={excedido:'Sobrepasado',cerca:'Cerca del límite',ok:'Dentro del presupuesto'},pgTxt={pagado:'✔ Completo',vencido:'Atrasado',pronto:'Sin margen',ok:'En curso'},MI=['E','F','M','A','M','J','J','A','S','O','N','D'];
+const nivTxt={excedido:'Sobrepasado',cerca:'Cerca del límite',ok:'Dentro del presupuesto'},pgTxt={pagado:'✔ Completo',atrasado:'Atrasado',aldia:'Al día'},MI=['E','F','M','A','M','J','J','A','S','O','N','D'];
 const anioPagos=()=>hoy().slice(0,4),mesesTxt=n=>n+(n===1?' mes':' meses');
 const ico=n=>`<span class="pr-ic" style="--ik:${Icons.col(n)}">${Icons.svg(n)}</span>`;
 const pgMeses=m=>`<div class="pg-m">${m.map((x,i)=>`<span class="${x?'on':''}" title="${R.MESES[i]}">${MI[i]}</span>`).join('')}</div>`;
-function pgFila(p,an,acc){const ruta=[p.categoria,p.subcategoria,p.detalle].filter(Boolean).map(esc).join(' › '),actual=an===anioPagos(),
- aviso=p.nivel==='vencido'&&actual?`Faltan ${p.faltan} pago${p.faltan===1?'':'s'} y solo quedan ${mesesTxt(p.restan)}.`:p.nivel==='pronto'?`Debes pagar todos los meses que quedan (${p.restan}).`:p.nivel==='vencido'?`Gestión cerrada con ${p.faltan} pago${p.faltan===1?'':'s'} pendiente${p.faltan===1?'':'s'}.`:'';
- return `<li class="pg-it pg-${p.nivel}"><div><b>${esc(p.nombre)}</b> <small class="badge nv-${p.nivel}">${pgTxt[p.nivel]}</small><small>${ruta}</small><div class="pg-cnt"><b>${p.hechos}/${p.pagos_anio}</b> pagos realizados en la gestión ${esc(an)}${p.lograda?'':' · faltan '+p.faltan}</div><div class="bar"><i style="width:${p.pct}%"></i></div>${pgMeses(p.meses)}${aviso?`<small class="${p.nivel==='vencido'?'warn':''}">${aviso}</small>`:''}</div><div>${acc?`${p.pagadoMes?'':`<button class="btn sm" data-pp="${esc(p.id)}">Registrar pago</button>`}<button class="edt" data-pe="${esc(p.id)}" title="Editar" aria-label="Editar">${Icons.svg('pencil')}</button><button class="del" data-pd="${esc(p.id)}" title="Quitar" aria-label="Quitar">${Icons.svg('trash')}</button>`:''}</div></li>`}
+const pgEstado=(p,an)=>R.textoPago(p,an,anioPagos());
+function pgFila(p,an,acc){const ruta=[p.categoria,p.subcategoria,p.detalle].filter(Boolean).map(esc).join(' › '),e=pgEstado(p,an);
+ return `<li class="pg-it pg-${p.nivel}"><div><b>${esc(p.nombre)}</b> <small class="badge nv-${p.nivel}">${pgTxt[p.nivel]}</small><small>${ruta}</small><div class="pg-cnt"><b>${p.hechos}/${p.pagos_anio}</b> pagos realizados en la gestión ${esc(an)}</div><div class="bar"><i style="width:${p.pct}%"></i></div>${pgMeses(p.meses)}<small class="${e.cl}">${e.ic} ${esc(e.est)}${e.resto?', '+esc(e.resto):''}</small></div><div>${acc?`${p.pagadoMes?'':`<button class="btn sm" data-pp="${esc(p.id)}">Registrar pago</button>`}<button class="edt" data-pe="${esc(p.id)}" title="Editar" aria-label="Editar">${Icons.svg('pencil')}</button><button class="del" data-pd="${esc(p.id)}" title="Quitar" aria-label="Quitar">${Icons.svg('trash')}</button>`:''}</div></li>`}
 function pintaPagos(){const el=$('#pg-list'),an=anioPagos();$('#pg-anio').textContent='('+an+')';$('#pg-add').hidden=!plOk;
  if(!plOk){el.innerHTML=FALTA;return}
  const ps=R.estadoPagos(movs,pagos,an,hoy());
@@ -181,11 +200,13 @@ async function borrarPg(id){if(!confirm('¿Quitar este pago mensual? Los gastos 
 async function pagarPg(id){const p=pagos.find(x=>x.id===id);if(!p)return;const v=prompt('Monto pagado de «'+p.nombre+'» (Bs):','');if(v===null||String(v).trim()==='')return;
  const mo=Math.round(parseFloat(String(v).replace(',','.'))*100)/100;if(!(mo>0))return alert('Monto no válido.');
  try{movs.push(await D.agregar({tipo:'gasto',monto:mo,fecha:hoy(),categoria:p.categoria,subcategoria:p.subcategoria||null,detalle:p.detalle||null,descripcion:p.nombre,cantidad:1}));todo()}catch(e){alert('Error: '+e.message)}}
-function avisos(){const el=$('#g-av');if(!plOk){el.innerHTML='';return}const hy=hoy(),mes=hy.slice(0,7),
+function avisos(){const el=$('#g-av');if(!plOk){el.innerHTML='';return}const hy=hoy(),mes=hy.slice(0,7),an0=hy.slice(0,4),
  an=R.analisisPresupuesto(R.presupuestoReal(movs.filter(m=>m.fecha.startsWith(mes)),mes+'-01',mes+'-'+p2(R.matrizMes(mes).n)),plan),pe=an.filas.filter(f=>f.nivel!=='ok'),
- pg=R.estadoPagos(movs,pagos,hy.slice(0,4),hy).filter(x=>!x.lograda&&(x.nivel==='vencido'||x.nivel==='pronto'||(x.pagos_anio===12&&!x.pagadoMes&&+hy.slice(8,10)>=25)));
+ pg=R.estadoPagos(movs,pagos,an0,hy).filter(x=>!x.lograda);
  if(!pe.length&&!pg.length){el.innerHTML='';return}
- el.innerHTML=`<div class="card av"><h3>🔔 Avisos</h3><ul class="list">${pe.map(f=>`<li><span>${f.nivel==='excedido'?'⚠':'🟠'} <b>${esc(f.cat)}</b>: llevas ${F(f.real)} de ${F(f.asignado)} este mes (${R.fmtPct(f.pct,0)})${f.nivel==='excedido'?' · superaste el presupuesto por '+F(-f.dif):''}</span></li>`).join('')}${pg.map(x=>`<li><span>${x.nivel==='vencido'?'⛔':'⏰'} <b>${esc(x.nombre)}</b>: ${x.hechos}/${x.pagos_anio} pagos${x.nivel==='vencido'?' · atrasado: faltan '+x.faltan+' y quedan '+mesesTxt(x.restan):x.nivel==='pronto'?' · debes pagar todos los meses que quedan':' · aún sin pago este mes'}</span></li>`).join('')}</ul><button class="btn ghost sm" data-go="his">Ver pagos mensuales</button></div>`}
+ const lp=pg.map(x=>{const e=pgEstado(x,an0);return `<li><span>⏰ <b>${esc(x.nombre)}</b>: ${x.hechos}/${x.pagos_anio} pagos · <span class="${e.cl}">${esc(e.est)} ${e.ic}</span>, ${esc(e.resto)}</span></li>`}).join(''),
+  lpr=pe.map(f=>{const ex=f.nivel==='excedido';return `<li><span>⏰ <b>${esc(f.cat)}</b>: ${F(f.real)} de ${F(f.asignado)} este mes (${R.fmtPct(f.pct,0)}) · <span class="${ex?'warn':'nv-cerca'}">${ex?'excedido por '+F(-f.dif)+' ⚠️':'cerca del límite 🟠'}</span>, ${ex?'ya superaste el presupuesto asignado.':'te quedan '+F(f.dif)+' de lo asignado.'}</span></li>`}).join('');
+ el.innerHTML=`<div class="card av"><h3>🔔 Avisos</h3><ul class="list">${lp}${lpr}</ul><button class="btn ghost sm" data-go="his">Ver pagos mensuales</button></div>`}
 /* ---------- Metas de ahorro ---------- */
 async function cargaMetas(){try{metas=await D.listarMetas();metOk=true}catch(e){metas=[];metOk=false}}
 function pintaMetas(){$('#mt-form').hidden=!metOk;
@@ -268,8 +289,8 @@ const tema=fo=>{const osc=fo||(!PDFM&&matchMedia('(prefers-color-scheme:dark)').
  return osc?{mu:'#dbe1ff',tx:'#f4f6ff',bd:'rgba(200,210,255,.14)',c:cv,gastos:'#c75bff',ingresos:'#00f8ff',osc,gi:['#00f8ff','#3b82ff'],gg:['#c75bff','#ff4fd8'],gb:['#4254FF','#00C0F5'],okc:'#22c55e',rampa:['#2AFAE9','#00C0F5','#4254FF','#8708E8','#D604FF','#fe9900']}:{mu:'#3b4466',tx:'#0b1130',bd:'rgba(11,17,48,.10)',c:PDFM?'#ffffff':cv,gastos:'#9a17dc',ingresos:'#0a86a8',osc,gi:['#0a86a8','#2563eb'],gg:['#9a17dc','#d6249f'],gb:['#3848DA','#02A1D2'],okc:'#16a34a',rampa:['#24D0C8','#02A1D2','#3848DA','#710AC7','#B206DA','#e07b00']}};
 let TM=tema();
 const DPR0=()=>Math.max(2,window.devicePixelRatio||1);
-if(window.Chart){Chart.defaults.devicePixelRatio=DPR0();Chart.defaults.font.family='system-ui,-apple-system,"Segoe UI",Roboto,sans-serif'}
-if(window.Chart)Chart.register({id:'fondo',beforeDraw(c){const x=c.ctx;x.save();x.globalCompositeOperation='destination-over';x.fillStyle=TM.c;x.fillRect(0,0,c.width,c.height);x.restore()}});
+function iniChart(){Chart.defaults.devicePixelRatio=DPR0();Chart.defaults.font.family='system-ui,-apple-system,"Segoe UI",Roboto,sans-serif';
+ Chart.register({id:'fondo',beforeDraw(c){const x=c.ctx;x.save();x.globalCompositeOperation='destination-over';x.fillStyle=TM.c;x.fillRect(0,0,c.width,c.height);x.restore()}})}
 const rotulos={id:'rotulos',afterDatasetsDraw(c,_a,o){if(!o||!o.on)return;const x=c.ctx,m=c.getDatasetMeta(0),d=c.data.datasets[0].data;x.save();x.fillStyle=o.color;x.font='600 '+o.size+'px system-ui,sans-serif';x.textBaseline='middle';x.textAlign='left';
  m.data.forEach((b,i)=>x.fillText('Bs '+R.fmtCorto(d[i])+' · '+R.fmtPct(R.pct(d[i],o.suma),0),b.x+6,b.y));x.restore()}};
 const ley=()=>({position:'bottom',labels:{usePointStyle:true,pointStyle:'circle',boxWidth:7,boxHeight:7,padding:16,color:TM.mu}});
@@ -286,7 +307,10 @@ const lineEvo=(id,s,keys)=>new Chart($(id),{type:'line',data:{labels:s.map(x=>x.
 const badge=v=>`<small class="badge">${{sube:'↗ en aumento',baja:'↘ en descenso',estable:'→ estable'}[R.tendencia(v).dir]}</small>`;
 const card=(h,id,hl,ht)=>`<div class="card${hl?' hl':''}"><h3>${h}</h3><div class="cv"${ht?` style="height:${ht}px"`:''}><canvas id="${id}"></canvas></div></div>`;
 const sub=t=>`<span class="sub">${t}</span>`;
-function renderRep(){
+function renderRep(){if(chartOK)return renderRep0();
+ if(!$('#t-rep').hidden)$('#rep-out').innerHTML='<div class="card vacio"><b>Cargando gráficos…</b></div>';
+ cargaChart().then(()=>{if(!$('#t-rep').hidden)renderRep0()}).catch(()=>{$('#rep-out').innerHTML='<div class="card vacio warn"><b>No se pudo cargar la librería de gráficos.</b><span class="muted">Necesita internet la primera vez. Revisa tu conexión y vuelve a entrar a Reportes.</span></div>'})}
+function renderRep0(){
  const f=filtros(),o=$('#rep-out'),fm=$('#f-msg'),mal=f.desde&&f.hasta&&f.desde>f.hasta;Object.values(ch).forEach(c=>c.destroy());ch={};
  fm.hidden=!mal;fm.textContent=mal?'La fecha «Desde» es posterior a «Hasta». Corrígela para ver el reporte.':'';if(mal){o.innerHTML='';return}
  $('#pdf').hidden=!tipoR||(tipoR==='vs'&&!vsSel.length);
@@ -418,14 +442,14 @@ function pdfGastos(){const f=filtros(),l=R.filtrar(movs,f);if(!l.length)return a
  try{renderRep();pags=vsInfo.filter(x=>!x.vacio).map(componer)}finally{PDFM=false;Chart.defaults.devicePixelRatio=DPR0();renderRep()}
  if(!pags.length)return alert('No hay datos para exportar.');
  const tp=soloTipo();PDF.generarBloques({titulo:tp==='gasto'?'Gastos por categoria':tp==='ingreso'?'Ingresos por categoria':'Gastos vs Ingresos',archivo:tp==='gasto'?'reporte-gastos.pdf':tp==='ingreso'?'reporte-ingresos.pdf':'reporte-gastos-vs-ingresos.pdf',periodo:'Periodo: '+R.fechaCorta(a)+' a '+R.fechaCorta(b),paginas:pags})}
-function pdf(){if(!tipoR)return alert('Elige un tipo de reporte.');if(tipoR==='presupuesto')return pdfPres();if(tipoR==='vs'&&vsSel.length)return pdfGastos();const f=filtros();let l0=R.filtrar(movs,f);if(tipoR==='vs')l0=R.enSeleccion(l0,vsSel);const l=R.ordenar(l0);if(!l.length)return alert('No hay datos para exportar.');const[a,b]=R.rango(f,l,hoy());let imgs=[];
+function pdf(){if(!window.jspdf){cargaJS(JSPDF).then(()=>pdf()).catch(()=>alert('No se pudo cargar la librería de PDF. Necesita internet la primera vez que la usas.'));return}if(!tipoR)return alert('Elige un tipo de reporte.');if(tipoR==='presupuesto')return pdfPres();if(tipoR==='vs'&&vsSel.length)return pdfGastos();const f=filtros();let l0=R.filtrar(movs,f);if(tipoR==='vs')l0=R.enSeleccion(l0,vsSel);const l=R.ordenar(l0);if(!l.length)return alert('No hay datos para exportar.');const[a,b]=R.rango(f,l,hoy());let imgs=[];
  PDFM=true;Chart.defaults.devicePixelRatio=3;
  try{renderRep();imgs=Object.values(ch).slice(0,tipoR==='vs'?40:2).map(x=>({img:x.toBase64Image('image/png',1),w:x.canvas.width,h:x.canvas.height}))}finally{PDFM=false;Chart.defaults.devicePixelRatio=DPR0();renderRep()}
  if(imgs.length<2)return alert('No hay datos para exportar.');
  PDF.generar({rango:`Periodo: ${a} a ${b}`,tot:R.totales(l,a,b),porCat:R.porCategoria(l),filas:l,imgs})}
 /* ---------- Notas ---------- */
 function crece(){const t=$('#n-txt');if(!t.offsetParent)return;t.style.height='auto';t.style.height=t.scrollHeight+'px'}
-let tm;function nota(){crece();msg('#n-st','Guardando…');clearTimeout(tm);tm=setTimeout(async()=>{try{await D.guardarNota($('#n-txt').value);msg('#n-st','Guardado ✔')}catch(e){msg('#n-st','Error: '+e.message)}},800)}
+let tm;function nota(){notaTocada=true;crece();msg('#n-st','Guardando…');clearTimeout(tm);tm=setTimeout(async()=>{try{await D.guardarNota($('#n-txt').value);msg('#n-st','Guardado ✔')}catch(e){msg('#n-st','Error: '+e.message)}},800)}
 async function importar(file){try{const j=JSON.parse(await file.text()),nuevos=R.paraImportar(movs,j.movimientos);
  if(!confirm(`Se importarán ${nuevos.length} movimientos nuevos (los duplicados se omiten). ¿Continuar?`))return;
  let n=0;for(const m of nuevos){movs.push(await D.agregar(m));msg('#c-st',`Importando ${++n}/${nuevos.length}…`)}
@@ -484,6 +508,23 @@ const kResp=()=>'ar_resp_'+userEmail;
 function estadoResp(){let f=null;try{f=localStorage.getItem(kResp())}catch(e){}const el=$('#c-resp');
  if(!f){el.textContent='Aún no has hecho un respaldo desde este dispositivo.';el.className='warn';return}
  const n=R.diasEntre(f,hoy());el.textContent='Último respaldo: '+R.fechaCorta(f)+' (hace '+n+(n===1?' día':' días')+')';el.className=n>14?'warn':'muted'}
+/* ---------- Conexión y sincronización (0.14.0) ---------- */
+let netOn=false,netT=0;
+function conectaRed(){if(netOn||!D.alCambiar)return;netOn=true;D.alCambiar(pintaNet);
+ D.alSincronizar(async()=>{try{const d=await cargaTodo();aplicaDatos(d);ultSig=sigDatos(d);todo()}catch(e){}const el=$('#net');clearTimeout(netT);el.className='listo';el.textContent='✔ Todo sincronizado';el.hidden=false;netT=setTimeout(()=>{el.hidden=true},3500)});
+ pintaNet(D.estado())}
+function pintaNet(s){const el=$('#net'),p=s.pendientes,f=s.fallos.length,pl=n=>n+' cambio'+(n===1?'':'s');clearTimeout(netT);let h='';el.className='';
+ if(f)h=`⚠️ ${f} cambio${f===1?'':'s'} no se pudo sincronizar (${esc(s.fallos[0].msg)}). <button class="btn ghost sm" data-net="fallos" type="button">Entendido</button>`;
+ else if(!s.online)h=`📴 Sin conexión · puedes seguir registrando${p?' ('+pl(p)+' pendiente'+(p===1?'':'s')+')':''}. Se sincroniza solo al volver internet.`;
+ else if(s.sincronizando){el.className='sync';h=`🔄 Sincronizando ${pl(p)}…`}
+ else if(p)h=`⏳ ${pl(p)} por sincronizar. <button class="btn ghost sm" data-net="sync" type="button">Reintentar</button>`;
+ else{el.hidden=true;return}
+ el.innerHTML=h;el.hidden=false}
+function registraSW(){if(!('serviceWorker' in navigator)||(window.MF_PREVIEW&&!window.MF_SW_TEST)||location.protocol==='file:')return;
+ const tenia=!!navigator.serviceWorker.controller;
+ navigator.serviceWorker.addEventListener('controllerchange',()=>{if(tenia)$('#upd').hidden=false});
+ const ir=()=>navigator.serviceWorker.register('sw.js').catch(()=>{});
+ if(document.readyState==='complete')ir();else window.addEventListener('load',ir)}
 /* ---------- Botón Atrás del móvil (0.13.2) ---------- */
 const pila=[];let trap=false,saliendo=false;
 const tabAct=()=>{const m=$('.mi.on');return m?m.dataset.t:'gen'};
@@ -502,7 +543,7 @@ function atras(){
  if(t!=='gen'){menu('gen',true);return true}
  return false}
 /* ---------- Eventos ---------- */
-function menu(t,sp){const cur=$('.mi.on');if(!cur||cur.dataset.t!==t){window.scrollTo(0,0);if(!sp&&cur){pila.push(cur.dataset.t);if(pila.length>30)pila.shift()}}$$('.mi').forEach(x=>x.classList.toggle('on',x.dataset.t===t));$$('.tab').forEach(s=>s.hidden=s.id!=='t-'+t);$('#side').classList.remove('open');$('#scrim').classList.remove('on');if(t==='rep')renderRep();if(t==='gen')general();if(t==='cfg')pintaCfg();if(t==='his')crece()}
+function menu(t,sp){const cur=$('.mi.on');if(!cur||cur.dataset.t!==t){window.scrollTo(0,0);if(!sp&&cur){pila.push(cur.dataset.t);if(pila.length>30)pila.shift()}}$$('.mi').forEach(x=>x.classList.toggle('on',x.dataset.t===t));$$('.tab').forEach(s=>s.hidden=s.id!=='t-'+t);$('#side').classList.remove('open');$('#scrim').classList.remove('on');if(t==='rep'){renderRep();precargaPDF()}if(t==='gen')general();if(t==='cfg')pintaCfg();if(t==='his')crece()}
 document.addEventListener('DOMContentLoaded',()=>{
  document.addEventListener('pointerdown',()=>{if(!$('#app').hidden)armarAtras()});
  window.addEventListener('popstate',()=>{if(saliendo||$('#app').hidden)return;trap=false;
@@ -562,6 +603,7 @@ document.addEventListener('DOMContentLoaded',()=>{
  $('#c-pwb').onclick=async()=>{const a=$('#c-pw').value,b=$('#c-pw2').value,m=$('#c-pwm'),bad=t=>{m.className='warn lab';m.textContent=t};
   if(a.length<6)return bad('La contraseña debe tener al menos 6 caracteres.');if(a!==b)return bad('Las contraseñas no coinciden.');
   try{await D.cambiarClave(a);$('#c-pw').value=$('#c-pw2').value='';m.className='ok lab';m.textContent='✔ Contraseña cambiada.'}catch(e){bad('Error: '+e.message)}};
- $('#out').onclick=$('#c-out').onclick=async()=>{await D.salir();location.reload()};iniciar();
+ $('#net').onclick=e=>{const b=e.target.closest('[data-net]');if(!b)return;if(b.dataset.net==='sync')D.sincronizar();else D.descartarFallos()};$('#upd-b').onclick=()=>location.reload();
+ $('#out').onclick=$('#c-out').onclick=async()=>{const s=D.estado?D.estado():null;if(s&&s.pendientes&&!confirm('Tienes '+s.pendientes+' cambio(s) sin sincronizar. Si sales ahora se perderán. ¿Salir de todos modos?'))return;try{await D.salir()}catch(e){}location.reload()};iniciar();registraSW();
 });
 })();

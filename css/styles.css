@@ -323,3 +323,13 @@ label.pr-row{flex-direction:row;align-items:center;justify-content:space-between
 .pr-ic{width:42px;height:42px;border-radius:50%;border:2px solid var(--ac);display:inline-grid;place-items:center;color:var(--ik,var(--ac));flex:none}
 .pr-ic svg{width:22px;height:22px}
 .pr-subl .pr-ic,label.pr-row.s .pr-ic{width:34px;height:34px;border-width:2px}.pr-subl .pr-ic svg,label.pr-row.s .pr-ic svg{width:18px;height:18px}
+
+/* ---- 0.14.0 Conexión, versión nueva y avisos de pagos ---- */
+#net,#upd{position:sticky;top:8px;z-index:14;display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;padding:9px 14px;margin:0 0 10px;border-radius:12px;border:1.5px solid #fe9900;background:var(--c);color:var(--tx);font-size:.92rem;font-weight:600;text-align:center;box-shadow:0 6px 18px rgba(0,0,0,.14)}
+#net.sync,#upd{border-color:var(--ac)}#net.listo{border-color:var(--ing)}
+@media(max-width:760px){#net,#upd{top:58px}}
+@media(min-width:761px){#app.colapsado #net,#app.colapsado #upd{margin-left:52px}}
+.nv-atrasado{color:var(--gas);border-color:var(--gas)}.nv-aldia{color:var(--ing);border-color:var(--ing)}
+.pg-atrasado .bar i{background:var(--gas)}.pg-aldia .bar i{background:var(--ing)}
+.list small.ok{color:var(--ing)}.list small.warn{color:var(--gas)}
+.av .list li span.warn{color:var(--gas);font-weight:700}.av .list li span.ok{color:var(--ing);font-weight:700}
