@@ -1,4 +1,8 @@
 # Changelog
+## 0.13.2
+- Móvil: el botón «Atrás» del teléfono ya no saca de la app de golpe. Cada pulsación da un paso atrás dentro de la app: cierra la ventana abierta (calendario, editar, pagos) o el menú ☰; en Registrar y Reportes deshace el último nivel elegido (detalle → subcategoría → categoría → tipo); y luego vuelve a la pestaña anterior hasta llegar a General. Solo estando en General, un «Atrás» más sale de la app. Sin mensajes.
+- Animaciones de los iconos (Registrar y Reportes): casi el doble de rápidas (se esconden/aparecen en ~0,2 s en vez de ~0,4 s). Mismo efecto, solo más veloz.
+- Sin cambios en la base de datos.
 ## 0.13.1
 - Reportes › Presupuesto: los iconos de categorías y subcategorías ahora tienen el mismo tamaño y estilo que los de «Gastos vs Ingresos», Gastos e Ingresos (círculo de 42 px con icono de 22 px; en subcategorías 34 px / 18 px). Mismos dibujos y colores que el resto de la app. Solo CSS; sin cambios en la base de datos.
 ## 0.13.0

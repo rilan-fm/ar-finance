@@ -1,6 +1,6 @@
 (function(){
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],R=Reports,esc=R.esc,F=R.fmt;
-const VERSION='0.13.1';
+const VERSION='0.13.2';
 let D,movs=[],custom=[],plan=[],pagos=[],metas=[],plOk=false,metOk=false,ch={},st,userEmail='';
 const NUEVA='Nueva categoría',hoy=()=>new Date().toLocaleDateString('sv');
 const tree=()=>R.GASTO.concat(custom.map(c=>({n:c.nombre,s:c.subs||[],d:{},id:c.id})));
@@ -19,7 +19,7 @@ function iniciar(){
 }
 async function acceso(m){try{msg('#login-msg','…');await entrar(await D[m]($('#l-mail').value.trim(),$('#l-pass').value))}catch(e){msg('#login-msg',e.message)}}
 async function entrar(u){
- $('#login').hidden=true;$('#app').hidden=false;$('#who').textContent=u.email;userEmail=u.email;$('#c-mail').textContent=u.email;
+ $('#login').hidden=true;$('#app').hidden=false;armarAtras();$('#who').textContent=u.email;userEmail=u.email;$('#c-mail').textContent=u.email;
  movs=await D.listar();custom=await D.listarCats();await cargaPlan();await cargaMetas();$('#n-txt').value=await D.leerNota();
  const a=R.aniosConDatos(movs),y=String(new Date().getFullYear());
  resetReg('');fs.anio=R.anioResumen(hoy(),movs);pintaTipos();armarCats();todo();
@@ -81,7 +81,7 @@ const fechaInicial=()=>mesFijo?R.fechaEnMes(mesFijo,diaFijo):hoy();
 function behind(t,cb){if(busy)return;busy=true;const r=t.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;
  [...t.parentElement.children].forEach(x=>{if(x===t)return x.classList.add('zoom');const q=x.getBoundingClientRect();
   x.style.setProperty('--dx',cx-(q.left+q.width/2)+'px');x.style.setProperty('--dy',cy-(q.top+q.height/2)+'px');x.classList.add('away')});
- setTimeout(()=>{busy=false;cb()},400)}
+ setTimeout(()=>{busy=false;cb()},220)}
 function drawReg(sc){
  const g=st.tipo==='gasto',a=st.a;st.a='';
  const colTipo=(t,n)=>`<div class="tipo-col ${t==='ingreso'?'ing':'gas'}${st.tipo===t?' on':''}"><button type="button" class="ill-btn" data-tipo="${t}" tabindex="-1" aria-hidden="true">${Icons.hero(t)}</button><button type="button" class="btn-tipo${st.tipo===t?' on':''}" data-tipo="${t}">${n}</button></div>`;
@@ -484,9 +484,29 @@ const kResp=()=>'ar_resp_'+userEmail;
 function estadoResp(){let f=null;try{f=localStorage.getItem(kResp())}catch(e){}const el=$('#c-resp');
  if(!f){el.textContent='Aún no has hecho un respaldo desde este dispositivo.';el.className='warn';return}
  const n=R.diasEntre(f,hoy());el.textContent='Último respaldo: '+R.fechaCorta(f)+' (hace '+n+(n===1?' día':' días')+')';el.className=n>14?'warn':'muted'}
+/* ---------- Botón Atrás del móvil (0.13.2) ---------- */
+const pila=[];let trap=false,saliendo=false;
+const tabAct=()=>{const m=$('.mi.on');return m?m.dataset.t:'gen'};
+function armarAtras(){if(trap)return;try{history.pushState({ar:1},'');trap=true}catch(e){}}
+function atras(){
+ if(cal){cerrarCal();return true}
+ if(ed){cerrarEd();return true}
+ if(pgE){cerrarPg();return true}
+ if($('#side').classList.contains('open')){$('#side').classList.remove('open');$('#scrim').classList.remove('on');return true}
+ const t=tabAct();
+ if(t==='reg'&&st&&st.tipo){if(st.det)st.det='';else if(st.sub)st.sub=st.det='';else if(st.cat)st.cat=st.sub=st.det='';else{resetReg('');irArriba();return true}drawReg(1);return true}
+ if(t==='rep'){if(fopen){fopen='';pintaFil();return true}
+  if(rs.det||rs.sub||rs.cat){if(rs.det)rs.det='';else if(rs.sub)rs.sub=rs.det='';else rs.cat=rs.sub=rs.det='';armarCats();renderRep();return true}
+  if(tipoR){tipoR='';rs={cat:'',sub:'',det:'',a:''};pintaTipos();armarCats();renderRep();return true}}
+ if(pila.length){menu(pila.pop(),true);return true}
+ if(t!=='gen'){menu('gen',true);return true}
+ return false}
 /* ---------- Eventos ---------- */
-function menu(t){const cur=$('.mi.on');if(!cur||cur.dataset.t!==t)window.scrollTo(0,0);$$('.mi').forEach(x=>x.classList.toggle('on',x.dataset.t===t));$$('.tab').forEach(s=>s.hidden=s.id!=='t-'+t);$('#side').classList.remove('open');$('#scrim').classList.remove('on');if(t==='rep')renderRep();if(t==='gen')general();if(t==='cfg')pintaCfg();if(t==='his')crece()}
+function menu(t,sp){const cur=$('.mi.on');if(!cur||cur.dataset.t!==t){window.scrollTo(0,0);if(!sp&&cur){pila.push(cur.dataset.t);if(pila.length>30)pila.shift()}}$$('.mi').forEach(x=>x.classList.toggle('on',x.dataset.t===t));$$('.tab').forEach(s=>s.hidden=s.id!=='t-'+t);$('#side').classList.remove('open');$('#scrim').classList.remove('on');if(t==='rep')renderRep();if(t==='gen')general();if(t==='cfg')pintaCfg();if(t==='his')crece()}
 document.addEventListener('DOMContentLoaded',()=>{
+ document.addEventListener('pointerdown',()=>{if(!$('#app').hidden)armarAtras()});
+ window.addEventListener('popstate',()=>{if(saliendo||$('#app').hidden)return;trap=false;
+  if(atras()){armarAtras()}else{saliendo=true;history.back()}});
  $$('.mi').forEach(b=>{b.insertAdjacentHTML('afterbegin','<span class="mi-ic">'+Icons.svg(b.dataset.ic)+'</span>');b.onclick=()=>menu(b.dataset.t)});
  const app=$('#app'),setMenu=o=>{app.classList.toggle('colapsado',!o);try{localStorage.setItem('ar_menu',o?'1':'0')}catch(e){}window.dispatchEvent(new Event('resize'))};
  try{if(localStorage.getItem('ar_menu')==='0')app.classList.add('colapsado')}catch(e){}
