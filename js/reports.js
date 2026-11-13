@@ -182,6 +182,9 @@ function libroExcel(EJS,l,hoy){const wb=new EJS.Workbook();wb.creator='Ar_Financ
  [['gasto','Gastos por categoría'],['ingreso','Ingresos por categoría']].forEach(([t,tit])=>{const pc=porCategoria(l,t),tot=pc.reduce((s,c)=>s+c.total,0);
   tabla(tit,['Categoría','Total (Bs)','% del total'],pc.map(c=>()=>[c.cat,c.total,tot?c.total/tot:0]),[null,mn,'0.0%'],['B','C'])});
  return wb}
-const api={textoPago,mesesLista,filasExport,libroExcel,mesesEquiv,presupuestoReal,planEfectivo,nivelPres,analisisPresupuesto,proyeccionMes,estadoPagos,matrizMes,sumaMes,fechaEnMes,difPorSubcat,mesesEntre,unidadProm,promedioFlex,porSubcat,masFrecuente,estadoMetas,estadoPresupuestos,estadoRecurrentes,ordenarReg,bloquesVs,enSeleccion,diasEntre,anioResumen,pct,fmtPct,fmtCorto,fechaCorta,mesCorto,periodoRapido,validarFilas,norm,paraImportar,MESES,rango,granularidad,serie,tendencia,frecuentes,GASTO,INGRESO,esc,fmt,etiquetaMes,dias,ordenar,filtrar,mesesConDatos,aniosConDatos,totales,porCategoria,porSub,porMes,topProducto};
+const fotoValida=x=>typeof x==='string'&&x.length<400000&&/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+\/=]+$/.test(x);
+const aliasLimpio=x=>String(x==null?'':x).replace(/[\u0000-\u001f]/g,' ').replace(/\s+/g,' ').trim().slice(0,24);
+const temaValido=x=>x==='claro'||x==='oscuro'?x:'auto';
+const api={fotoValida,aliasLimpio,temaValido,textoPago,mesesLista,filasExport,libroExcel,mesesEquiv,presupuestoReal,planEfectivo,nivelPres,analisisPresupuesto,proyeccionMes,estadoPagos,matrizMes,sumaMes,fechaEnMes,difPorSubcat,mesesEntre,unidadProm,promedioFlex,porSubcat,masFrecuente,estadoMetas,estadoPresupuestos,estadoRecurrentes,ordenarReg,bloquesVs,enSeleccion,diasEntre,anioResumen,pct,fmtPct,fmtCorto,fechaCorta,mesCorto,periodoRapido,validarFilas,norm,paraImportar,MESES,rango,granularidad,serie,tendencia,frecuentes,GASTO,INGRESO,esc,fmt,etiquetaMes,dias,ordenar,filtrar,mesesConDatos,aniosConDatos,totales,porCategoria,porSub,porMes,topProducto};
 if(typeof module!=='undefined')module.exports=api;else root.Reports=api;
 })(typeof window!=='undefined'?window:globalThis);

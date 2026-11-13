@@ -1,6 +1,6 @@
 // Service worker de Ar_Finance: guarda la app en el teléfono para que abra al instante y funcione sin internet.
 // Los DATOS no pasan por aquí (los guarda data.js). Subir V en cada versión, igual que ?v= en index.html.
-const V='0.14.2',SHELL='ar-shell-'+V,CDN='ar-cdn';
+const V='0.15.0',SHELL='ar-shell-'+V,CDN='ar-cdn';
 const LOCAL=['./','index.html','css/styles.css?v='+V,'js/config.js','js/data.js?v='+V,'js/reports.js?v='+V,'js/icons.js?v='+V,'js/pdf.js?v='+V,'js/app.js?v='+V,'manifest.webmanifest','icons/icon-192.png','icons/icon-512.png','img/logo-full-dark.png','img/logo-full-light.png'];
 const LIBS=['https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js','https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js','https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'];
 const HOSTS=['cdn.jsdelivr.net','cdnjs.cloudflare.com'];

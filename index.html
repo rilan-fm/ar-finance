@@ -2,11 +2,12 @@
 <html lang="es"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Ar_Finance</title><meta name="theme-color" content="#0b1130">
+<script>(function(){var d=document.documentElement;try{var t=localStorage.getItem("ar_tema")||"auto";d.dataset.tema=(t==="oscuro"||(t!=="claro"&&matchMedia("(prefers-color-scheme:dark)").matches))?"dark":"light"}catch(e){d.dataset.tema="light"}})()</script>
 <link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icons/icon-192.png"><link rel="apple-touch-icon" href="icons/icon-192.png"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-<link rel="stylesheet" href="css/styles.css?v=0.14.2">
+<link rel="stylesheet" href="css/styles.css?v=0.15.0">
 </head><body>
 <section id="login" class="card login">
-  <picture><source media="(prefers-color-scheme:dark)" srcset="img/logo-full-dark.png"><img src="img/logo-full-light.png" alt="Ar_Finance" class="logo-l"></picture>
+  <span class="lgw"><img class="logo-l lg-l" src="img/logo-full-light.png" alt="Ar_Finance"><img class="logo-l lg-d" src="img/logo-full-dark.png" alt="" aria-hidden="true"></span>
   <input id="l-mail" type="email" placeholder="Correo" autocomplete="username">
   <input id="l-pass" type="password" placeholder="Contraseña" autocomplete="current-password">
   <button id="l-in" class="btn">Entrar</button>
@@ -14,14 +15,15 @@
   <p id="login-msg" class="muted"></p>
 </section>
 <div id="app" hidden>
-<div class="top"><button id="burger" class="btn ghost sm">☰</button><picture><source media="(prefers-color-scheme:dark)" srcset="img/logo-full-dark.png"><img src="img/logo-full-light.png" alt="Ar_Finance" height="38"></picture></div>
+<div class="top"><button id="burger" class="btn ghost sm">☰</button><span class="lgw"><img class="lg-l" src="img/logo-full-light.png" alt="Ar_Finance" height="38"><img class="lg-d" src="img/logo-full-dark.png" alt="" aria-hidden="true" height="38"></span><button type="button" class="pf-btn pf-open" aria-haspopup="menu" aria-expanded="false" aria-label="Abrir menú de perfil"><span class="pf-nm"></span><span class="pf-av" aria-hidden="true"></span></button></div>
 <div id="scrim"></div>
 <aside id="side">
-  <div class="sb-top"><picture><source media="(prefers-color-scheme:dark)" srcset="img/logo-full-dark.png"><img src="img/logo-full-light.png" alt="Ar_Finance" class="logo"></picture><button id="sb-hide" class="sb-tg" title="Ocultar menú" aria-label="Ocultar menú">‹</button></div>
-  <nav id="menu"><button class="mi on" data-t="gen" data-ic="home">General</button><button class="mi" data-t="reg" data-ic="plus">Registrar</button><button class="mi" data-t="rep" data-ic="chart">Reportes</button><button class="mi" data-t="his" data-ic="file">Historial y notas</button><button class="mi" data-t="cfg" data-ic="gear">Configuración</button></nav>
-  <div class="grow"></div><small id="who" class="muted"></small><button id="out" class="btn ghost sm">Salir</button>
+  <div class="sb-top"><span class="lgw"><img class="logo lg-l" src="img/logo-full-light.png" alt="Ar_Finance"><img class="logo lg-d" src="img/logo-full-dark.png" alt="" aria-hidden="true"></span><button id="sb-hide" class="sb-tg" title="Ocultar menú" aria-label="Ocultar menú">‹</button></div>
+  <nav id="menu"><button class="mi on" data-t="gen" data-ic="home">General</button><button class="mi" data-t="reg" data-ic="plus">Registrar</button><button class="mi" data-t="rep" data-ic="chart">Reportes</button><button class="mi" data-t="his" data-ic="file">Historial y notas</button></nav>
+  <div class="grow"></div>
 </aside>
 <main>
+<div class="pfbar"><button type="button" class="pf-btn pf-open" aria-haspopup="menu" aria-expanded="false" aria-label="Abrir menú de perfil"><span class="pf-nm"></span><span class="pf-av" aria-hidden="true"></span></button></div>
 <div id="net" hidden></div><div id="upd" hidden>🆕 Hay una versión nueva de Ar_Finance. <button id="upd-b" class="btn sm" type="button">Actualizar</button></div>
 <button id="sb-show" class="sb-tg" title="Mostrar menú" aria-label="Mostrar menú">☰</button>
 <section id="t-gen" class="tab"><h2 id="g-tit"></h2><div id="g-av"></div><div id="g-out"></div></section>
@@ -47,10 +49,30 @@
     </div>
   </div>
 </section>
-<section id="t-cfg" class="tab" hidden>
-  <h2>⚙️ Configuración</h2>
-  <div class="card"><h3>Mis categorías</h3><p class="muted lab">Categorías propias de gastos (máximo 3). Para crear una nueva: Registrar › Gasto › «Nueva categoría».</p><div id="c-cats" class="col"></div></div>
-  <div class="card"><h3>Respaldo y datos</h3><small id="c-resp" class="muted"></small>
+</main></div>
+<div id="pf-menu" class="pf-menu" role="menu" aria-label="Perfil" hidden>
+  <div class="pf-head"><span class="pf-av big" aria-hidden="true"></span><div><b id="pf-nm">Mi perfil</b><small id="pf-em" class="muted"></small></div></div>
+  <p class="pf-lab">Tema</p>
+  <div class="pf-tema" role="radiogroup" aria-label="Tema del programa"><button type="button" role="radio" data-tema="claro" data-ic="sun">Claro</button><button type="button" role="radio" data-tema="oscuro" data-ic="moon">Oscuro</button><button type="button" role="radio" data-tema="auto" data-ic="monitor">Sistema</button></div>
+  <button type="button" role="menuitem" class="pf-it" data-pf="perfil" data-ic="user" style="--i:1">Editar perfil</button>
+  <button type="button" role="menuitem" class="pf-it" data-pf="cats" data-ic="tag" style="--i:2">Mis categorías</button>
+  <button type="button" role="menuitem" class="pf-it" data-pf="datos" data-ic="db" style="--i:3">Respaldo y datos</button>
+  <button type="button" role="menuitem" class="pf-it" data-pf="cuenta" data-ic="lock" style="--i:4">Cuenta y seguridad</button>
+  <button type="button" role="menuitem" class="pf-it" data-pf="acerca" data-ic="info" style="--i:5">Acerca de</button>
+  <div class="pf-sep"></div>
+  <button type="button" role="menuitem" class="pf-it out" id="pf-out" data-ic="logout" style="--i:6">Cerrar sesión</button>
+</div>
+<div id="pf-back" hidden><div id="pf-box" role="dialog" aria-modal="true" aria-labelledby="pf-t">
+  <div class="pf-hd"><h3 id="pf-t"></h3><button id="pf-x" class="sb-tg" type="button" aria-label="Cerrar" data-ic="close"></button></div>
+  <section class="pf-sec" data-s="perfil" hidden>
+    <div class="pf-foto"><span class="pf-av xl" aria-hidden="true"></span><div class="col"><button id="pf-fb" class="btn sm" type="button">Cambiar imagen</button><button id="pf-fq" class="btn ghost sm" type="button">Quitar imagen</button><input id="pf-file" type="file" accept="image/*" hidden></div></div>
+    <label>Alias (cómo quieres que te llame la app)<input id="pf-alias" maxlength="24" placeholder="Ej.: Rilan" autocomplete="nickname"></label>
+    <div class="row"><button id="pf-save" class="btn sm" type="button">Guardar alias</button></div>
+    <p id="pf-m" class="lab"></p>
+    <p class="muted lab">El alias y la imagen se guardan en este dispositivo (la imagen se reduce automáticamente). El tema también se recuerda por dispositivo.</p>
+  </section>
+  <section class="pf-sec" data-s="cats" hidden><p class="muted lab">Categorías propias de gastos (máximo 3). Para crear una nueva: Registrar › Gasto › «Nueva categoría».</p><div id="c-cats" class="col"></div></section>
+  <section class="pf-sec" data-s="datos" hidden><small id="c-resp" class="muted"></small>
     <div class="row"><span><button id="n-exp" class="btn ghost sm">Respaldo JSON</button> <button id="n-imp" class="btn ghost sm">Importar respaldo</button><input id="n-file" type="file" accept=".json,application/json" hidden></span><span><button id="n-xlx" class="btn ghost sm">📤 Exportar a Excel</button> <button id="n-xl" class="btn ghost sm">📥 Importar desde Excel</button></span></div>
     <small id="c-st" class="muted"></small>
   <div id="xl-panel" class="box" hidden>
@@ -60,22 +82,20 @@
     <textarea id="xl-txt" rows="5" placeholder="O pega aquí las filas copiadas desde Excel (Ctrl+V)…"></textarea>
     <div class="row"><button id="xl-rev" class="btn sm">Revisar</button><button id="xl-x" class="btn ghost sm">Cerrar</button></div>
     <div id="xl-res"></div>
-  </div>
-  </div>
-  <div class="card"><h3>Cuenta</h3><p class="lab">Correo: <b id="c-mail"></b></p><p class="muted lab">Tus registros son privados: otras personas, con su propia cuenta, no los ven.</p>
+  </div></section>
+  <section class="pf-sec" data-s="cuenta" hidden><p class="lab">Correo: <b id="c-mail"></b></p><p class="muted lab">Tus registros son privados: otras personas, con su propia cuenta, no los ven.</p>
     <label>Nueva contraseña<input id="c-pw" type="password" autocomplete="new-password"></label><label>Repite la nueva contraseña<input id="c-pw2" type="password" autocomplete="new-password"></label><p id="c-pwm" class="lab"></p>
-    <div class="row"><button id="c-pwb" class="btn sm">Cambiar contraseña</button><button id="c-out" class="btn ghost sm">Salir</button></div></div>
-  <div class="card"><h3>Acerca de</h3><p class="muted lab">Ar_Finance versión <span id="c-ver"></span></p></div>
-</section>
-</main></div>
+    <div class="row"><button id="c-pwb" class="btn sm">Cambiar contraseña</button></div></section>
+  <section class="pf-sec" data-s="acerca" hidden><p class="muted lab">Ar_Finance versión <span id="c-ver"></span></p></section>
+</div></div>
 <div id="ed-back" hidden><div id="ed-box" class="card" role="dialog" aria-modal="true" aria-labelledby="ed-t"><h3 id="ed-t">Editar movimiento</h3><div id="ed-f" class="col"></div><p id="ed-m" class="warn lab"></p><div class="row acts"><button id="ed-ok" class="btn">Guardar cambios</button><button id="ed-no" class="btn ghost">Cancelar</button></div></div></div>
 <div id="pg-back" hidden><div id="pg-box" class="card" role="dialog" aria-modal="true" aria-labelledby="pg-t"><h3 id="pg-t">Configurar pago mensual</h3><div id="pg-f" class="col"></div><p id="pg-m" class="warn lab"></p><div class="row acts"><button id="pg-ok" class="btn">Guardar</button><button id="pg-no" class="btn ghost">Cancelar</button></div></div></div>
 <div id="cal-back" hidden><div id="cal-box" role="dialog" aria-modal="true" aria-labelledby="cal-t"></div></div>
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js"></script>
 <script defer src="js/config.js"></script>
-<script defer src="js/data.js?v=0.14.2"></script>
-<script defer src="js/reports.js?v=0.14.2"></script>
-<script defer src="js/icons.js?v=0.14.2"></script>
-<script defer src="js/pdf.js?v=0.14.2"></script>
-<script defer src="js/app.js?v=0.14.2"></script>
+<script defer src="js/data.js?v=0.15.0"></script>
+<script defer src="js/reports.js?v=0.15.0"></script>
+<script defer src="js/icons.js?v=0.15.0"></script>
+<script defer src="js/pdf.js?v=0.15.0"></script>
+<script defer src="js/app.js?v=0.15.0"></script>
 </body></html>

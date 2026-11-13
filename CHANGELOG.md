@@ -1,4 +1,12 @@
 # Changelog
+## 0.15.0
+- **Perfil** (icono redondo arriba a la derecha; en el móvil, en la barra superior). Al pulsarlo se despliega un menú con animación suave: Tema (Claro / Oscuro / Sistema), Editar perfil, Mis categorías, Respaldo y datos, Cuenta y seguridad, Acerca de y **Cerrar sesión**.
+- **Tema claro / oscuro / automático (sistema)**: se aplica al instante a toda la app (incluidos gráficos y logo) y se recuerda en el dispositivo. Sin parpadeo al abrir.
+- **Editar perfil**: alias (hasta 24 caracteres) e imagen personalizada (se recorta en cuadrado y se reduce a 256 px). Se guardan en el dispositivo, por usuario.
+- La pestaña **Configuración desaparece del menú izquierdo**: todo su contenido pasó al menú de perfil (cada opción abre una ventana). También se quitó «Salir» del menú izquierdo; ahora está en el perfil, con confirmación (avisa si hay cambios sin sincronizar o no hay conexión).
+- Nuevos iconos del mismo estilo (cámara, luna, monitor, salida, candado, información, base de datos, cerrar). Botón «Atrás» del móvil y tecla Esc cierran el menú y las ventanas.
+- Interno: el modo oscuro ahora se controla con `data-tema` en `<html>` (antes solo seguía al sistema). Lógica pura probada: `temaValido`, `aliasLimpio`, `fotoValida`.
+- Sin cambios en la base de datos.
 ## 0.14.2
 - General › Avisos: ahora muestra solo los 3 avisos más críticos (pago atrasado o presupuesto excedido primero, luego presupuesto cerca del límite, luego pagos al día) y avisa cuántos hay en total.
 - Avisos: los emojis se reemplazan por iconos minimalistas del estilo de la app (campana en el título; triángulo de alerta rojo o naranja; check verde) dentro de un círculo con contorno.

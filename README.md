@@ -1,4 +1,4 @@
-# Ar_Finance 0.14.2
+# Ar_Finance 0.15.0
 App estática (HTML/CSS/JS) con Supabase. Despliegue: ver guía de la sección 5 del documento del proyecto.
 - Pruebas: `node test/test.js` y `for f in js/*.js; do node --check $f; done`
 - Configura `js/config.js` con la URL y clave **anon** de Supabase (nunca service_role).
@@ -19,3 +19,6 @@ La primera vez abre la app CON internet y espera unos segundos (se guarda sola).
 
 ## Migraciones de base de datos
 Ejecuta en Supabase (SQL Editor → New query), una sola vez y en orden, el contenido de: `supabase/migrations/001_presupuestos_recurrentes.sql` `supabase/migrations/002_metas_ahorro.sql` y `supabase/migrations/003_pagos_presupuesto.sql` (0.12.0: presupuesto asignado y pagos mensuales). Antes haz un Respaldo JSON (Configuración). Solo agregan tablas nuevas.
+
+## Perfil y tema (0.15.0)
+Icono redondo arriba a la derecha: tema, alias, imagen, categorías propias, respaldo, contraseña, versión y cerrar sesión. Alias, imagen y tema se guardan en el dispositivo (localStorage), no en Supabase.
