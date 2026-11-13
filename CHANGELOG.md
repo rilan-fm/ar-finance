@@ -1,4 +1,9 @@
 # Changelog
+## 0.16.0
+- **Perfil**: el icono redondo es más grande (56 px en escritorio, 48 px en móvil) y queda a la misma altura del icono del menú (el botón ‹ / ☰), un poco más arriba que antes.
+- **Imagen de perfil**: al elegir una foto se abre un recuadro para encuadrarla dentro del círculo: arrastrar, zoom (barra, botones − / +, rueda del mouse), «Centrar», flechas del teclado, «Aplicar» y «Cancelar». Se guarda en 256 px, solo en este dispositivo.
+- **General › Avisos**: solo muestra pagos mensuales con su número definido (ej. «Agua: 7/12 pagos»), con los atrasados primero. Se quitan los avisos de presupuesto. Siguen los 3 más atrasados.
+- Lógica pura nueva y probada: `encuadre`, `avisosPagos`. Sin cambios en la base de datos.
 ## 0.15.0
 - **Perfil** (icono redondo arriba a la derecha; en el móvil, en la barra superior). Al pulsarlo se despliega un menú con animación suave: Tema (Claro / Oscuro / Sistema), Editar perfil, Mis categorías, Respaldo y datos, Cuenta y seguridad, Acerca de y **Cerrar sesión**.
 - **Tema claro / oscuro / automático (sistema)**: se aplica al instante a toda la app (incluidos gráficos y logo) y se recuerda en el dispositivo. Sin parpadeo al abrir.

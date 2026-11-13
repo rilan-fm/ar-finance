@@ -381,3 +381,14 @@ label.pr-row{flex-direction:row;align-items:center;justify-content:space-between
 .pf-foto{display:flex;align-items:center;gap:16px;flex-wrap:wrap}.pf-foto .col{gap:8px}
 @media(prefers-reduced-motion:reduce){.pf-menu,.pf-it,#pf-box,#pf-back{animation:none!important}}
 @media(max-width:760px){.pfbar{display:none}.top .pf-btn{margin-left:auto;padding:2px}.pf-nm{display:none}#pf-box{padding:14px}}
+
+/* ---- 0.16.0 Perfil más grande y alineado con el menú; recorte de imagen ---- */
+.pfbar{min-height:60px;margin:-11px 0 6px}
+.pfbar .pf-av{width:56px;height:56px;border-width:3px}
+#app.colapsado .pfbar{margin-top:-59px}
+.top .pf-av{width:48px;height:48px}
+#pf-main{display:flex;flex-direction:column;gap:10px}
+.pf-crop{display:flex;flex-direction:column;align-items:center;gap:12px}.pf-crop .row{width:min(100%,300px)}
+#pf-cv{width:min(100%,300px);height:auto;aspect-ratio:1;border-radius:14px;background:#000;cursor:grab;touch-action:none;display:block}
+#pf-cv:active{cursor:grabbing}#pf-cv:focus-visible{outline:3px solid var(--tx);outline-offset:2px}
+.pf-zoom{display:flex;align-items:center;gap:10px;width:min(100%,300px)}.pf-zoom input{flex:1;padding:0;accent-color:var(--ac)}.pf-zoom .btn{min-width:42px;min-height:42px;font-size:1.2rem;padding:0}

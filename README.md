@@ -1,4 +1,4 @@
-# Ar_Finance 0.15.0
+# Ar_Finance 0.16.0
 App estática (HTML/CSS/JS) con Supabase. Despliegue: ver guía de la sección 5 del documento del proyecto.
 - Pruebas: `node test/test.js` y `for f in js/*.js; do node --check $f; done`
 - Configura `js/config.js` con la URL y clave **anon** de Supabase (nunca service_role).
@@ -22,3 +22,6 @@ Ejecuta en Supabase (SQL Editor → New query), una sola vez y en orden, el cont
 
 ## Perfil y tema (0.15.0)
 Icono redondo arriba a la derecha: tema, alias, imagen, categorías propias, respaldo, contraseña, versión y cerrar sesión. Alias, imagen y tema se guardan en el dispositivo (localStorage), no en Supabase.
+
+## Imagen de perfil (0.16.0)
+Al elegir una imagen se abre un recuadro para encuadrarla: arrastra, usa el zoom (barra, − / + o rueda del mouse) y «Centrar»; luego «Aplicar».

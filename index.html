@@ -4,7 +4,7 @@
 <title>Ar_Finance</title><meta name="theme-color" content="#0b1130">
 <script>(function(){var d=document.documentElement;try{var t=localStorage.getItem("ar_tema")||"auto";d.dataset.tema=(t==="oscuro"||(t!=="claro"&&matchMedia("(prefers-color-scheme:dark)").matches))?"dark":"light"}catch(e){d.dataset.tema="light"}})()</script>
 <link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icons/icon-192.png"><link rel="apple-touch-icon" href="icons/icon-192.png"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-<link rel="stylesheet" href="css/styles.css?v=0.15.0">
+<link rel="stylesheet" href="css/styles.css?v=0.16.0">
 </head><body>
 <section id="login" class="card login">
   <span class="lgw"><img class="logo-l lg-l" src="img/logo-full-light.png" alt="Ar_Finance"><img class="logo-l lg-d" src="img/logo-full-dark.png" alt="" aria-hidden="true"></span>
@@ -65,11 +65,14 @@
 <div id="pf-back" hidden><div id="pf-box" role="dialog" aria-modal="true" aria-labelledby="pf-t">
   <div class="pf-hd"><h3 id="pf-t"></h3><button id="pf-x" class="sb-tg" type="button" aria-label="Cerrar" data-ic="close"></button></div>
   <section class="pf-sec" data-s="perfil" hidden>
+    <div id="pf-crop" class="pf-crop" hidden><p class="lab muted">Arrastra la imagen para moverla y usa el zoom para encuadrarla dentro del círculo.</p><canvas id="pf-cv" width="300" height="300" tabindex="0" aria-label="Encuadre de la imagen de perfil"></canvas><div class="pf-zoom"><button type="button" class="btn ghost sm" id="pf-zm" aria-label="Alejar">−</button><input id="pf-z" type="range" min="1" max="4" step="0.01" value="1" aria-label="Zoom"><button type="button" class="btn ghost sm" id="pf-zp" aria-label="Acercar">+</button></div><div class="row"><button type="button" class="btn ghost sm" id="pf-ce">Centrar</button><span><button type="button" class="btn sm" id="pf-ap">Aplicar</button> <button type="button" class="btn ghost sm" id="pf-cn">Cancelar</button></span></div></div>
+    <div id="pf-main">
     <div class="pf-foto"><span class="pf-av xl" aria-hidden="true"></span><div class="col"><button id="pf-fb" class="btn sm" type="button">Cambiar imagen</button><button id="pf-fq" class="btn ghost sm" type="button">Quitar imagen</button><input id="pf-file" type="file" accept="image/*" hidden></div></div>
     <label>Alias (cómo quieres que te llame la app)<input id="pf-alias" maxlength="24" placeholder="Ej.: Rilan" autocomplete="nickname"></label>
     <div class="row"><button id="pf-save" class="btn sm" type="button">Guardar alias</button></div>
     <p id="pf-m" class="lab"></p>
     <p class="muted lab">El alias y la imagen se guardan en este dispositivo (la imagen se reduce automáticamente). El tema también se recuerda por dispositivo.</p>
+    </div>
   </section>
   <section class="pf-sec" data-s="cats" hidden><p class="muted lab">Categorías propias de gastos (máximo 3). Para crear una nueva: Registrar › Gasto › «Nueva categoría».</p><div id="c-cats" class="col"></div></section>
   <section class="pf-sec" data-s="datos" hidden><small id="c-resp" class="muted"></small>
@@ -93,9 +96,9 @@
 <div id="cal-back" hidden><div id="cal-box" role="dialog" aria-modal="true" aria-labelledby="cal-t"></div></div>
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js"></script>
 <script defer src="js/config.js"></script>
-<script defer src="js/data.js?v=0.15.0"></script>
-<script defer src="js/reports.js?v=0.15.0"></script>
-<script defer src="js/icons.js?v=0.15.0"></script>
-<script defer src="js/pdf.js?v=0.15.0"></script>
-<script defer src="js/app.js?v=0.15.0"></script>
+<script defer src="js/data.js?v=0.16.0"></script>
+<script defer src="js/reports.js?v=0.16.0"></script>
+<script defer src="js/icons.js?v=0.16.0"></script>
+<script defer src="js/pdf.js?v=0.16.0"></script>
+<script defer src="js/app.js?v=0.16.0"></script>
 </body></html>

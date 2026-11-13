@@ -1,6 +1,6 @@
 (function(){
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],R=Reports,esc=R.esc,F=R.fmt;
-const VERSION='0.15.0';
+const VERSION='0.16.0';
 const esOscuro=()=>document.documentElement.dataset.tema==='dark';
 let D,movs=[],custom=[],plan=[],pagos=[],metas=[],plOk=false,metOk=false,ch={},st,userEmail='';
 let chartOK=false,chartP=null,pdfP=null,gTok=0,notaTocada=false,ultSig='';
@@ -201,18 +201,11 @@ async function borrarPg(id){if(!confirm('¿Quitar este pago mensual? Los gastos 
 async function pagarPg(id){const p=pagos.find(x=>x.id===id);if(!p)return;const v=prompt('Monto pagado de «'+p.nombre+'» (Bs):','');if(v===null||String(v).trim()==='')return;
  const mo=Math.round(parseFloat(String(v).replace(',','.'))*100)/100;if(!(mo>0))return alert('Monto no válido.');
  try{movs.push(await D.agregar({tipo:'gasto',monto:mo,fecha:hoy(),categoria:p.categoria,subcategoria:p.subcategoria||null,detalle:p.detalle||null,descripcion:p.nombre,cantidad:1}));todo()}catch(e){alert('Error: '+e.message)}}
-function avisos(){const el=$('#g-av');if(!plOk){el.innerHTML='';return}const hy=hoy(),mes=hy.slice(0,7),an0=hy.slice(0,4),
- an=R.analisisPresupuesto(R.presupuestoReal(movs.filter(m=>m.fecha.startsWith(mes)),mes+'-01',mes+'-'+p2(R.matrizMes(mes).n)),plan),pe=an.filas.filter(f=>f.nivel!=='ok'),
- pg=R.estadoPagos(movs,pagos,an0,hy).filter(x=>!x.lograda),it=[];
- if(!pe.length&&!pg.length){el.innerHTML='';return}
- /* puntaje de criticidad: pago atrasado / presupuesto excedido (3000+) > presupuesto cerca (2000+) > pago al día (1000+) */
- const li=(ic,cl,tx)=>`<li class="av-li"><span class="av-ic ${cl}">${Icons.svg(ic)}</span><span class="av-tx">${tx}</span></li>`;
- pg.forEach(x=>{const e=pgEstado(x,an0),at=x.nivel==='atrasado',t=`<b>${esc(x.nombre)}</b>: ${x.hechos}/${x.pagos_anio} pagos · <span class="${e.cl}">${esc(e.est)}</span>${e.resto?', '+esc(e.resto):''}`;
-  it.push({s:at?3000+x.atrasados*10:1000+x.faltan,h:li(at?'alert':'check',at?'rojo':'verde',t)})});
- pe.forEach(f=>{const ex=f.nivel==='excedido',t=`<b>${esc(f.cat)}</b>: ${F(f.real)} de ${F(f.asignado)} este mes (${R.fmtPct(f.pct,0)}) · <span class="${ex?'warn':'nv-cerca'}">${ex?'excedido por '+F(-f.dif):'cerca del límite'}</span>, ${ex?'ya superaste el presupuesto asignado.':'te quedan '+F(f.dif)+' de lo asignado.'}`;
-  it.push({s:ex?3000+Math.min(100,f.pct-100):2000+f.pct,h:li('alert',ex?'rojo':'naranja',t)})});
- it.sort((a,b)=>b.s-a.s);const top=it.slice(0,3);
- el.innerHTML=`<div class="card av"><h3><span class="av-h">${Icons.svg('bell')}</span>Avisos</h3><ul class="list">${top.map(x=>x.h).join('')}</ul>${it.length>3?`<small class="muted">Se muestran los 3 más críticos de ${it.length} avisos.</small>`:''}<button class="btn ghost sm" data-go="his" data-sc="pg" type="button">Ver pagos mensuales</button></div>`}
+function avisos(){const el=$('#g-av');if(!plOk){el.innerHTML='';return}const hy=hoy(),an0=hy.slice(0,4),r=R.avisosPagos(R.estadoPagos(movs,pagos,an0,hy),3);
+ if(!r.top.length){el.innerHTML='';return}
+ /* 0.16.0: solo pagos mensuales con su número definido (ej. 7/12), los atrasados primero; sin avisos de presupuesto */
+ const li=x=>{const e=pgEstado(x,an0),at=x.nivel==='atrasado';return `<li class="av-li"><span class="av-ic ${at?'rojo':'verde'}">${Icons.svg(at?'alert':'check')}</span><span class="av-tx"><b>${esc(x.nombre)}</b>: ${x.hechos}/${x.pagos_anio} pagos · <span class="${e.cl}">${esc(e.est)}</span>${e.resto?', '+esc(e.resto):''}</span></li>`};
+ el.innerHTML=`<div class="card av"><h3><span class="av-h">${Icons.svg('bell')}</span>Avisos</h3><ul class="list">${r.top.map(li).join('')}</ul>${r.total>3?`<small class="muted">Se muestran los 3 más atrasados de ${r.total} pagos pendientes.</small>`:''}<button class="btn ghost sm" data-go="his" data-sc="pg" type="button">Ver pagos mensuales</button></div>`}
 /* ---------- Metas de ahorro ---------- */
 async function cargaMetas(){try{metas=await D.listarMetas();metOk=true}catch(e){metas=[];metOk=false}}
 function pintaMetas(){$('#mt-form').hidden=!metOk;
@@ -558,19 +551,31 @@ function cargaPerfil(){perfil={alias:'',foto:''};try{const p=JSON.parse(lsGet(kP
 const guardaPerfil=()=>lsSet(kPerf(),JSON.stringify(perfil));
 function pintaAv(){const h=perfil.foto?`<img src="${perfil.foto}" alt="">`:Icons.svg('user');$$('.pf-av').forEach(e=>e.innerHTML=h);
  $$('.pf-nm').forEach(e=>e.textContent=perfil.alias);$('#pf-nm').textContent=perfil.alias||'Mi perfil';$('#pf-em').textContent=userEmail}
-function fotoAData(f){return new Promise((ok,no)=>{if(!/^image\//.test(f.type))return no(new Error('Elige un archivo de imagen (JPG, PNG o WebP).'));
+let crop=null;
+const cropVer=on=>{$('#pf-crop').hidden=!on;$('#pf-main').hidden=on};
+function cropDibuja(){const c=crop;if(!c)return;const V=300,e=R.encuadre(c.w,c.h,V,c.z,c.cx,c.cy),g=$('#pf-cv').getContext('2d');c.cx=e.cx;c.cy=e.cy;c.z=e.z;
+ g.fillStyle='#fff';g.fillRect(0,0,V,V);g.drawImage(c.im,e.dx,e.dy,e.dw,e.dh);
+ g.save();g.fillStyle='rgba(0,0,0,.55)';g.beginPath();g.rect(0,0,V,V);g.arc(V/2,V/2,V/2-6,0,Math.PI*2,true);g.fill('evenodd');g.restore();
+ g.strokeStyle='#fff';g.lineWidth=2;g.beginPath();g.arc(V/2,V/2,V/2-6,0,Math.PI*2);g.stroke();$('#pf-z').value=c.z}
+function abreCrop(f){return new Promise((ok,no)=>{if(!/^image\//.test(f.type))return no(new Error('Elige un archivo de imagen (JPG, PNG o WebP).'));
  const u=URL.createObjectURL(f),im=new Image();
- im.onload=()=>{try{const s=Math.min(im.naturalWidth,im.naturalHeight),c=document.createElement('canvas');c.width=c.height=256;c.getContext('2d').drawImage(im,(im.naturalWidth-s)/2,(im.naturalHeight-s)/2,s,s,0,0,256,256);URL.revokeObjectURL(u);ok(c.toDataURL('image/jpeg',.85))}catch(e){no(e)}};
+ im.onload=()=>{URL.revokeObjectURL(u);crop={im,w:im.naturalWidth,h:im.naturalHeight,z:1,cx:im.naturalWidth/2,cy:im.naturalHeight/2};cropVer(true);cropDibuja();ok()};
  im.onerror=()=>{URL.revokeObjectURL(u);no(new Error('No se pudo leer la imagen. Prueba con JPG o PNG.'))};im.src=u})}
+const cancelaCrop=()=>{crop=null;cropVer(false)};
+function cropAplica(){const c=crop;if(!c)return;const V=300,e=R.encuadre(c.w,c.h,V,c.z,c.cx,c.cy),o=document.createElement('canvas');o.width=o.height=256;const g=o.getContext('2d');
+ g.fillStyle='#fff';g.fillRect(0,0,256,256);g.drawImage(c.im,(6-e.dx)/e.s,(6-e.dy)/e.s,(V-12)/e.s,(V-12)/e.s,0,0,256,256);
+ const ant=perfil.foto;perfil.foto=o.toDataURL('image/jpeg',.85);
+ if(guardaPerfil())pfMsg('✔ Imagen actualizada.');else{perfil.foto=ant;pfMsg('No se pudo guardar la imagen en este dispositivo.',true)}cancelaCrop();pintaAv()}
+const cropZoom=d=>{if(crop){crop.z=Math.min(4,Math.max(1,crop.z+d));cropDibuja()}};
 const pfMsg=(t,mal)=>{const m=$('#pf-m');m.className=(mal?'warn':'ok')+' lab';m.textContent=t};
 function abreMenu(btn){if(pfMenu)return cierraMenu();const m=$('#pf-menu'),r=btn.getBoundingClientRect();m.style.top=(r.bottom+8)+'px';m.style.right=Math.max(8,window.innerWidth-r.right)+'px';
  m.classList.remove('cierra');m.hidden=false;pfMenu=true;$$('.pf-open').forEach(b=>b.setAttribute('aria-expanded','true'));pasoNuevo({v:()=>pfMenu,u:cierraMenu})}
 function cierraMenu(){if(!pfMenu)return;pfMenu=false;const m=$('#pf-menu');m.classList.add('cierra');$$('.pf-open').forEach(b=>b.setAttribute('aria-expanded','false'));setTimeout(()=>{if(!pfMenu){m.hidden=true;m.classList.remove('cierra')}},140)}
 const PFT={perfil:'Editar perfil',cats:'Mis categorías',datos:'Respaldo y datos',cuenta:'Cuenta y seguridad',acerca:'Acerca de'};
 function abrePf(k){cierraMenu();pfSec=k;$$('.pf-sec').forEach(x=>x.hidden=x.dataset.s!==k);$('#pf-t').textContent=PFT[k];pintaCfg();
- if(k==='perfil'){$('#pf-alias').value=perfil.alias;$('#pf-m').textContent=''}
+ if(k==='perfil'){cancelaCrop();$('#pf-alias').value=perfil.alias;$('#pf-m').textContent=''}
  $('#pf-back').hidden=false;document.body.style.overflow='hidden';pasoNuevo({v:()=>!!pfSec,u:cierraPf})}
-function cierraPf(){if(!pfSec)return;pfSec='';$('#pf-back').hidden=true;document.body.style.overflow=''}
+function cierraPf(){if(!pfSec)return;cancelaCrop();pfSec='';$('#pf-back').hidden=true;document.body.style.overflow=''}
 async function cerrarSesion(){const s=D.estado?D.estado():null;let m='¿Cerrar sesión en este dispositivo?';
  if(s&&s.pendientes)m='Tienes '+s.pendientes+' cambio(s) sin sincronizar. Si sales ahora se perderán. ¿Cerrar sesión de todos modos?';
  else if(navigator.onLine===false)m='Estás sin conexión: para volver a entrar necesitarás internet. ¿Cerrar sesión?';
@@ -586,8 +591,15 @@ function enlazaPerfil(){
  $('#pf-save').onclick=()=>{perfil.alias=R.aliasLimpio($('#pf-alias').value);$('#pf-alias').value=perfil.alias;guardaPerfil()?pfMsg(perfil.alias?'✔ Alias guardado.':'✔ Alias borrado.'):pfMsg('No se pudo guardar en este dispositivo.',true);pintaAv()};
  $('#pf-alias').onkeydown=e=>{if(e.key==='Enter')$('#pf-save').click()};
  $('#pf-fb').onclick=()=>$('#pf-file').click();
- $('#pf-file').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;const ant=perfil.foto;
-  try{perfil.foto=await fotoAData(f);if(guardaPerfil())pfMsg('✔ Imagen actualizada.');else{perfil.foto=ant;pfMsg('No se pudo guardar la imagen en este dispositivo.',true)}}catch(er){perfil.foto=ant;pfMsg(er.message,true)}pintaAv()};
+ $('#pf-file').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;try{await abreCrop(f)}catch(er){pfMsg(er.message,true)}};
+ const cv=$('#pf-cv');let dr=null;
+ cv.onpointerdown=e=>{if(!crop)return;dr={x:e.clientX,y:e.clientY};try{cv.setPointerCapture(e.pointerId)}catch(er){}};
+ cv.onpointermove=e=>{if(!dr||!crop)return;const k=300/cv.getBoundingClientRect().width,s=R.encuadre(crop.w,crop.h,300,crop.z,crop.cx,crop.cy).s;crop.cx-=(e.clientX-dr.x)*k/s;crop.cy-=(e.clientY-dr.y)*k/s;dr={x:e.clientX,y:e.clientY};cropDibuja()};
+ cv.onpointerup=cv.onpointercancel=()=>{dr=null};
+ cv.onwheel=e=>{if(!crop)return;e.preventDefault();cropZoom(e.deltaY<0?.15:-.15)};
+ cv.onkeydown=e=>{if(!crop)return;const d={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]}[e.key];if(!d)return;e.preventDefault();const s=R.encuadre(crop.w,crop.h,300,crop.z,crop.cx,crop.cy).s;crop.cx+=d[0]*10/s;crop.cy+=d[1]*10/s;cropDibuja()};
+ $('#pf-z').oninput=e=>{if(crop){crop.z=+e.target.value;cropDibuja()}};$('#pf-zp').onclick=()=>cropZoom(.25);$('#pf-zm').onclick=()=>cropZoom(-.25);
+ $('#pf-ce').onclick=()=>{if(crop){crop.cx=crop.w/2;crop.cy=crop.h/2;cropDibuja()}};$('#pf-ap').onclick=cropAplica;$('#pf-cn').onclick=cancelaCrop;
  $('#pf-fq').onclick=()=>{perfil.foto='';guardaPerfil();pintaAv();pfMsg('Imagen quitada.')}}
 /* ---------- Eventos ---------- */
 function menu(t,sp){const cur=$('.mi.on');if(!cur||cur.dataset.t!==t){window.scrollTo(0,0);if(!sp&&cur)ptab(cur.dataset.t)}$$('.mi').forEach(x=>x.classList.toggle('on',x.dataset.t===t));$$('.tab').forEach(s=>s.hidden=s.id!=='t-'+t);$('#side').classList.remove('open');$('#scrim').classList.remove('on');if(t==='rep'){renderRep();precargaPDF()}if(t==='gen')general();if(t==='his')crece()}
@@ -626,7 +638,7 @@ document.addEventListener('DOMContentLoaded',()=>{
  $('#rep-out').addEventListener('toggle',e=>{const d=e.target;if(d&&d.dataset&&d.dataset.od){if(d.open)prOpen.add(d.dataset.od);else prOpen.delete(d.dataset.od)}},true);
  $('#g-av').onclick=e=>{const g=e.target.closest('[data-go]');if(!g)return;menu(g.dataset.go);if(g.dataset.sc==='pg')setTimeout(()=>revelar($('#pg-list').closest('.card')),60)};window.addEventListener('resize',()=>{if(!$('#t-his').hidden)crece()});
  $('#ed-no').onclick=cerrarEd;$('#ed-back').onclick=e=>{if(e.target.id==='ed-back')cerrarEd()};$('#ed-ok').onclick=guardarEd;
- document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(pfSec)cierraPf();else if(pfMenu)cierraMenu();else if(cal)cerrarCal();else if(ed)cerrarEd();else if(pgE)cerrarPg()}});
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(crop)cancelaCrop();else if(pfSec)cierraPf();else if(pfMenu)cierraMenu();else if(cal)cerrarCal();else if(ed)cerrarEd();else if(pgE)cerrarPg()}});
  $('#f-bar').onclick=e=>{if(e.target.closest('#f-todo'))return limpiaFil();const b=e.target.closest('[data-fb]'),y=e.target.closest('[data-fy]'),m=e.target.closest('[data-fm]');
   if(b){const k=b.dataset.fb;
    if(k==='rango'){if(fs.rango){fs.rango=false;fs.anio=fs.anio||R.anioResumen(hoy(),movs);fopen=''}else{fs.rango=true;fs.anio=fs.mes='';fopen='rango'}}
