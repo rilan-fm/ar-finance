@@ -1,6 +1,6 @@
 (function(){
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],R=Reports,esc=R.esc,F=R.fmt;
-const VERSION='0.14.1';
+const VERSION='0.14.2';
 let D,movs=[],custom=[],plan=[],pagos=[],metas=[],plOk=false,metOk=false,ch={},st,userEmail='';
 let chartOK=false,chartP=null,pdfP=null,gTok=0,notaTocada=false,ultSig='';
 const NUEVA='Nueva categoría',hoy=()=>new Date().toLocaleDateString('sv');
@@ -202,11 +202,16 @@ async function pagarPg(id){const p=pagos.find(x=>x.id===id);if(!p)return;const v
  try{movs.push(await D.agregar({tipo:'gasto',monto:mo,fecha:hoy(),categoria:p.categoria,subcategoria:p.subcategoria||null,detalle:p.detalle||null,descripcion:p.nombre,cantidad:1}));todo()}catch(e){alert('Error: '+e.message)}}
 function avisos(){const el=$('#g-av');if(!plOk){el.innerHTML='';return}const hy=hoy(),mes=hy.slice(0,7),an0=hy.slice(0,4),
  an=R.analisisPresupuesto(R.presupuestoReal(movs.filter(m=>m.fecha.startsWith(mes)),mes+'-01',mes+'-'+p2(R.matrizMes(mes).n)),plan),pe=an.filas.filter(f=>f.nivel!=='ok'),
- pg=R.estadoPagos(movs,pagos,an0,hy).filter(x=>!x.lograda);
+ pg=R.estadoPagos(movs,pagos,an0,hy).filter(x=>!x.lograda),it=[];
  if(!pe.length&&!pg.length){el.innerHTML='';return}
- const lp=pg.map(x=>{const e=pgEstado(x,an0);return `<li><span>⏰ <b>${esc(x.nombre)}</b>: ${x.hechos}/${x.pagos_anio} pagos · <span class="${e.cl}">${esc(e.est)} ${e.ic}</span>, ${esc(e.resto)}</span></li>`}).join(''),
-  lpr=pe.map(f=>{const ex=f.nivel==='excedido';return `<li><span>⏰ <b>${esc(f.cat)}</b>: ${F(f.real)} de ${F(f.asignado)} este mes (${R.fmtPct(f.pct,0)}) · <span class="${ex?'warn':'nv-cerca'}">${ex?'excedido por '+F(-f.dif)+' ⚠️':'cerca del límite 🟠'}</span>, ${ex?'ya superaste el presupuesto asignado.':'te quedan '+F(f.dif)+' de lo asignado.'}</span></li>`}).join('');
- el.innerHTML=`<div class="card av"><h3>🔔 Avisos</h3><ul class="list">${lp}${lpr}</ul><button class="btn ghost sm" data-go="his">Ver pagos mensuales</button></div>`}
+ /* puntaje de criticidad: pago atrasado / presupuesto excedido (3000+) > presupuesto cerca (2000+) > pago al día (1000+) */
+ const li=(ic,cl,tx)=>`<li class="av-li"><span class="av-ic ${cl}">${Icons.svg(ic)}</span><span class="av-tx">${tx}</span></li>`;
+ pg.forEach(x=>{const e=pgEstado(x,an0),at=x.nivel==='atrasado',t=`<b>${esc(x.nombre)}</b>: ${x.hechos}/${x.pagos_anio} pagos · <span class="${e.cl}">${esc(e.est)}</span>${e.resto?', '+esc(e.resto):''}`;
+  it.push({s:at?3000+x.atrasados*10:1000+x.faltan,h:li(at?'alert':'check',at?'rojo':'verde',t)})});
+ pe.forEach(f=>{const ex=f.nivel==='excedido',t=`<b>${esc(f.cat)}</b>: ${F(f.real)} de ${F(f.asignado)} este mes (${R.fmtPct(f.pct,0)}) · <span class="${ex?'warn':'nv-cerca'}">${ex?'excedido por '+F(-f.dif):'cerca del límite'}</span>, ${ex?'ya superaste el presupuesto asignado.':'te quedan '+F(f.dif)+' de lo asignado.'}`;
+  it.push({s:ex?3000+Math.min(100,f.pct-100):2000+f.pct,h:li('alert',ex?'rojo':'naranja',t)})});
+ it.sort((a,b)=>b.s-a.s);const top=it.slice(0,3);
+ el.innerHTML=`<div class="card av"><h3><span class="av-h">${Icons.svg('bell')}</span>Avisos</h3><ul class="list">${top.map(x=>x.h).join('')}</ul>${it.length>3?`<small class="muted">Se muestran los 3 más críticos de ${it.length} avisos.</small>`:''}<button class="btn ghost sm" data-go="his" data-sc="pg" type="button">Ver pagos mensuales</button></div>`}
 /* ---------- Metas de ahorro ---------- */
 async function cargaMetas(){try{metas=await D.listarMetas();metOk=true}catch(e){metas=[];metOk=false}}
 function pintaMetas(){$('#mt-form').hidden=!metOk;
@@ -574,7 +579,7 @@ document.addEventListener('DOMContentLoaded',()=>{
  $('#rep-out').addEventListener('change',e=>{const i=e.target.closest('[data-pc]');if(i)guardarPlanInput(i)});
  $('#rep-out').addEventListener('click',e=>{if(e.target.closest('[data-pa]'))rellenarPlan()});
  $('#rep-out').addEventListener('toggle',e=>{const d=e.target;if(d&&d.dataset&&d.dataset.od){if(d.open)prOpen.add(d.dataset.od);else prOpen.delete(d.dataset.od)}},true);
- $('#g-av').onclick=e=>{const g=e.target.closest('[data-go]');if(g)menu(g.dataset.go)};window.addEventListener('resize',()=>{if(!$('#t-his').hidden)crece()});
+ $('#g-av').onclick=e=>{const g=e.target.closest('[data-go]');if(!g)return;menu(g.dataset.go);if(g.dataset.sc==='pg')setTimeout(()=>revelar($('#pg-list').closest('.card')),60)};window.addEventListener('resize',()=>{if(!$('#t-his').hidden)crece()});
  $('#ed-no').onclick=cerrarEd;$('#ed-back').onclick=e=>{if(e.target.id==='ed-back')cerrarEd()};$('#ed-ok').onclick=guardarEd;
  document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(cal)cerrarCal();else if(ed)cerrarEd();else if(pgE)cerrarPg()}});
  $('#f-bar').onclick=e=>{if(e.target.closest('#f-todo'))return limpiaFil();const b=e.target.closest('[data-fb]'),y=e.target.closest('[data-fy]'),m=e.target.closest('[data-fm]');

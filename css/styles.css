@@ -208,7 +208,11 @@ label{display:flex;flex-direction:column;gap:4px;font-size:.85rem;color:var(--mu
 .bar i{display:block;height:100%;border-radius:99px;background:var(--ac)}.pr-cerca .bar i{background:#fe9900}.pr-excedido .bar i{background:var(--gas)}
 .list small.badge{display:inline-block}.list li>div:first-child{flex:1;min-width:0}
 .nv-excedido,.nv-vencido{color:var(--gas);border-color:var(--gas)}.nv-cerca,.nv-pronto{color:var(--c-or);border-color:var(--c-or)}.nv-pagado{color:var(--ing);border-color:var(--ing)}.nv-ok{color:var(--mu)}
-.av{border-left:5px solid #fe9900}
+.card.av{border:1px solid #f5a62a}
+.av h3{display:flex;align-items:center;gap:8px}.av-h{display:inline-grid;color:#f5a62a}.av-h svg{width:1.25em;height:1.25em}
+.av-li{justify-content:flex-start!important;align-items:center;gap:12px}.av-tx{flex:1;min-width:0}
+.av-ic{width:34px;height:34px;border-radius:50%;border:2px solid currentColor;display:grid;place-items:center;flex:none}.av-ic svg{width:18px;height:18px}
+.av-ic.rojo{color:var(--c-re)}.av-ic.naranja{color:var(--c-or)}.av-ic.verde{color:var(--c-gr)}
 .lograda .bar i{background:var(--ing)}
 .row2>label{min-width:0}.row2 input,.row2 select{min-width:0}
 

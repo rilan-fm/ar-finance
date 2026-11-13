@@ -1,4 +1,10 @@
 # Changelog
+## 0.14.2
+- General › Avisos: ahora muestra solo los 3 avisos más críticos (pago atrasado o presupuesto excedido primero, luego presupuesto cerca del límite, luego pagos al día) y avisa cuántos hay en total.
+- Avisos: los emojis se reemplazan por iconos minimalistas del estilo de la app (campana en el título; triángulo de alerta rojo o naranja; check verde) dentro de un círculo con contorno.
+- Avisos: la tarjeta tiene contorno de 1 px en #f5a62a en todo su borde.
+- «Ver pagos mensuales» lleva a Historial y notas, hasta la tarjeta de Pagos mensuales, y esos pagos se ordenan del más atrasado al que está al día (los completos al final).
+- Sin cambios en la base de datos.
 ## 0.14.1
 - Móvil, botón «Atrás»: ahora retrocede **cada paso** que diste, en orden inverso, hasta llegar a General (por ejemplo: Registrar › Gasto › Víveres Alimentos › Abarrotes; cada «Atrás» quita un nivel, luego vuelve a la pestaña anterior, y así hasta General). Solo estando en General, un «Atrás» más sale de la app. Cada paso guarda su propia entrada en el historial del navegador en el momento en que tocas (antes se añadía al pulsar «Atrás», y los navegadores móviles lo ignoraban). Cerrar una ventana o enviar un registro con sus botones no deja «Atrás» muertos.
 - Sin cambios en la base de datos.

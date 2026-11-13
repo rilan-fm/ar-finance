@@ -156,7 +156,7 @@ function estadoPagos(l,items,anio,hoy){const hy=hoy.slice(0,4),mA=+hoy.slice(5,7
    req=anio<hy?tot:anio===hy?Math.min(tot,Math.max(0,tot-(12-mA))):0,
    mesesAtraso=tot===12&&!lograda?meses.map((x,i)=>!x&&(anio<hy||(anio===hy&&i<mA))?i:-1).filter(i=>i>=0):[],
    atrasados=lograda?0:tot===12?mesesAtraso.length:Math.max(0,req-hechos),nivel=lograda?'pagado':atrasados>0?'atrasado':'aldia';
-  return{...it,pagos_anio:tot,meses,hechos,faltan,lograda,pct:Math.min(100,r1(hechos/tot*100)),nivel,atrasados,mesesAtraso,pagadoMes:anio===hy&&meses[mA-1]}}).sort((a,b)=>rk[a.nivel]-rk[b.nivel])}
+  return{...it,pagos_anio:tot,meses,hechos,faltan,lograda,pct:Math.min(100,r1(hechos/tot*100)),nivel,atrasados,mesesAtraso,pagadoMes:anio===hy&&meses[mA-1]}}).sort((a,b)=>rk[a.nivel]-rk[b.nivel]||b.atrasados-a.atrasados||b.faltan-a.faltan)}
 function mesesLista(ix){const n=ix.map(i=>MESES[i].toLowerCase());return n.length<2?n.join(''):n.slice(0,-1).join(', ')+' y '+n[n.length-1]}
 function textoPago(p,anio,hy){const f=p.faltan,pl=f===1?'pago':'pagos';
  if(p.lograda)return{ic:'✅',cl:'ok',est:'completaste todos los pagos del año',resto:''};
