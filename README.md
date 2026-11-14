@@ -1,4 +1,4 @@
-# Ar_Finance 0.16.2
+# Ar_Finance 0.17.0
 App estática (HTML/CSS/JS) con Supabase. Despliegue: ver guía de la sección 5 del documento del proyecto.
 - Pruebas: `node test/test.js` y `for f in js/*.js; do node --check $f; done`
 - Configura `js/config.js` con la URL y clave **anon** de Supabase (nunca service_role).
@@ -25,3 +25,12 @@ Icono redondo arriba a la derecha: tema, alias, imagen, categorías propias, res
 
 ## Imagen de perfil (0.16.0)
 Al elegir una imagen se abre un recuadro para encuadrarla: arrastra, usa el zoom (barra, − / + o rueda del mouse) y «Centrar»; luego «Aplicar».
+
+## Actualizar con un solo archivo (0.17.0)
+1. Descarga `actualizacion.zip` (NO lo descomprimas).
+2. En tu repositorio de GitHub: Add file → Upload files, arrastra el ZIP y pulsa Commit changes.
+3. Pestaña Actions: aparece «Aplicar actualización»; en 1 o 2 minutos queda en verde. Luego GitHub Pages publica (otro minuto o dos).
+4. Abre Ar_Finance instalada: abajo a la izquierda aparece «Nueva versión» → Descargar actualización → Instalar y reiniciar.
+- Si el paso 3 falla con un error de permisos: Settings → Actions → General → Workflow permissions → «Read and write permissions» → Save, y sube el ZIP otra vez.
+- Los cambios dentro de `.github/workflows/` (como este mismo workflow) se siguen subiendo a mano.
+- Primera vez con 0.17.0: sube los archivos del paquete normalmente (arrastrando carpetas). Después, cierra Ar_Finance por completo y ábrela dos veces.

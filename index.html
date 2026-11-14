@@ -4,7 +4,7 @@
 <title>Ar_Finance</title><meta name="theme-color" content="#0b1130">
 <script>(function(){var d=document.documentElement;try{var t=localStorage.getItem("ar_tema")||"auto";d.dataset.tema=(t==="oscuro"||(t!=="claro"&&matchMedia("(prefers-color-scheme:dark)").matches))?"dark":"light"}catch(e){d.dataset.tema="light"}})()</script>
 <link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icons/icon-192.png"><link rel="apple-touch-icon" href="icons/icon-192.png"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-<link rel="stylesheet" href="css/styles.css?v=0.16.2">
+<link rel="stylesheet" href="css/styles.css?v=0.17.0">
 </head><body>
 <section id="login" class="card login">
   <span class="lgw"><img class="logo-l lg-l" src="img/logo-full-light.png" alt="Ar_Finance"><img class="logo-l lg-d" src="img/logo-full-dark.png" alt="" aria-hidden="true"></span>
@@ -25,7 +25,7 @@
 </aside>
 <main>
 <div class="pfbar"><button type="button" class="pf-btn pf-open" aria-haspopup="menu" aria-expanded="false" aria-label="Abrir menú de perfil"><span class="pf-nm"></span><span class="pf-av" aria-hidden="true"></span></button></div>
-<div id="net" hidden></div><div id="upd" hidden>🆕 Hay una versión nueva de Ar_Finance. <button id="upd-b" class="btn sm" type="button">Actualizar</button></div>
+<div id="net" hidden></div>
 <button id="sb-show" class="sb-tg" title="Mostrar menú" aria-label="Mostrar menú">☰</button>
 <section id="t-gen" class="tab"><h2 id="g-tit"></h2><div id="g-av"></div><div id="g-out"></div></section>
 <section id="t-reg" class="tab card" hidden><div id="reg-body" class="col"></div></section>
@@ -95,11 +95,12 @@
 <div id="ed-back" hidden><div id="ed-box" class="card" role="dialog" aria-modal="true" aria-labelledby="ed-t"><h3 id="ed-t">Editar movimiento</h3><div id="ed-f" class="col"></div><p id="ed-m" class="warn lab"></p><div class="row acts"><button id="ed-ok" class="btn">Guardar cambios</button><button id="ed-no" class="btn ghost">Cancelar</button></div></div></div>
 <div id="pg-back" hidden><div id="pg-box" class="card" role="dialog" aria-modal="true" aria-labelledby="pg-t"><h3 id="pg-t">Configurar pago mensual</h3><div id="pg-f" class="col"></div><p id="pg-m" class="warn lab"></p><div class="row acts"><button id="pg-ok" class="btn">Guardar</button><button id="pg-no" class="btn ghost">Cancelar</button></div></div></div>
 <div id="cal-back" hidden><div id="cal-box" role="dialog" aria-modal="true" aria-labelledby="cal-t"></div></div>
+<div id="ua" class="ua" role="status" aria-live="polite" hidden></div>
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js"></script>
 <script defer src="js/config.js"></script>
-<script defer src="js/data.js?v=0.16.2"></script>
-<script defer src="js/reports.js?v=0.16.2"></script>
-<script defer src="js/icons.js?v=0.16.2"></script>
-<script defer src="js/pdf.js?v=0.16.2"></script>
-<script defer src="js/app.js?v=0.16.2"></script>
+<script defer src="js/data.js?v=0.17.0"></script>
+<script defer src="js/reports.js?v=0.17.0"></script>
+<script defer src="js/icons.js?v=0.17.0"></script>
+<script defer src="js/pdf.js?v=0.17.0"></script>
+<script defer src="js/app.js?v=0.17.0"></script>
 </body></html>

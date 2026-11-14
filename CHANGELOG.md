@@ -1,4 +1,10 @@
 # Changelog
+## 0.17.0
+- **Aviso de actualización nuevo**, abajo a la izquierda, minimalista y vibrante. Cuando hay una versión nueva aparece «Nueva versión X.Y.Z · Descargar actualización». Al pulsarlo se descarga con una **barra de progreso** (por archivos) y, al terminar, pregunta «¿Instalar y reiniciar ahora?». Al aceptar, la app se actualiza y se reinicia sola. «Más tarde» lo oculta hasta la próxima vez que abras la app. Reemplaza el aviso anterior «🆕 Hay una versión nueva».
+- La versión nueva ya no se activa sola: espera tu decisión (así la app nunca cambia a mitad de un registro). Se revisa si hay versión nueva al abrir la app, al volver a la ventana y cada 30 minutos.
+- **Actualizar con un solo archivo:** nuevo workflow `.github/workflows/aplicar-actualizacion.yml`. Subes `actualizacion.zip` a la raíz del repositorio y GitHub lo descomprime, reemplaza los archivos (nunca `js/config.js`, `test/` ni `.github/`), hace el commit y pide la publicación de Pages.
+- Interno: `sw.js` descarga en pasos y avisa el progreso (mensajes `ESTADO`, `DESCARGAR`, `ACTIVAR`). Migración automática desde versiones anteriores a 0.17 (esa primera vez se activa sola). Lógica pura probada: `progresoDescarga`; pruebas del service worker en `test/sw.test.js`.
+- Sin cambios en la base de datos.
 ## 0.16.2
 - **Iconos del menú izquierdo** (General, Registrar, Reportes, Historial y notas): nuevo estilo minimalista y vibrante. Cada icono va en un recuadro redondeado con degradado propio (General azul→violeta, Registrar naranja→rosa, Reportes verde→esmeralda, Historial magenta→violeta) y trazo blanco; contrastan con el fondo en modo claro y oscuro y se despegan del relleno celeste #13dbf3 cuando la opción está activa (aro blanco y leve zoom). Al pasar el cursor, un pequeño giro.
 - **Versión del menú**: texto centrado, un poco más grande (0,95 rem) y de color más claro.

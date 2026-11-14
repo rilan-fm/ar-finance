@@ -1,6 +1,6 @@
 (function(){
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],R=Reports,esc=R.esc,F=R.fmt;
-const VERSION='0.16.2';
+const VERSION='0.17.0';
 const esOscuro=()=>document.documentElement.dataset.tema==='dark';
 let D,movs=[],custom=[],plan=[],pagos=[],metas=[],plOk=false,metOk=false,ch={},st,userEmail='';
 let chartOK=false,chartP=null,pdfP=null,gTok=0,notaTocada=false,ultSig='';
@@ -519,10 +519,32 @@ function pintaNet(s){const el=$('#net'),p=s.pendientes,f=s.fallos.length,pl=n=>n
  else if(p)h=`⏳ ${pl(p)} por sincronizar. <button class="btn ghost sm" data-net="sync" type="button">Reintentar</button>`;
  else{el.hidden=true;return}
  el.innerHTML=h;el.hidden=false}
+/* ---------- Actualizaciones (0.17.0): aviso abajo a la izquierda → Descargar (con barra) → Instalar y reiniciar ---------- */
+let ua={fase:'',v:'',w:null,p:{hecho:0,total:1},oculto:false,reinicia:false};
+function uaPinta(){const el=$('#ua');if(!ua.fase||ua.oculto){el.hidden=true;return}
+ const g=R.progresoDescarga(ua.p.hecho,ua.p.total),f=ua.fase,
+  T={aviso:['Nueva versión '+ua.v,'Hay mejoras listas para ti.'],bajando:['Descargando '+ua.v+'…',g.texto+' · '+g.pct+'%'],listo:['Versión '+ua.v+' lista','Descarga completa. ¿Instalar y reiniciar ahora?'],error:['No se pudo descargar','Revisa tu conexión e inténtalo de nuevo.'],reinicio:['Instalando…','Ar_Finance se reiniciará en un momento.']}[f],
+  b=(k,t,g2)=>`<button class="btn${g2?' ghost':''} sm" data-ua="${k}" type="button">${t}</button>`,
+  btn=f==='aviso'?b('bajar','Descargar actualización')+b('luego','Más tarde',1):f==='listo'?b('instalar','Instalar y reiniciar')+b('luego','Más tarde',1):f==='error'?b('bajar','Reintentar')+b('luego','Cerrar',1):'';
+ el.hidden=false;el.className='ua '+f;
+ el.innerHTML=`<span class="ua-ic">${Icons.svg(f==='listo'?'check':f==='error'?'alert':'down')}</span><div class="ua-tx"><b>${esc(T[0])}</b><small>${esc(T[1])}</small>${f==='bajando'?`<div class="ua-bar"><i style="width:${g.pct}%"></i></div>`:''}${btn?`<div class="ua-acts">${btn}</div>`:''}</div>`}
+function uaMsg(d){if(!d||!d.tipo)return;
+ if(d.tipo==='estado'){ua.v=d.v;ua.fase=d.listo?'listo':'aviso';uaPinta()}
+ else if(ua.fase!=='bajando')return;
+ else if(d.tipo==='progreso'){ua.v=d.v||ua.v;ua.p={hecho:d.hecho,total:d.total};uaPinta()}
+ else if(d.tipo==='listo'){ua.fase='listo';uaPinta()}
+ else if(d.tipo==='error'){ua.fase='error';uaPinta()}}
+function uaClic(e){const b=e.target.closest('[data-ua]');if(!b||!ua.w)return;const k=b.dataset.ua;
+ if(k==='luego'){ua.oculto=true;uaPinta()}
+ else if(k==='bajar'){ua.fase='bajando';ua.p={hecho:0,total:1};uaPinta();ua.w.postMessage({tipo:'DESCARGAR'})}
+ else if(k==='instalar'){ua.fase='reinicio';ua.reinicia=true;uaPinta();ua.w.postMessage({tipo:'ACTIVAR'});setTimeout(()=>location.reload(),6000)}}
+function uaNueva(w){if(!w||(ua.w===w&&ua.fase))return;ua.w=w;ua.oculto=false;ua.fase='';w.postMessage({tipo:'ESTADO'})}
 function registraSW(){if(!('serviceWorker' in navigator)||(window.MF_PREVIEW&&!window.MF_SW_TEST)||location.protocol==='file:')return;
- const tenia=!!navigator.serviceWorker.controller;
- navigator.serviceWorker.addEventListener('controllerchange',()=>{if(tenia)$('#upd').hidden=false});
- const ir=()=>navigator.serviceWorker.register('sw.js').catch(()=>{});
+ const sw=navigator.serviceWorker,mira=r=>{if(r.waiting&&sw.controller)uaNueva(r.waiting)};
+ sw.addEventListener('message',e=>uaMsg(e.data));
+ sw.addEventListener('controllerchange',()=>{if(ua.reinicia)location.reload()});
+ const ir=()=>sw.register('sw.js').then(r=>{mira(r);r.addEventListener('updatefound',()=>{const w=r.installing;if(w)w.addEventListener('statechange',()=>{if(w.state==='installed')mira(r)})});
+  const busca=()=>r.update().catch(()=>{});setInterval(busca,30*60*1000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)busca()})}).catch(()=>{});
  if(document.readyState==='complete')ir();else window.addEventListener('load',ir)}
 /* ---------- Botón Atrás del móvil (0.14.1): una entrada del historial por cada paso que das ---------- */
 const pasos=[],cola=[];let entradas=0,espera=0;
@@ -660,7 +682,7 @@ document.addEventListener('DOMContentLoaded',()=>{
  $('#c-pwb').onclick=async()=>{const a=$('#c-pw').value,b=$('#c-pw2').value,m=$('#c-pwm'),bad=t=>{m.className='warn lab';m.textContent=t};
   if(a.length<6)return bad('La contraseña debe tener al menos 6 caracteres.');if(a!==b)return bad('Las contraseñas no coinciden.');
   try{await D.cambiarClave(a);$('#c-pw').value=$('#c-pw2').value='';m.className='ok lab';m.textContent='✔ Contraseña cambiada.'}catch(e){bad('Error: '+e.message)}};
- $('#net').onclick=e=>{const b=e.target.closest('[data-net]');if(!b)return;if(b.dataset.net==='sync')D.sincronizar();else D.descartarFallos()};$('#upd-b').onclick=()=>location.reload();
+ $('#net').onclick=e=>{const b=e.target.closest('[data-net]');if(!b)return;if(b.dataset.net==='sync')D.sincronizar();else D.descartarFallos()};$('#ua').onclick=uaClic;
  $('#sb-v').textContent=VERSION;aplicaTema(temaPref,true);enlazaPerfil();iniciar();registraSW();
 });
 })();
