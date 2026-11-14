@@ -1,4 +1,9 @@
 # Changelog
+## 0.16.1
+- **Menú izquierdo**: abajo a la izquierda se muestra la versión actual del programa («Versión 0.16.1»).
+- **Menú izquierdo**: el botón activo (General, Registrar, Reportes, Historial y notas) ahora se rellena con #13dbf3 (antes #114df2), con texto e icono oscuros para que se lean bien.
+- **Perfil**: el icono redondo es 2 px más pequeño (54 px en escritorio, 46 px en móvil), manteniendo su alineación con el icono del menú.
+- Sin cambios en la base de datos.
 ## 0.16.0
 - **Perfil**: el icono redondo es más grande (56 px en escritorio, 48 px en móvil) y queda a la misma altura del icono del menú (el botón ‹ / ☰), un poco más arriba que antes.
 - **Imagen de perfil**: al elegir una foto se abre un recuadro para encuadrarla dentro del círculo: arrastrar, zoom (barra, botones − / +, rueda del mouse), «Centrar», flechas del teclado, «Aplicar» y «Cancelar». Se guarda en 256 px, solo en este dispositivo.

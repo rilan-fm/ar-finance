@@ -1,6 +1,6 @@
 (function(){
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],R=Reports,esc=R.esc,F=R.fmt;
-const VERSION='0.16.0';
+const VERSION='0.16.1';
 const esOscuro=()=>document.documentElement.dataset.tema==='dark';
 let D,movs=[],custom=[],plan=[],pagos=[],metas=[],plOk=false,metOk=false,ch={},st,userEmail='';
 let chartOK=false,chartP=null,pdfP=null,gTok=0,notaTocada=false,ultSig='';
@@ -661,6 +661,6 @@ document.addEventListener('DOMContentLoaded',()=>{
   if(a.length<6)return bad('La contraseña debe tener al menos 6 caracteres.');if(a!==b)return bad('Las contraseñas no coinciden.');
   try{await D.cambiarClave(a);$('#c-pw').value=$('#c-pw2').value='';m.className='ok lab';m.textContent='✔ Contraseña cambiada.'}catch(e){bad('Error: '+e.message)}};
  $('#net').onclick=e=>{const b=e.target.closest('[data-net]');if(!b)return;if(b.dataset.net==='sync')D.sincronizar();else D.descartarFallos()};$('#upd-b').onclick=()=>location.reload();
- aplicaTema(temaPref,true);enlazaPerfil();iniciar();registraSW();
+ $('#sb-v').textContent=VERSION;aplicaTema(temaPref,true);enlazaPerfil();iniciar();registraSW();
 });
 })();

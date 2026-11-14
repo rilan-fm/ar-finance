@@ -268,8 +268,8 @@ aside{padding:18px 12px;gap:6px}#menu{display:flex;flex-direction:column;gap:7px
 .mi-ic svg{width:25px;height:25px}
 .mi:hover{background:color-mix(in srgb,var(--ac) 9%,transparent);border-color:color-mix(in srgb,var(--ac) 45%,transparent);transform:translateX(3px)}
 .mi:hover .mi-ic{background:var(--ac);color:var(--onac)}
-.mi.on{background:#114df2;color:#fff;font-weight:700;border-color:transparent;box-shadow:0 6px 18px rgba(17,77,242,.45)}
-.mi.on .mi-ic{background:rgba(255,255,255,.22);color:#fff}
+.mi.on{background:#13dbf3;color:#0b1130;font-weight:700;border-color:transparent;box-shadow:0 6px 18px rgba(19,219,243,.45)}
+.mi.on .mi-ic{background:rgba(11,17,48,.14);color:#0b1130}
 .mi:focus-visible{outline:3px solid var(--tx);outline-offset:2px}
 @media(max-width:760px){aside{width:274px}}
 .vs-chks{display:flex;gap:16px;flex-wrap:wrap;align-items:center}
@@ -384,11 +384,14 @@ label.pr-row{flex-direction:row;align-items:center;justify-content:space-between
 
 /* ---- 0.16.0 Perfil más grande y alineado con el menú; recorte de imagen ---- */
 .pfbar{min-height:60px;margin:-11px 0 6px}
-.pfbar .pf-av{width:56px;height:56px;border-width:3px}
+.pfbar .pf-av{width:54px;height:54px;border-width:3px}
 #app.colapsado .pfbar{margin-top:-59px}
-.top .pf-av{width:48px;height:48px}
+.top .pf-av{width:46px;height:46px}
 #pf-main{display:flex;flex-direction:column;gap:10px}
 .pf-crop{display:flex;flex-direction:column;align-items:center;gap:12px}.pf-crop .row{width:min(100%,300px)}
 #pf-cv{width:min(100%,300px);height:auto;aspect-ratio:1;border-radius:14px;background:#000;cursor:grab;touch-action:none;display:block}
 #pf-cv:active{cursor:grabbing}#pf-cv:focus-visible{outline:3px solid var(--tx);outline-offset:2px}
 .pf-zoom{display:flex;align-items:center;gap:10px;width:min(100%,300px)}.pf-zoom input{flex:1;padding:0;accent-color:var(--ac)}.pf-zoom .btn{min-width:42px;min-height:42px;font-size:1.2rem;padding:0}
+
+/* ---- 0.16.1 Versión en el menú izquierdo ---- */
+.sb-ver{margin:8px 6px 2px;padding-top:10px;border-top:1px solid var(--bd);font-size:.8rem;font-weight:600;color:var(--mu);text-align:left}
