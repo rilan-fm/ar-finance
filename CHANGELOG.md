@@ -1,4 +1,8 @@
 # Changelog
+## 0.16.2
+- **Iconos del menú izquierdo** (General, Registrar, Reportes, Historial y notas): nuevo estilo minimalista y vibrante. Cada icono va en un recuadro redondeado con degradado propio (General azul→violeta, Registrar naranja→rosa, Reportes verde→esmeralda, Historial magenta→violeta) y trazo blanco; contrastan con el fondo en modo claro y oscuro y se despegan del relleno celeste #13dbf3 cuando la opción está activa (aro blanco y leve zoom). Al pasar el cursor, un pequeño giro.
+- **Versión del menú**: texto centrado, un poco más grande (0,95 rem) y de color más claro.
+- Solo CSS y número de versión; sin cambios en la base de datos.
 ## 0.16.1
 - **Menú izquierdo**: abajo a la izquierda se muestra la versión actual del programa («Versión 0.16.1»).
 - **Menú izquierdo**: el botón activo (General, Registrar, Reportes, Historial y notas) ahora se rellena con #13dbf3 (antes #114df2), con texto e icono oscuros para que se lean bien.

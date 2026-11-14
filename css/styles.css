@@ -395,3 +395,15 @@ label.pr-row{flex-direction:row;align-items:center;justify-content:space-between
 
 /* ---- 0.16.1 Versión en el menú izquierdo ---- */
 .sb-ver{margin:8px 6px 2px;padding-top:10px;border-top:1px solid var(--bd);font-size:.8rem;font-weight:600;color:var(--mu);text-align:left}
+
+/* ---- 0.16.2 Iconos del menú: minimalistas, vibrantes, con degradado ---- */
+.mi[data-t=gen]{--g1:#4f7cff;--g2:#8708e8}
+.mi[data-t=reg]{--g1:#ffb020;--g2:#ff3d6e}
+.mi[data-t=rep]{--g1:#19d27a;--g2:#0a8f6e}
+.mi[data-t=his]{--g1:#ff4fd8;--g2:#7a1bff}
+.mi .mi-ic,.mi:hover .mi-ic,.mi.on .mi-ic{background:linear-gradient(160deg,rgba(255,255,255,.30),rgba(255,255,255,0) 55%),linear-gradient(135deg,var(--g1),var(--g2));color:#fff;box-shadow:0 5px 14px color-mix(in srgb,var(--g2) 45%,transparent),inset 0 0 0 1px rgba(255,255,255,.22);transition:transform .2s,box-shadow .2s}
+.mi-ic svg{stroke-width:2;filter:drop-shadow(0 1px 1px rgba(0,0,0,.25))}
+.mi:hover .mi-ic{transform:scale(1.08) rotate(-4deg)}
+.mi.on .mi-ic{transform:scale(1.06);box-shadow:0 0 0 2.5px rgba(255,255,255,.75),0 6px 16px rgba(11,17,48,.35)}
+.sb-ver{text-align:center;font-size:.95rem;font-weight:600;letter-spacing:.02em;color:#7d86a6}
+:root[data-tema=dark] .sb-ver{color:#c7cffa}
