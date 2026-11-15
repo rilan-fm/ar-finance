@@ -421,3 +421,11 @@ label.pr-row{flex-direction:row;align-items:center;justify-content:space-between
 .ua .btn{background:#13dbf3;color:#04122a}.ua .btn.ghost{background:transparent;color:#13dbf3;border-color:#13dbf3}
 @media(prefers-reduced-motion:reduce){.ua{animation:none}.ua-bar i{transition:none}}
 @media(max-width:760px){.ua{left:10px;bottom:10px;width:calc(100vw - 20px)}}
+
+/* ---- 0.17.1 Luz de linterna: efecto único al pasar el mouse sobre lo que muestra la mano ---- */
+#luz{position:fixed;left:0;top:0;width:0;height:0;pointer-events:none;z-index:300;opacity:0;transition:opacity .16s ease}
+#luz.on{opacity:1}
+#luz.sp{background:radial-gradient(circle var(--lr,110px) at var(--lx,50%) var(--ly,50%),rgba(214,140,255,.46),rgba(190,95,255,.20) 45%,transparent 72%);box-shadow:0 0 18px rgba(190,95,255,.35)}
+#luz.sp::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.5px;background:radial-gradient(circle var(--lr,110px) at var(--lx,50%) var(--ly,50%),#f3d0ff,#c26bff 45%,rgba(194,107,255,.25) 80%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude}
+#luz.ring{box-shadow:0 0 0 2px #cf7bff,0 0 10px 2px rgba(207,123,255,.9),0 0 26px 6px rgba(178,77,255,.55),inset 0 0 10px rgba(226,170,255,.65)}
+@media(prefers-reduced-motion:reduce){#luz{transition:none}}

@@ -1,6 +1,6 @@
 (function(){
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],R=Reports,esc=R.esc,F=R.fmt;
-const VERSION='0.17.0';
+const VERSION='0.17.1';
 const esOscuro=()=>document.documentElement.dataset.tema==='dark';
 let D,movs=[],custom=[],plan=[],pagos=[],metas=[],plOk=false,metOk=false,ch={},st,userEmail='';
 let chartOK=false,chartP=null,pdfP=null,gTok=0,notaTocada=false,ultSig='';
@@ -623,6 +623,21 @@ function enlazaPerfil(){
  $('#pf-z').oninput=e=>{if(crop){crop.z=+e.target.value;cropDibuja()}};$('#pf-zp').onclick=()=>cropZoom(.25);$('#pf-zm').onclick=()=>cropZoom(-.25);
  $('#pf-ce').onclick=()=>{if(crop){crop.cx=crop.w/2;crop.cy=crop.h/2;cropDibuja()}};$('#pf-ap').onclick=cropAplica;$('#pf-cn').onclick=cancelaCrop;
  $('#pf-fq').onclick=()=>{perfil.foto='';guardaPerfil();pintaAv();pfMsg('Imagen quitada.')}}
+/* ---------- Luz de linterna (0.17.1): efecto al pasar el mouse sobre todo lo que muestra la mano ---------- */
+function luzLinterna(){const luz=document.createElement('div');luz.id='luz';luz.setAttribute('aria-hidden','true');document.body.appendChild(luz);
+ let mx=-1,my=-1,run=false,ult='';
+ const cs=e=>getComputedStyle(e),
+  raiz=t=>{if(!t||t.nodeType!==1||t.closest('.ill-btn')||cs(t).cursor!=='pointer')return null;let e=t;while(e.parentElement&&cs(e.parentElement).cursor==='pointer')e=e.parentElement;return e},
+  objetivo=e=>(e.matches('.tile:not(.big)')?e.querySelector('.ic'):e.matches('.pf-btn')?e.querySelector('.pf-av'):null)||e,
+  apaga=()=>{run=false;ult='';luz.className=''};
+ function tick(){if(!run)return;const r=raiz(document.elementFromPoint(mx,my));if(!r)return apaga();
+  const o=objetivo(r),b=o.getBoundingClientRect(),c=cs(o),rd=c.borderTopLeftRadius,cuad=Math.abs(b.width-b.height)<2,redondo=o!==r||(cuad&&(rd.includes('%')||parseFloat(rd)>=b.width/2-1)),m=redondo?'ring':'sp',st=luz.style;
+  st.transform='translate('+b.left+'px,'+b.top+'px)';st.width=b.width+'px';st.height=b.height+'px';st.borderRadius=redondo&&cuad?'50%':rd;
+  st.setProperty('--lx',(mx-b.left)+'px');st.setProperty('--ly',(my-b.top)+'px');st.setProperty('--lr',Math.max(70,Math.min(150,Math.max(b.width,b.height)*.6))+'px');
+  if(ult!==m){ult=m;luz.className=m+' on'}
+  requestAnimationFrame(tick)}
+ document.addEventListener('pointermove',e=>{if(e.pointerType&&e.pointerType!=='mouse')return;mx=e.clientX;my=e.clientY;if(!run){run=true;requestAnimationFrame(tick)}},{passive:true});
+ document.documentElement.addEventListener('mouseleave',apaga)}
 /* ---------- Eventos ---------- */
 function menu(t,sp){const cur=$('.mi.on');if(!cur||cur.dataset.t!==t){window.scrollTo(0,0);if(!sp&&cur)ptab(cur.dataset.t)}$$('.mi').forEach(x=>x.classList.toggle('on',x.dataset.t===t));$$('.tab').forEach(s=>s.hidden=s.id!=='t-'+t);$('#side').classList.remove('open');$('#scrim').classList.remove('on');if(t==='rep'){renderRep();precargaPDF()}if(t==='gen')general();if(t==='his')crece()}
 document.addEventListener('DOMContentLoaded',()=>{
@@ -683,6 +698,6 @@ document.addEventListener('DOMContentLoaded',()=>{
   if(a.length<6)return bad('La contraseña debe tener al menos 6 caracteres.');if(a!==b)return bad('Las contraseñas no coinciden.');
   try{await D.cambiarClave(a);$('#c-pw').value=$('#c-pw2').value='';m.className='ok lab';m.textContent='✔ Contraseña cambiada.'}catch(e){bad('Error: '+e.message)}};
  $('#net').onclick=e=>{const b=e.target.closest('[data-net]');if(!b)return;if(b.dataset.net==='sync')D.sincronizar();else D.descartarFallos()};$('#ua').onclick=uaClic;
- $('#sb-v').textContent=VERSION;aplicaTema(temaPref,true);enlazaPerfil();iniciar();registraSW();
+ $('#sb-v').textContent=VERSION;aplicaTema(temaPref,true);enlazaPerfil();iniciar();registraSW();luzLinterna();
 });
 })();

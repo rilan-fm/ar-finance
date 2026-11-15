@@ -1,4 +1,8 @@
 # Changelog
+## 0.17.1
+- **Efecto de luz de linterna** en todos los lugares donde el cursor se vuelve una mano: al pasar el mouse aparece una luz morada eléctrica (fluorescente) que sigue al cursor dentro del elemento e ilumina su borde. En los **iconos redondos** (categorías, subcategorías y detalles, foto de perfil) no hay luz de fondo: se ilumina solo el contorno, con los mismos colores.
+- Es un único efecto para toda la app (una sola capa que sigue al mouse), así que también funciona en los botones que se añadan en el futuro. Solo con mouse (no en pantallas táctiles). Las ilustraciones grandes de Gasto/Ingreso en Registrar conservan su propio efecto.
+- Sin cambios en la base de datos.
 ## 0.17.0
 - **Aviso de actualización nuevo**, abajo a la izquierda, minimalista y vibrante. Cuando hay una versión nueva aparece «Nueva versión X.Y.Z · Descargar actualización». Al pulsarlo se descarga con una **barra de progreso** (por archivos) y, al terminar, pregunta «¿Instalar y reiniciar ahora?». Al aceptar, la app se actualiza y se reinicia sola. «Más tarde» lo oculta hasta la próxima vez que abras la app. Reemplaza el aviso anterior «🆕 Hay una versión nueva».
 - La versión nueva ya no se activa sola: espera tu decisión (así la app nunca cambia a mitad de un registro). Se revisa si hay versión nueva al abrir la app, al volver a la ventana y cada 30 minutos.
