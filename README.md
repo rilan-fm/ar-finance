@@ -1,6 +1,6 @@
-# Ar_Finance 0.17.1
+# Ar_Finance 0.18.0
 App estática (HTML/CSS/JS) con Supabase. Despliegue: ver guía de la sección 5 del documento del proyecto.
-- Pruebas: `node test/test.js` y `for f in js/*.js; do node --check $f; done`
+- Pruebas: `node test/test.js`, `node test/voz.test.js`, `node test/sw.test.js` y `for f in js/*.js; do node --check $f; done`
 - Configura `js/config.js` con la URL y clave **anon** de Supabase (nunca service_role).
 - Ejecuta `supabase/schema.sql` en el SQL Editor de Supabase.
 - `test/seed.js` es solo para pruebas; no lo subas como parte de la app.
@@ -34,3 +34,6 @@ Al elegir una imagen se abre un recuadro para encuadrarla: arrastra, usa el zoom
 - Si el paso 3 falla con un error de permisos: Settings → Actions → General → Workflow permissions → «Read and write permissions» → Save, y sube el ZIP otra vez.
 - Los cambios dentro de `.github/workflows/` (como este mismo workflow) se siguen subiendo a mano.
 - Primera vez con 0.17.0: sube los archivos del paquete normalmente (arrastrando carpetas). Después, cierra Ar_Finance por completo y ábrela dos veces.
+
+## Grabar registro por voz (0.18.0)
+En General › «Grabar registro». Pensado para Android + Chrome (o la app instalada). La primera vez Chrome pide permiso de micrófono: pulsa «Permitir». Si el botón no escucha, toca el micrófono de tu teclado dentro del cuadro de texto. Lo que corriges se guarda en el teléfono (no se comparte entre teléfonos).

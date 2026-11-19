@@ -4,7 +4,7 @@
 <title>Ar_Finance</title><meta name="theme-color" content="#0b1130">
 <script>(function(){var d=document.documentElement;try{var t=localStorage.getItem("ar_tema")||"auto";d.dataset.tema=(t==="oscuro"||(t!=="claro"&&matchMedia("(prefers-color-scheme:dark)").matches))?"dark":"light"}catch(e){d.dataset.tema="light"}})()</script>
 <link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icons/icon-192.png"><link rel="apple-touch-icon" href="icons/icon-192.png"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-<link rel="stylesheet" href="css/styles.css?v=0.17.1">
+<link rel="stylesheet" href="css/styles.css?v=0.18.0">
 </head><body>
 <section id="login" class="card login">
   <span class="lgw"><img class="logo-l lg-l" src="img/logo-full-light.png" alt="Ar_Finance"><img class="logo-l lg-d" src="img/logo-full-dark.png" alt="" aria-hidden="true"></span>
@@ -27,7 +27,7 @@
 <div class="pfbar"><button type="button" class="pf-btn pf-open" aria-haspopup="menu" aria-expanded="false" aria-label="Abrir menú de perfil"><span class="pf-nm"></span><span class="pf-av" aria-hidden="true"></span></button></div>
 <div id="net" hidden></div>
 <button id="sb-show" class="sb-tg" title="Mostrar menú" aria-label="Mostrar menú">☰</button>
-<section id="t-gen" class="tab"><h2 id="g-tit"></h2><div id="g-av"></div><div id="g-out"></div></section>
+<section id="t-gen" class="tab"><h2 id="g-tit"></h2><button id="vz-open" class="btn vz-btn" type="button">Grabar registro</button><div id="g-av"></div><div id="g-out"></div></section>
 <section id="t-reg" class="tab card" hidden><div id="reg-body" class="col"></div></section>
 <section id="t-rep" class="tab" hidden>
   <div class="card rtipo"><h2 class="rt-h">TIPO DE REPORTE</h2><div id="f-t" class="rtypes"></div><div id="f-cats" class="col"></div></div>
@@ -95,12 +95,22 @@
 <div id="ed-back" hidden><div id="ed-box" class="card" role="dialog" aria-modal="true" aria-labelledby="ed-t"><h3 id="ed-t">Editar movimiento</h3><div id="ed-f" class="col"></div><p id="ed-m" class="warn lab"></p><div class="row acts"><button id="ed-ok" class="btn">Guardar cambios</button><button id="ed-no" class="btn ghost">Cancelar</button></div></div></div>
 <div id="pg-back" hidden><div id="pg-box" class="card" role="dialog" aria-modal="true" aria-labelledby="pg-t"><h3 id="pg-t">Configurar pago mensual</h3><div id="pg-f" class="col"></div><p id="pg-m" class="warn lab"></p><div class="row acts"><button id="pg-ok" class="btn">Guardar</button><button id="pg-no" class="btn ghost">Cancelar</button></div></div></div>
 <div id="cal-back" hidden><div id="cal-box" role="dialog" aria-modal="true" aria-labelledby="cal-t"></div></div>
+<div id="vz-back" hidden><div id="vz-box" class="card" role="dialog" aria-modal="true" aria-labelledby="vz-t">
+  <div class="vz-hd"><h3 id="vz-t">Grabar registro</h3><button id="vz-x" class="sb-tg" type="button" aria-label="Cerrar" data-ic="close"></button></div>
+  <p class="muted lab">Toca el micrófono y di tus gastos seguidos, con su monto. Ej.: «plátano 10 bolivianos, carne de res 150, factura de agua 40».</p>
+  <button id="vz-mic" class="vz-mic" type="button" aria-pressed="false"><span id="vz-mi"></span><span id="vz-mt">Grabar</span></button>
+  <textarea id="vz-txt" rows="4" placeholder="Aquí aparece lo que dices. Puedes corregirlo o escribirlo (también sirve el micrófono de tu teclado)."></textarea>
+  <p id="vz-m" class="lab"></p>
+  <button id="vz-an" class="btn" type="button">Analizar</button>
+  <div id="vz-rev" class="col"></div><div id="vz-foot"></div>
+</div></div>
 <div id="ua" class="ua" role="status" aria-live="polite" hidden></div>
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js"></script>
 <script defer src="js/config.js"></script>
-<script defer src="js/data.js?v=0.17.1"></script>
-<script defer src="js/reports.js?v=0.17.1"></script>
-<script defer src="js/icons.js?v=0.17.1"></script>
-<script defer src="js/pdf.js?v=0.17.1"></script>
-<script defer src="js/app.js?v=0.17.1"></script>
+<script defer src="js/data.js?v=0.18.0"></script>
+<script defer src="js/reports.js?v=0.18.0"></script>
+<script defer src="js/icons.js?v=0.18.0"></script>
+<script defer src="js/pdf.js?v=0.18.0"></script>
+<script defer src="js/voz.js?v=0.18.0"></script>
+<script defer src="js/app.js?v=0.18.0"></script>
 </body></html>

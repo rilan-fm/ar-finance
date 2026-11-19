@@ -1,6 +1,6 @@
 (function(){
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],R=Reports,esc=R.esc,F=R.fmt;
-const VERSION='0.17.1';
+const VERSION='0.18.0';
 const esOscuro=()=>document.documentElement.dataset.tema==='dark';
 let D,movs=[],custom=[],plan=[],pagos=[],metas=[],plOk=false,metOk=false,ch={},st,userEmail='';
 let chartOK=false,chartP=null,pdfP=null,gTok=0,notaTocada=false,ultSig='';
@@ -638,6 +638,73 @@ function luzLinterna(){const luz=document.createElement('div');luz.id='luz';luz.
   requestAnimationFrame(tick)}
  document.addEventListener('pointermove',e=>{if(e.pointerType&&e.pointerType!=='mouse')return;mx=e.clientX;my=e.clientY;if(!run){run=true;requestAnimationFrame(tick)}},{passive:true});
  document.documentElement.addEventListener('mouseleave',apaga)}
+/* ---------- Grabar registro por voz (0.18.0): dictas, la app separa, clasifica y tú revisas ---------- */
+let vz=null;
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+const kVoz=()=>'ar_voz_'+userEmail;
+const vzApr=()=>{try{const o=JSON.parse(lsGet(kVoz())||'{}');return o&&typeof o==='object'?o:{}}catch(e){return{}}};
+const vzFuente={historial:'por tu historial',aprendido:'lo aprendí de ti',diccionario:'por el diccionario'};
+const vzOpt=(l,v,ph)=>`<option value="">${ph}</option>`+l.map(x=>`<option${x===v?' selected':''}>${esc(x)}</option>`).join('');
+const vzOk=(it,t)=>+it.monto>0&&Voz.completo(t,it.c,it.s,it.d);
+const vzFecha=it=>it.fecha&&!mesFijo?it.fecha:fechaInicial();
+const vzClasif=d=>Voz.clasificar(d,vz.lib,tree());
+function vzEstado(it,t){if(!(+it.monto>0))return['dud','Falta el monto.'];
+ if(!it.c)return['dud','No sé dónde ponerlo. Elige una categoría (si ninguna encaja, usa «Otro»).'];
+ if(!Voz.completo(t,it.c,it.s,it.d))return['dud','Falta elegir la subcategoría o el detalle.'];
+ return['ok','✔ '+[it.c,it.s,it.d].filter(Boolean).join(' › ')+(vzFuente[it.f]?' · '+vzFuente[it.f]:'')]}
+function vzCard(it,i,t){const n=t.find(c=>c.n===it.c),subs=n?n.s:[],dets=(n&&n.d[it.s])||[],[cl,tx]=vzEstado(it,t),fe=it.fecha&&!mesFijo?` <span class="badge">📅 ${R.fechaCorta(it.fecha)}</span>`:'';
+ return `<div class="vz-it ${cl}" data-vi="${i}"><div class="vz-r1"><input data-k="desc" maxlength="120" value="${esc(it.desc)}" aria-label="Descripción" placeholder="Descripción"><input data-k="monto" type="number" step="0.01" min="0.01" inputmode="decimal" value="${esc(it.monto)}" aria-label="Monto en Bs" placeholder="Bs"><button class="del" type="button" data-vdel="${i}" aria-label="Quitar este gasto" title="Quitar">${Icons.svg('trash')}</button></div>
+ <div class="vz-r2"><select data-k="c" aria-label="Categoría">${vzOpt(t.map(c=>c.n),it.c,'Categoría…')}</select>${subs.length?`<select data-k="s" aria-label="Subcategoría">${vzOpt(subs,it.s,'Subcategoría…')}</select>`:''}${dets.length?`<select data-k="d" aria-label="Detalle">${vzOpt(dets,it.d,'Detalle…')}</select>`:''}</div><small class="vz-st">${esc(tx)}${fe}</small></div>`}
+function vzFoot(){const t=tree(),n=vz.items.length,tot=vz.items.reduce((a,x)=>a+(+x.monto||0),0),mal=vz.items.filter(x=>!vzOk(x,t)).length;
+ $('#vz-foot').innerHTML=n?`<div class="vz-sum"><b>${n}</b> gasto${n===1?'':'s'} · <b>${F(tot)}</b>${mal?` · <span class="warn">${mal} por revisar</span>`:''}</div><button id="vz-ok" class="btn" type="button">${n===1?'Registrar el gasto':'Registrar todo ('+n+')'}</button>`:''}
+function pintaVzRev(){const t=tree();$('#vz-rev').innerHTML=vz.items.map((it,i)=>vzCard(it,i,t)).join('');vzFoot()}
+function vzRefresca(i){const t=tree(),it=vz.items[i],c=$('#vz-rev [data-vi="'+i+'"]');if(!c)return;const[cl,tx]=vzEstado(it,t);c.className='vz-it '+cl;c.querySelector('.vz-st').textContent=tx;vzFoot()}
+function pintaMic(){const on=!!(vz&&vz.grab);$('#vz-mic').classList.toggle('rec',on);$('#vz-mic').setAttribute('aria-pressed',on);$('#vz-mt').textContent=on?'Detener':'Grabar'}
+const vzTexto=m=>{$('#vz-m').textContent=m||''};
+function vzUnir(rs){const o=[];for(let i=0;i<rs.length;i++){const t=rs[i][0].transcript.trim(),p=o.length?o[o.length-1].toLowerCase():'';if(o.length&&t.toLowerCase().startsWith(p))o[o.length-1]=t;else o.push(t)}return o.join(' ')}   // Android a veces repite el texto acumulado
+function abrirVz(){vz={items:[],grab:false,rec:null,acum:'',cur:'',lib:null};$('#vz-txt').value='';vzTexto(SR?'':'Aquí no puedo escuchar directamente: escribe tus gastos o usa el micrófono de tu teclado.');pintaMic();pintaVzRev();
+ $('#vz-back').hidden=false;document.body.style.overflow='hidden';pasoNuevo({v:()=>!!vz,u:cerrarVz})}
+function paraVz(){if(vz&&vz.grab){vz.grab=false;try{vz.rec.stop()}catch(e){}}if(vz)pintaMic()}
+function cerrarVz(){if(!vz)return;paraVz();vz=null;$('#vz-back').hidden=true;document.body.style.overflow=''}
+function alternaVz(){if(!vz)return;if(!SR)return vzTexto('Este navegador no permite grabar aquí. Escribe tus gastos o usa el micrófono de tu teclado.');
+ if(vz.grab)return paraVz();
+ vz.acum=$('#vz-txt').value.trim();vz.cur='';vzTexto('');
+ const r=new SR();r.lang='es-BO';r.continuous=true;r.interimResults=true;r.maxAlternatives=1;vz.rec=r;
+ r.onresult=e=>{if(!vz||vz.rec!==r)return;vz.cur=vzUnir(e.results);$('#vz-txt').value=(vz.acum+' '+vz.cur).trim()};
+ r.onerror=e=>{if(!vz)return;const k=e.error;
+  if(k==='not-allowed'||k==='service-not-allowed'){vz.grab=false;vzTexto('Chrome no tiene permiso para usar el micrófono. Toca el candado junto a la dirección (o Ajustes de Android › Apps › Chrome › Permisos › Micrófono) y elige «Permitir».')}
+  else if(k==='network'){vz.grab=false;vzTexto('No hay conexión: el dictado necesita internet. También puedes escribir o usar el micrófono de tu teclado.')}
+  else if(k==='audio-capture'){vz.grab=false;vzTexto('No encuentro el micrófono del teléfono.')}
+  pintaMic()};
+ r.onend=()=>{if(!vz||vz.rec!==r)return;vz.acum=($('#vz-txt').value||'').trim();vz.cur='';if(vz.grab){try{r.start()}catch(e){vz.grab=false}}pintaMic()};   // Chrome corta tras unos segundos de silencio: se reanuda solo
+ vz.grab=true;try{r.start()}catch(e){vz.grab=false;vzTexto('No pude iniciar la grabación. Inténtalo otra vez.')}pintaMic()}
+function analizaVz(){if(!vz)return;if(vz.grab){paraVz();setTimeout(analizaVz,500);return}
+ const txt=$('#vz-txt').value.trim();if(!txt)return vzTexto('Primero graba o escribe tus gastos.');
+ const its=Voz.parse(txt,hoy());if(!its.length)return vzTexto('No encontré gastos en ese texto. Prueba diciendo, por ejemplo: «plátano 10 bolivianos».');
+ vz.lib=Voz.construirLibreta(movs,vzApr());
+ vz.items=its.map(x=>{const c=vzClasif(x.desc);return{desc:x.desc,monto:x.monto==null?'':String(x.monto),fecha:x.fecha,c:c.c,s:c.s,d:c.d,f:c.f,man:false}});
+ const mal=vz.items.filter(x=>!vzOk(x,tree())).length;vzTexto(mal?`${vz.items.length} gastos encontrados. Revisa los ${mal} marcados en naranja antes de registrar.`:`${vz.items.length} gastos listos. Revísalos y pulsa «Registrar».`);
+ pintaVzRev();$('#vz-rev').scrollIntoView({behavior:'smooth',block:'start'})}
+async function registraVz(){if(!vz)return;const t=tree(),bad=vz.items.findIndex(it=>!vzOk(it,t));
+ if(bad>=0){vzTexto('Aún hay gastos por revisar (en naranja): completa su monto y su categoría, o quítalos con la papelera.');const c=$('#vz-rev [data-vi="'+bad+'"]');if(c)c.scrollIntoView({behavior:'smooth',block:'center'});return}
+ if(mesFijo&&vz.items.some(it=>!vzFecha(it).startsWith(mesFijo)))return vzTexto('Hay una fecha fuera del mes fijado ('+R.etiquetaMes(mesFijo)+').');
+ const b=$('#vz-ok');b.disabled=true;
+ const rows=vz.items.map(it=>({tipo:'gasto',monto:Math.round(parseFloat(it.monto)*100)/100,fecha:vzFecha(it),categoria:it.c,subcategoria:it.s||null,detalle:it.d||null,descripcion:it.desc.trim(),cantidad:1}));
+ try{const res=await D.agregarVarios(rows);movs.push(...res);
+  const ap=vzApr();vz.items.forEach(it=>{const k=Voz.clave(it.desc);if(k){delete ap[k];ap[k]={c:it.c,s:it.s,d:it.d}}});const ks=Object.keys(ap);if(ks.length>500)ks.slice(0,ks.length-500).forEach(k=>delete ap[k]);lsSet(kVoz(),JSON.stringify(ap));
+  const n=rows.length,el=$('#net');cerrarVz();todo();irArriba();clearTimeout(netT);el.className='listo';el.textContent='✔ '+n+' gasto'+(n===1?'':'s')+' registrado'+(n===1?'':'s')+(navigator.onLine===false?' (sin conexión: se sincronizará solo)':'');el.hidden=false;netT=setTimeout(()=>{el.hidden=true},4000)}
+ catch(e){vzTexto('Error: '+e.message);b.disabled=false}}
+function enlazaVoz(){$('#vz-open').insertAdjacentHTML('afterbegin',Icons.svg('mic'));$('#vz-mi').innerHTML=Icons.svg('mic');
+ $('#vz-open').onclick=abrirVz;$('#vz-x').onclick=cerrarVz;$('#vz-back').onclick=e=>{if(e.target.id==='vz-back')cerrarVz()};$('#vz-mic').onclick=alternaVz;$('#vz-an').onclick=analizaVz;
+ const rev=$('#vz-rev');
+ rev.addEventListener('input',e=>{const k=e.target.dataset.k,c=e.target.closest('[data-vi]');if(!vz||!c||(k!=='desc'&&k!=='monto'))return;vz.items[+c.dataset.vi][k]=e.target.value});
+ rev.addEventListener('change',e=>{const el=e.target,card=el.closest('[data-vi]'),k=el.dataset.k;if(!vz||!card||!k)return;const i=+card.dataset.vi,it=vz.items[i];if(!it)return;
+  if(k==='desc'){it.desc=el.value;if(!it.man){const c=vzClasif(it.desc);if(c.c!==it.c||c.s!==it.s||c.d!==it.d){Object.assign(it,{c:c.c,s:c.s,d:c.d,f:c.f});pintaVzRev();return}}}
+  else if(k==='monto')it.monto=el.value;
+  else{it.man=true;it.f='manual';if(k==='c'){it.c=el.value;it.s=it.d=''}else if(k==='s'){it.s=el.value;it.d=''}else it.d=el.value;pintaVzRev();return}
+  vzRefresca(i)});
+ rev.addEventListener('click',e=>{const b=e.target.closest('[data-vdel]');if(!b||!vz)return;vz.items.splice(+b.dataset.vdel,1);pintaVzRev();if(!vz.items.length)vzTexto('')});
+ $('#vz-foot').addEventListener('click',e=>{if(e.target.closest('#vz-ok'))registraVz()})}
 /* ---------- Eventos ---------- */
 function menu(t,sp){const cur=$('.mi.on');if(!cur||cur.dataset.t!==t){window.scrollTo(0,0);if(!sp&&cur)ptab(cur.dataset.t)}$$('.mi').forEach(x=>x.classList.toggle('on',x.dataset.t===t));$$('.tab').forEach(s=>s.hidden=s.id!=='t-'+t);$('#side').classList.remove('open');$('#scrim').classList.remove('on');if(t==='rep'){renderRep();precargaPDF()}if(t==='gen')general();if(t==='his')crece()}
 document.addEventListener('DOMContentLoaded',()=>{
@@ -675,7 +742,7 @@ document.addEventListener('DOMContentLoaded',()=>{
  $('#rep-out').addEventListener('toggle',e=>{const d=e.target;if(d&&d.dataset&&d.dataset.od){if(d.open)prOpen.add(d.dataset.od);else prOpen.delete(d.dataset.od)}},true);
  $('#g-av').onclick=e=>{const g=e.target.closest('[data-go]');if(!g)return;menu(g.dataset.go);if(g.dataset.sc==='pg')setTimeout(()=>revelar($('#pg-list').closest('.card')),60)};window.addEventListener('resize',()=>{if(!$('#t-his').hidden)crece()});
  $('#ed-no').onclick=cerrarEd;$('#ed-back').onclick=e=>{if(e.target.id==='ed-back')cerrarEd()};$('#ed-ok').onclick=guardarEd;
- document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(crop)cancelaCrop();else if(pfSec)cierraPf();else if(pfMenu)cierraMenu();else if(cal)cerrarCal();else if(ed)cerrarEd();else if(pgE)cerrarPg()}});
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(vz)cerrarVz();else if(crop)cancelaCrop();else if(pfSec)cierraPf();else if(pfMenu)cierraMenu();else if(cal)cerrarCal();else if(ed)cerrarEd();else if(pgE)cerrarPg()}});
  $('#f-bar').onclick=e=>{if(e.target.closest('#f-todo'))return limpiaFil();const b=e.target.closest('[data-fb]'),y=e.target.closest('[data-fy]'),m=e.target.closest('[data-fm]');
   if(b){const k=b.dataset.fb;
    if(k==='rango'){if(fs.rango){fs.rango=false;fs.anio=fs.anio||R.anioResumen(hoy(),movs);fopen=''}else{fs.rango=true;fs.anio=fs.mes='';fopen='rango'}}
@@ -698,6 +765,6 @@ document.addEventListener('DOMContentLoaded',()=>{
   if(a.length<6)return bad('La contraseña debe tener al menos 6 caracteres.');if(a!==b)return bad('Las contraseñas no coinciden.');
   try{await D.cambiarClave(a);$('#c-pw').value=$('#c-pw2').value='';m.className='ok lab';m.textContent='✔ Contraseña cambiada.'}catch(e){bad('Error: '+e.message)}};
  $('#net').onclick=e=>{const b=e.target.closest('[data-net]');if(!b)return;if(b.dataset.net==='sync')D.sincronizar();else D.descartarFallos()};$('#ua').onclick=uaClic;
- $('#sb-v').textContent=VERSION;aplicaTema(temaPref,true);enlazaPerfil();iniciar();registraSW();luzLinterna();
+ $('#sb-v').textContent=VERSION;aplicaTema(temaPref,true);enlazaPerfil();enlazaVoz();iniciar();registraSW();luzLinterna();
 });
 })();

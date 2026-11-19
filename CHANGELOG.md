@@ -1,4 +1,10 @@
 # Changelog
+## 0.18.0
+- **Grabar registro por voz (Android).** Primer botón de General: «Grabar registro». Dictas todos tus gastos seguidos con su monto («plátano 10 bolivianos, carne de res 150, factura de agua 40») y la app los separa, les pone categoría › subcategoría › detalle y te muestra una **pantalla de revisión** antes de guardar. Nada se registra sin tu confirmación.
+- **Revisión:** una tarjeta por gasto (verde = listo, naranja = por revisar) donde puedes cambiar descripción, monto, categoría, subcategoría o detalle, o quitarlo con la papelera. Si no sabe dónde ponerlo («botellón de agua»), te lo dice y tú eliges; **lo recuerda** para la próxima vez. «Registrar todo» guarda todos juntos (también sin conexión: se sincronizan solos).
+- **Cómo decide:** (1) lo que tú corriges, (2) tu propio historial de gastos (cada teléfono aprende de sus registros), (3) un diccionario inicial (frutas, carnes, servicios, ropa de los hijos, auto, salud…). «Pollo» va a Víveres; «pollo a la bróster» a Hogar › Comida fuera de casa.
+- Entiende «10 bolivianos de plátano», «plátano 10 bolivianos», «Bs 25», decimales, y «ayer» / «anteayer». Respeta «Mes fijo». También puedes escribir o usar el micrófono del teclado en el cuadro de texto.
+- Archivo nuevo `js/voz.js` (lógica pura, probada en `test/voz.test.js`). Sin cambios en la base de datos: lo aprendido se guarda en el teléfono.
 ## 0.17.1
 - **Efecto de luz de linterna** en todos los lugares donde el cursor se vuelve una mano: al pasar el mouse aparece una luz morada eléctrica (fluorescente) que sigue al cursor dentro del elemento e ilumina su borde. En los **iconos redondos** (categorías, subcategorías y detalles, foto de perfil) no hay luz de fondo: se ilumina solo el contorno, con los mismos colores.
 - Es un único efecto para toda la app (una sola capa que sigue al mouse), así que también funciona en los botones que se añadan en el futuro. Solo con mouse (no en pantallas táctiles). Las ilustraciones grandes de Gasto/Ingreso en Registrar conservan su propio efecto.
