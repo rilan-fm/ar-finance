@@ -448,3 +448,4 @@ label.pr-row{flex-direction:row;align-items:center;justify-content:space-between
 .vz-st{font-size:.85rem}.vz-it.ok .vz-st{color:var(--ing)}.vz-it.dud .vz-st{color:var(--c-or);font-weight:600}
 .vz-sum{text-align:center}#vz-foot{display:flex;flex-direction:column;gap:10px}#vz-foot:empty{display:none}#vz-foot .btn{min-height:56px;font-size:1.1rem}
 @media(prefers-reduced-motion:reduce){.vz-mic.rec{animation:none}}
+.vz-lg{font-size:.8rem;flex:none}.vz-lg select{padding:8px}

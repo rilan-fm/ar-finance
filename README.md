@@ -1,4 +1,4 @@
-# Ar_Finance 0.18.0
+# Ar_Finance 0.18.1
 App estática (HTML/CSS/JS) con Supabase. Despliegue: ver guía de la sección 5 del documento del proyecto.
 - Pruebas: `node test/test.js`, `node test/voz.test.js`, `node test/sw.test.js` y `for f in js/*.js; do node --check $f; done`
 - Configura `js/config.js` con la URL y clave **anon** de Supabase (nunca service_role).
@@ -37,3 +37,6 @@ Al elegir una imagen se abre un recuadro para encuadrarla: arrastra, usa el zoom
 
 ## Grabar registro por voz (0.18.0)
 En General › «Grabar registro». Pensado para Android + Chrome (o la app instalada). La primera vez Chrome pide permiso de micrófono: pulsa «Permitir». Si el botón no escucha, toca el micrófono de tu teclado dentro del cuadro de texto. Lo que corriges se guarda en el teléfono (no se comparte entre teléfonos).
+
+## Si el dictado no funciona en un teléfono (0.18.1)
+Perfil › «Buscar actualizaciones» para tener la última versión. En la ventana de grabar, la app indica la causa del problema del micrófono. Casos típicos en Samsung: Chrome › ⋮ › Configuración › Configuración de sitios › Micrófono (permitir esta página); Ajustes › Aplicaciones › Chrome › Permisos › Micrófono; que la app «Google» esté activada; y probar con «Idioma del dictado» en Latinoamérica.

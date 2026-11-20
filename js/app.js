@@ -1,6 +1,6 @@
 (function(){
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],R=Reports,esc=R.esc,F=R.fmt;
-const VERSION='0.18.0';
+const VERSION='0.18.1';
 const esOscuro=()=>document.documentElement.dataset.tema==='dark';
 let D,movs=[],custom=[],plan=[],pagos=[],metas=[],plOk=false,metOk=false,ch={},st,userEmail='';
 let chartOK=false,chartP=null,pdfP=null,gTok=0,notaTocada=false,ultSig='';
@@ -489,7 +489,7 @@ function respaldo(){const b=new Blob([JSON.stringify({exportado:new Date().toISO
  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='respaldo-finanzas.json';a.click();try{localStorage.setItem(kResp(),hoy())}catch(e){}estadoResp()}
 /* ---------- Configuración ---------- */
 let cfgEd='';
-function pintaCfg(){cfgEd='';pintaCfgCats();estadoResp();$('#c-ver').textContent=VERSION}
+function pintaCfg(){cfgEd='';pintaCfgCats();estadoResp();$('#c-ver').textContent=VERSION;$('#ac-v').textContent=VERSION}
 function pintaCfgCats(){const el=$('#c-cats');
  if(!custom.length){el.innerHTML='<p class="muted lab">Aún no tienes categorías propias.</p>';return}
  el.innerHTML=custom.map(c=>c.id===cfgEd?`<div class="box"><label>Nombre<input id="ce-n" maxlength="30" value="${esc(c.nombre)}"></label><label>Subcategorías (separadas por coma)<textarea id="ce-s" rows="2">${esc((c.subs||[]).join(', '))}</textarea></label><div class="row"><button class="btn sm" data-ce="ok" data-id="${esc(c.id)}">Guardar</button><button class="btn ghost sm" data-ce="no">Cancelar</button></div></div>`
@@ -560,6 +560,18 @@ window.addEventListener('popstate',()=>{
  if(entradas>0)entradas--;
  while(pasos.length){const p=pasos.pop();if(p.v()){p.u();setTimeout(podaPasos,60);return}}
  if(entradas>0){espera++;const n=entradas;entradas=0;history.go(-n)}});
+/* ---------- Buscar actualizaciones a mano (0.18.1) ---------- */
+async function buscaAct(){const m=$('#ac-m'),b=$('#ac-b'),say=(t,c)=>{m.className=(c||'muted')+' lab';m.textContent=t};
+ if(!('serviceWorker' in navigator)){say('Este navegador no permite actualizaciones automáticas. Recarga la página.','warn');return}
+ if(navigator.onLine===false){say('Sin conexión: necesitas internet para buscar.','warn');return}
+ b.disabled=true;say('Buscando…');
+ try{const r=await navigator.serviceWorker.getRegistration();
+  if(!r){say('La actualización automática no está activa aquí. Prueba con la app instalada o recarga la página.','warn');return}
+  await r.update();
+  if(r.installing)await new Promise(ok=>{const w=r.installing,t=setTimeout(ok,10000);w.addEventListener('statechange',()=>{if(w.state!=='installing'){clearTimeout(t);ok()}})});
+  if(r.waiting&&navigator.serviceWorker.controller){uaNueva(r.waiting);ua.oculto=false;say('✔ Hay una versión nueva. Cierro esta ventana: mira el aviso abajo a la izquierda.','ok');setTimeout(()=>{cierraPf();uaPinta()},900)}
+  else say('✔ Ya tienes la última versión ('+VERSION+').','ok')}
+ catch(e){say('No se pudo comprobar: '+e.message,'warn')}finally{b.disabled=false}}
 /* ---------- Perfil, tema y cierre de sesión (0.15.0) ---------- */
 const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}},lsSet=(k,v)=>{try{localStorage.setItem(k,v);return true}catch(e){return false}};
 let temaPref=R.temaValido(lsGet('ar_tema')),perfil={alias:'',foto:''},pfSec='',pfMenu=false;
@@ -593,9 +605,10 @@ const pfMsg=(t,mal)=>{const m=$('#pf-m');m.className=(mal?'warn':'ok')+' lab';m.
 function abreMenu(btn){if(pfMenu)return cierraMenu();const m=$('#pf-menu'),r=btn.getBoundingClientRect();m.style.top=(r.bottom+8)+'px';m.style.right=Math.max(8,window.innerWidth-r.right)+'px';
  m.classList.remove('cierra');m.hidden=false;pfMenu=true;$$('.pf-open').forEach(b=>b.setAttribute('aria-expanded','true'));pasoNuevo({v:()=>pfMenu,u:cierraMenu})}
 function cierraMenu(){if(!pfMenu)return;pfMenu=false;const m=$('#pf-menu');m.classList.add('cierra');$$('.pf-open').forEach(b=>b.setAttribute('aria-expanded','false'));setTimeout(()=>{if(!pfMenu){m.hidden=true;m.classList.remove('cierra')}},140)}
-const PFT={perfil:'Editar perfil',cats:'Mis categorías',datos:'Respaldo y datos',cuenta:'Cuenta y seguridad',acerca:'Acerca de'};
+const PFT={perfil:'Editar perfil',cats:'Mis categorías',datos:'Respaldo y datos',cuenta:'Cuenta y seguridad',act:'Actualizaciones',acerca:'Acerca de'};
 function abrePf(k){cierraMenu();pfSec=k;$$('.pf-sec').forEach(x=>x.hidden=x.dataset.s!==k);$('#pf-t').textContent=PFT[k];pintaCfg();
  if(k==='perfil'){cancelaCrop();$('#pf-alias').value=perfil.alias;$('#pf-m').textContent=''}
+ if(k==='act')$('#ac-m').textContent=''
  $('#pf-back').hidden=false;document.body.style.overflow='hidden';pasoNuevo({v:()=>!!pfSec,u:cierraPf})}
 function cierraPf(){if(!pfSec)return;cancelaCrop();pfSec='';$('#pf-back').hidden=true;document.body.style.overflow=''}
 async function cerrarSesion(){const s=D.estado?D.estado():null;let m='¿Cerrar sesión en este dispositivo?';
@@ -609,7 +622,7 @@ function enlazaPerfil(){
  $('#pf-menu').onclick=e=>{const t=e.target.closest('button[data-tema]'),i=e.target.closest('[data-pf]');if(t)return aplicaTema(t.dataset.tema);if(i)return abrePf(i.dataset.pf);if(e.target.closest('#pf-out')){cierraMenu();cerrarSesion()}};
  document.addEventListener('click',e=>{if(pfMenu&&!e.target.closest('#pf-menu')&&!e.target.closest('.pf-open'))cierraMenu()});
  window.addEventListener('scroll',()=>{if(pfMenu)cierraMenu()},{passive:true});
- $('#pf-x').onclick=cierraPf;$('#pf-back').onclick=e=>{if(e.target.id==='pf-back')cierraPf()};
+ $('#ac-b').onclick=buscaAct;$('#pf-x').onclick=cierraPf;$('#pf-back').onclick=e=>{if(e.target.id==='pf-back')cierraPf()};
  $('#pf-save').onclick=()=>{perfil.alias=R.aliasLimpio($('#pf-alias').value);$('#pf-alias').value=perfil.alias;guardaPerfil()?pfMsg(perfil.alias?'✔ Alias guardado.':'✔ Alias borrado.'):pfMsg('No se pudo guardar en este dispositivo.',true);pintaAv()};
  $('#pf-alias').onkeydown=e=>{if(e.key==='Enter')$('#pf-save').click()};
  $('#pf-fb').onclick=()=>$('#pf-file').click();
@@ -642,6 +655,15 @@ function luzLinterna(){const luz=document.createElement('div');luz.id='luz';luz.
 let vz=null;
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
 const kVoz=()=>'ar_voz_'+userEmail;
+const VZ_LANGS=[['es-BO','Español (Bolivia)'],['es-419','Español (Latinoamérica)'],['es-US','Español (EE. UU.)'],['es-ES','Español (España)']];
+const vzLang=()=>{const l=lsGet('ar_voz_lang');return VZ_LANGS.some(x=>x[0]===l)?l:'es-BO'};
+async function vzPermiso(){try{if(navigator.permissions&&navigator.permissions.query)return(await navigator.permissions.query({name:'microphone'})).state}catch(e){}return''}
+/* En Android el error «no permitido» tiene 3 causas distintas; se mira el estado del permiso para decir cuál es. */
+async function vzDiagnostico(k){const est=await vzPermiso(),cod=' (código: '+k+(est?', permiso: '+est:'')+')';
+ if(est==='denied')return'El micrófono está BLOQUEADO para Ar_Finance. En Chrome toca ⋮ › Configuración › Configuración de sitios › Micrófono, busca esta página en «Bloqueado» y ponla en «Permitir». Luego cierra y abre la app.'+cod;
+ if(k==='service-not-allowed')return'Este teléfono no deja usar el reconocimiento de voz de Google. Revisa que la app «Google» (o «Servicios de voz de Google») esté ACTIVADA y actualizada en Play Store, y que en Ajustes › Aplicaciones predeterminadas › Asistente digital esté «Google». Mientras tanto, usa el micrófono del teclado dentro del cuadro de texto.'+cod;
+ if(est==='granted')return'Chrome sí tiene permiso, pero Android no se lo da al micrófono. Ajustes › Aplicaciones › Chrome › Permisos › Micrófono › «Permitir solo mientras se usa la app». Si usas la app instalada, ábrela una vez desde Chrome (no desde el icono) y prueba. También sirve el micrófono del teclado en el cuadro de texto.'+cod;
+ return'Cuando Chrome pregunte por el micrófono, toca «Permitir». Si no pregunta, abre Ar_Finance desde Chrome y prueba otra vez. También sirve el micrófono del teclado en el cuadro de texto.'+cod}
 const vzApr=()=>{try{const o=JSON.parse(lsGet(kVoz())||'{}');return o&&typeof o==='object'?o:{}}catch(e){return{}}};
 const vzFuente={historial:'por tu historial',aprendido:'lo aprendí de ti',diccionario:'por el diccionario'};
 const vzOpt=(l,v,ph)=>`<option value="">${ph}</option>`+l.map(x=>`<option${x===v?' selected':''}>${esc(x)}</option>`).join('');
@@ -669,21 +691,23 @@ function cerrarVz(){if(!vz)return;paraVz();vz=null;$('#vz-back').hidden=true;doc
 function alternaVz(){if(!vz)return;if(!SR)return vzTexto('Este navegador no permite grabar aquí. Escribe tus gastos o usa el micrófono de tu teclado.');
  if(vz.grab)return paraVz();
  vz.acum=$('#vz-txt').value.trim();vz.cur='';vzTexto('');
- const r=new SR();r.lang='es-BO';r.continuous=true;r.interimResults=true;r.maxAlternatives=1;vz.rec=r;
+ const r=new SR();r.lang=vzLang();r.continuous=true;r.interimResults=true;r.maxAlternatives=1;vz.rec=r;
  r.onresult=e=>{if(!vz||vz.rec!==r)return;vz.cur=vzUnir(e.results);$('#vz-txt').value=(vz.acum+' '+vz.cur).trim()};
  r.onerror=e=>{if(!vz)return;const k=e.error;
-  if(k==='not-allowed'||k==='service-not-allowed'){vz.grab=false;vzTexto('Chrome no tiene permiso para usar el micrófono. Toca el candado junto a la dirección (o Ajustes de Android › Apps › Chrome › Permisos › Micrófono) y elige «Permitir».')}
+  if(k==='not-allowed'||k==='service-not-allowed'){vz.grab=false;vzTexto('Comprobando el micrófono…');vzDiagnostico(k).then(t=>vzTexto(t))}
+  else if(k==='language-not-supported'){vz.grab=false;vzTexto('Este teléfono no tiene el idioma «'+vzLang()+'». Cambia el «Idioma del dictado» (prueba Latinoamérica) e inténtalo otra vez.')}
   else if(k==='network'){vz.grab=false;vzTexto('No hay conexión: el dictado necesita internet. También puedes escribir o usar el micrófono de tu teclado.')}
-  else if(k==='audio-capture'){vz.grab=false;vzTexto('No encuentro el micrófono del teléfono.')}
+  else if(k==='audio-capture'){vz.grab=false;vzTexto('No encuentro el micrófono del teléfono (¿otra app lo está usando?).')}
   pintaMic()};
  r.onend=()=>{if(!vz||vz.rec!==r)return;vz.acum=($('#vz-txt').value||'').trim();vz.cur='';if(vz.grab){try{r.start()}catch(e){vz.grab=false}}pintaMic()};   // Chrome corta tras unos segundos de silencio: se reanuda solo
  vz.grab=true;try{r.start()}catch(e){vz.grab=false;vzTexto('No pude iniciar la grabación. Inténtalo otra vez.')}pintaMic()}
 function analizaVz(){if(!vz)return;if(vz.grab){paraVz();setTimeout(analizaVz,500);return}
  const txt=$('#vz-txt').value.trim();if(!txt)return vzTexto('Primero graba o escribe tus gastos.');
- const its=Voz.parse(txt,hoy());if(!its.length)return vzTexto('No encontré gastos en ese texto. Prueba diciendo, por ejemplo: «plátano 10 bolivianos».');
+ const info={},its=Voz.parse(txt,hoy(),info);if(!its.length)return vzTexto('No encontré gastos con monto. Cada gasto necesita su precio, por ejemplo: «plátano 10 bolivianos».');
+ const ig=(info.ignorados||[]).filter(Boolean),igTx=ig.length?' Ignoré lo que no tenía monto: '+ig.slice(0,3).map(x=>'«'+x.slice(0,40)+'»').join(' ')+(ig.length>3?' …':'')+'.':'';
  vz.lib=Voz.construirLibreta(movs,vzApr());
  vz.items=its.map(x=>{const c=vzClasif(x.desc);return{desc:x.desc,monto:x.monto==null?'':String(x.monto),fecha:x.fecha,c:c.c,s:c.s,d:c.d,f:c.f,man:false}});
- const mal=vz.items.filter(x=>!vzOk(x,tree())).length;vzTexto(mal?`${vz.items.length} gastos encontrados. Revisa los ${mal} marcados en naranja antes de registrar.`:`${vz.items.length} gastos listos. Revísalos y pulsa «Registrar».`);
+ const mal=vz.items.filter(x=>!vzOk(x,tree())).length;vzTexto((mal?`${vz.items.length} gastos encontrados. Revisa los ${mal} marcados en naranja antes de registrar.`:`${vz.items.length} gastos listos. Revísalos y pulsa «Registrar».`)+igTx);
  pintaVzRev();$('#vz-rev').scrollIntoView({behavior:'smooth',block:'start'})}
 async function registraVz(){if(!vz)return;const t=tree(),bad=vz.items.findIndex(it=>!vzOk(it,t));
  if(bad>=0){vzTexto('Aún hay gastos por revisar (en naranja): completa su monto y su categoría, o quítalos con la papelera.');const c=$('#vz-rev [data-vi="'+bad+'"]');if(c)c.scrollIntoView({behavior:'smooth',block:'center'});return}
@@ -695,6 +719,7 @@ async function registraVz(){if(!vz)return;const t=tree(),bad=vz.items.findIndex(
   const n=rows.length,el=$('#net');cerrarVz();todo();irArriba();clearTimeout(netT);el.className='listo';el.textContent='✔ '+n+' gasto'+(n===1?'':'s')+' registrado'+(n===1?'':'s')+(navigator.onLine===false?' (sin conexión: se sincronizará solo)':'');el.hidden=false;netT=setTimeout(()=>{el.hidden=true},4000)}
  catch(e){vzTexto('Error: '+e.message);b.disabled=false}}
 function enlazaVoz(){$('#vz-open').insertAdjacentHTML('afterbegin',Icons.svg('mic'));$('#vz-mi').innerHTML=Icons.svg('mic');
+ const sl=$('#vz-lang');sl.innerHTML=VZ_LANGS.map(([v,n])=>`<option value="${v}">${n}</option>`).join('');sl.value=vzLang();sl.onchange=()=>lsSet('ar_voz_lang',sl.value);
  $('#vz-open').onclick=abrirVz;$('#vz-x').onclick=cerrarVz;$('#vz-back').onclick=e=>{if(e.target.id==='vz-back')cerrarVz()};$('#vz-mic').onclick=alternaVz;$('#vz-an').onclick=analizaVz;
  const rev=$('#vz-rev');
  rev.addEventListener('input',e=>{const k=e.target.dataset.k,c=e.target.closest('[data-vi]');if(!vz||!c||(k!=='desc'&&k!=='monto'))return;vz.items[+c.dataset.vi][k]=e.target.value});

@@ -4,7 +4,7 @@
 <title>Ar_Finance</title><meta name="theme-color" content="#0b1130">
 <script>(function(){var d=document.documentElement;try{var t=localStorage.getItem("ar_tema")||"auto";d.dataset.tema=(t==="oscuro"||(t!=="claro"&&matchMedia("(prefers-color-scheme:dark)").matches))?"dark":"light"}catch(e){d.dataset.tema="light"}})()</script>
 <link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icons/icon-192.png"><link rel="apple-touch-icon" href="icons/icon-192.png"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-<link rel="stylesheet" href="css/styles.css?v=0.18.0">
+<link rel="stylesheet" href="css/styles.css?v=0.18.1">
 </head><body>
 <section id="login" class="card login">
   <span class="lgw"><img class="logo-l lg-l" src="img/logo-full-light.png" alt="Ar_Finance"><img class="logo-l lg-d" src="img/logo-full-dark.png" alt="" aria-hidden="true"></span>
@@ -59,9 +59,10 @@
   <button type="button" role="menuitem" class="pf-it" data-pf="cats" data-ic="tag" style="--i:2">Mis categorías</button>
   <button type="button" role="menuitem" class="pf-it" data-pf="datos" data-ic="db" style="--i:3">Respaldo y datos</button>
   <button type="button" role="menuitem" class="pf-it" data-pf="cuenta" data-ic="lock" style="--i:4">Cuenta y seguridad</button>
-  <button type="button" role="menuitem" class="pf-it" data-pf="acerca" data-ic="info" style="--i:5">Acerca de</button>
+  <button type="button" role="menuitem" class="pf-it" data-pf="act" data-ic="repeat" style="--i:5">Buscar actualizaciones</button>
+  <button type="button" role="menuitem" class="pf-it" data-pf="acerca" data-ic="info" style="--i:6">Acerca de</button>
   <div class="pf-sep"></div>
-  <button type="button" role="menuitem" class="pf-it out" id="pf-out" data-ic="logout" style="--i:6">Cerrar sesión</button>
+  <button type="button" role="menuitem" class="pf-it out" id="pf-out" data-ic="logout" style="--i:7">Cerrar sesión</button>
 </div>
 <div id="pf-back" hidden><div id="pf-box" role="dialog" aria-modal="true" aria-labelledby="pf-t">
   <div class="pf-hd"><h3 id="pf-t"></h3><button id="pf-x" class="sb-tg" type="button" aria-label="Cerrar" data-ic="close"></button></div>
@@ -90,6 +91,7 @@
   <section class="pf-sec" data-s="cuenta" hidden><p class="lab">Correo: <b id="c-mail"></b></p><p class="muted lab">Tus registros son privados: otras personas, con su propia cuenta, no los ven.</p>
     <label>Nueva contraseña<input id="c-pw" type="password" autocomplete="new-password"></label><label>Repite la nueva contraseña<input id="c-pw2" type="password" autocomplete="new-password"></label><p id="c-pwm" class="lab"></p>
     <div class="row"><button id="c-pwb" class="btn sm">Cambiar contraseña</button></div></section>
+  <section class="pf-sec" data-s="act" hidden><p class="lab">Versión instalada: <b id="ac-v"></b></p><p class="muted lab">Busca si hay una versión nueva de Ar_Finance. Si la hay, aparece el aviso abajo a la izquierda para descargarla e instalarla.</p><div class="row"><button id="ac-b" class="btn sm" type="button">Buscar actualizaciones</button></div><p id="ac-m" class="lab"></p></section>
   <section class="pf-sec" data-s="acerca" hidden><p class="muted lab">Ar_Finance versión <span id="c-ver"></span></p></section>
 </div></div>
 <div id="ed-back" hidden><div id="ed-box" class="card" role="dialog" aria-modal="true" aria-labelledby="ed-t"><h3 id="ed-t">Editar movimiento</h3><div id="ed-f" class="col"></div><p id="ed-m" class="warn lab"></p><div class="row acts"><button id="ed-ok" class="btn">Guardar cambios</button><button id="ed-no" class="btn ghost">Cancelar</button></div></div></div>
@@ -98,6 +100,7 @@
 <div id="vz-back" hidden><div id="vz-box" class="card" role="dialog" aria-modal="true" aria-labelledby="vz-t">
   <div class="vz-hd"><h3 id="vz-t">Grabar registro</h3><button id="vz-x" class="sb-tg" type="button" aria-label="Cerrar" data-ic="close"></button></div>
   <p class="muted lab">Toca el micrófono y di tus gastos seguidos, con su monto. Ej.: «plátano 10 bolivianos, carne de res 150, factura de agua 40».</p>
+  <label class="vz-lg">Idioma del dictado<select id="vz-lang"></select></label>
   <button id="vz-mic" class="vz-mic" type="button" aria-pressed="false"><span id="vz-mi"></span><span id="vz-mt">Grabar</span></button>
   <textarea id="vz-txt" rows="4" placeholder="Aquí aparece lo que dices. Puedes corregirlo o escribirlo (también sirve el micrófono de tu teclado)."></textarea>
   <p id="vz-m" class="lab"></p>
@@ -107,10 +110,10 @@
 <div id="ua" class="ua" role="status" aria-live="polite" hidden></div>
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js"></script>
 <script defer src="js/config.js"></script>
-<script defer src="js/data.js?v=0.18.0"></script>
-<script defer src="js/reports.js?v=0.18.0"></script>
-<script defer src="js/icons.js?v=0.18.0"></script>
-<script defer src="js/pdf.js?v=0.18.0"></script>
-<script defer src="js/voz.js?v=0.18.0"></script>
-<script defer src="js/app.js?v=0.18.0"></script>
+<script defer src="js/data.js?v=0.18.1"></script>
+<script defer src="js/reports.js?v=0.18.1"></script>
+<script defer src="js/icons.js?v=0.18.1"></script>
+<script defer src="js/pdf.js?v=0.18.1"></script>
+<script defer src="js/voz.js?v=0.18.1"></script>
+<script defer src="js/app.js?v=0.18.1"></script>
 </body></html>

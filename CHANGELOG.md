@@ -1,4 +1,13 @@
 # Changelog
+## 0.18.1
+- **Perfil › «Buscar actualizaciones»** (antes de «Acerca de»): muestra la versión instalada y busca si hay una nueva. Si la hay, cierra la ventana y muestra el aviso «Nueva versión» abajo a la izquierda; si no, dice «Ya tienes la última versión».
+- **Dictado: solo se registra lo que tiene monto.** Todo lo que se diga sin precio (introducción, «y esos son los registros del día», comentarios) se ignora, y al analizar la app avisa «Ignoré lo que no tenía monto: …». Se ignoran también muletillas («digamos», «o sea», «bueno», «entonces», «pues», «por ejemplo») y frases de cierre («y esos son…», «eso es todo», «nada más», «ya está»).
+- **Fecha dicha:** «el 15 de febrero», «en fecha 15 de febrero», «15/02/2025», «ayer», «anteayer». Rige para los gastos que se dicen desde ese punto en adelante. Sin año usa el más reciente que no sea futuro. Una fecha imposible («31 de febrero») se descarta.
+- **Introducción larga:** «hoy quiero registrar la siguiente lista que se ha comprado…» se descarta y se queda con el primer producto.
+- **Números dichos en letras:** «diez», «cuarenta y cinco», «ciento cincuenta», «dos mil quinientos», «diez con cincuenta bolivianos» se convierten a cifras (algunos teléfonos, como ciertos Samsung, los escriben así). También entiende el estilo mezclado «10 bolivianos de plátano, 40 de carne de res».
+- **Micrófono en otros celulares:** el error «sin permiso» tenía 3 causas distintas y se mostraba el mismo mensaje. Ahora la app mira el estado del permiso y dice cuál es: (1) bloqueado en Chrome para este sitio, (2) Chrome tiene permiso pero Android no se lo da al micrófono, (3) el servicio de voz de Google no está disponible en el teléfono. El mensaje incluye un código para diagnosticar.
+- **Idioma del dictado** (en la ventana de grabar): Bolivia, Latinoamérica, EE. UU. o España; se recuerda en cada teléfono. Si un teléfono no soporta es-BO, se cambia a Latinoamérica.
+- Sin cambios en la base de datos.
 ## 0.18.0
 - **Grabar registro por voz (Android).** Primer botón de General: «Grabar registro». Dictas todos tus gastos seguidos con su monto («plátano 10 bolivianos, carne de res 150, factura de agua 40») y la app los separa, les pone categoría › subcategoría › detalle y te muestra una **pantalla de revisión** antes de guardar. Nada se registra sin tu confirmación.
 - **Revisión:** una tarjeta por gasto (verde = listo, naranja = por revisar) donde puedes cambiar descripción, monto, categoría, subcategoría o detalle, o quitarlo con la papelera. Si no sabe dónde ponerlo («botellón de agua»), te lo dice y tú eliges; **lo recuerda** para la próxima vez. «Registrar todo» guarda todos juntos (también sin conexión: se sincronizan solos).
