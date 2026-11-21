@@ -1,6 +1,6 @@
 (function(){
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],R=Reports,esc=R.esc,F=R.fmt;
-const VERSION='0.18.1';
+const VERSION='0.18.2';
 const esOscuro=()=>document.documentElement.dataset.tema==='dark';
 let D,movs=[],custom=[],plan=[],pagos=[],metas=[],plOk=false,metOk=false,ch={},st,userEmail='';
 let chartOK=false,chartP=null,pdfP=null,gTok=0,notaTocada=false,ultSig='';
@@ -640,7 +640,7 @@ function enlazaPerfil(){
 function luzLinterna(){const luz=document.createElement('div');luz.id='luz';luz.setAttribute('aria-hidden','true');document.body.appendChild(luz);
  let mx=-1,my=-1,run=false,ult='';
  const cs=e=>getComputedStyle(e),
-  raiz=t=>{if(!t||t.nodeType!==1||t.closest('.ill-btn')||cs(t).cursor!=='pointer')return null;let e=t;while(e.parentElement&&cs(e.parentElement).cursor==='pointer')e=e.parentElement;return e},
+  raiz=t=>{if(!t||t.nodeType!==1||t.closest('.ill-btn')||t.closest('.vz-btn')||cs(t).cursor!=='pointer')return null;let e=t;while(e.parentElement&&cs(e.parentElement).cursor==='pointer')e=e.parentElement;return e},
   objetivo=e=>(e.matches('.tile:not(.big)')?e.querySelector('.ic'):e.matches('.pf-btn')?e.querySelector('.pf-av'):null)||e,
   apaga=()=>{run=false;ult='';luz.className=''};
  function tick(){if(!run)return;const r=raiz(document.elementFromPoint(mx,my));if(!r)return apaga();
@@ -681,13 +681,14 @@ function vzFoot(){const t=tree(),n=vz.items.length,tot=vz.items.reduce((a,x)=>a+
  $('#vz-foot').innerHTML=n?`<div class="vz-sum"><b>${n}</b> gasto${n===1?'':'s'} · <b>${F(tot)}</b>${mal?` · <span class="warn">${mal} por revisar</span>`:''}</div><button id="vz-ok" class="btn" type="button">${n===1?'Registrar el gasto':'Registrar todo ('+n+')'}</button>`:''}
 function pintaVzRev(){const t=tree();$('#vz-rev').innerHTML=vz.items.map((it,i)=>vzCard(it,i,t)).join('');vzFoot()}
 function vzRefresca(i){const t=tree(),it=vz.items[i],c=$('#vz-rev [data-vi="'+i+'"]');if(!c)return;const[cl,tx]=vzEstado(it,t);c.className='vz-it '+cl;c.querySelector('.vz-st').textContent=tx;vzFoot()}
-function pintaMic(){const on=!!(vz&&vz.grab);$('#vz-mic').classList.toggle('rec',on);$('#vz-mic').setAttribute('aria-pressed',on);$('#vz-mt').textContent=on?'Detener':'Grabar'}
+function pintaMic(){const on=!!(vz&&vz.grab);$('#vz-mic').classList.toggle('rec',on);$('#vz-mic').setAttribute('aria-pressed',on);$('#vz-mt').textContent=on?'Detener':'Grabar';pintaBtnVz()}
+function pintaBtnVz(){const o=$('#vz-open');o.classList.toggle('rec',!!vz);o.classList.toggle('grab',!!(vz&&vz.grab));$('#vz-lb').textContent=vz&&vz.grab?'Grabando…':'Grabar registro'}
 const vzTexto=m=>{$('#vz-m').textContent=m||''};
 function vzUnir(rs){const o=[];for(let i=0;i<rs.length;i++){const t=rs[i][0].transcript.trim(),p=o.length?o[o.length-1].toLowerCase():'';if(o.length&&t.toLowerCase().startsWith(p))o[o.length-1]=t;else o.push(t)}return o.join(' ')}   // Android a veces repite el texto acumulado
 function abrirVz(){vz={items:[],grab:false,rec:null,acum:'',cur:'',lib:null};$('#vz-txt').value='';vzTexto(SR?'':'Aquí no puedo escuchar directamente: escribe tus gastos o usa el micrófono de tu teclado.');pintaMic();pintaVzRev();
  $('#vz-back').hidden=false;document.body.style.overflow='hidden';pasoNuevo({v:()=>!!vz,u:cerrarVz})}
 function paraVz(){if(vz&&vz.grab){vz.grab=false;try{vz.rec.stop()}catch(e){}}if(vz)pintaMic()}
-function cerrarVz(){if(!vz)return;paraVz();vz=null;$('#vz-back').hidden=true;document.body.style.overflow=''}
+function cerrarVz(){if(!vz)return;paraVz();vz=null;$('#vz-back').hidden=true;document.body.style.overflow='';pintaBtnVz()}
 function alternaVz(){if(!vz)return;if(!SR)return vzTexto('Este navegador no permite grabar aquí. Escribe tus gastos o usa el micrófono de tu teclado.');
  if(vz.grab)return paraVz();
  vz.acum=$('#vz-txt').value.trim();vz.cur='';vzTexto('');
@@ -718,9 +719,9 @@ async function registraVz(){if(!vz)return;const t=tree(),bad=vz.items.findIndex(
   const ap=vzApr();vz.items.forEach(it=>{const k=Voz.clave(it.desc);if(k){delete ap[k];ap[k]={c:it.c,s:it.s,d:it.d}}});const ks=Object.keys(ap);if(ks.length>500)ks.slice(0,ks.length-500).forEach(k=>delete ap[k]);lsSet(kVoz(),JSON.stringify(ap));
   const n=rows.length,el=$('#net');cerrarVz();todo();irArriba();clearTimeout(netT);el.className='listo';el.textContent='✔ '+n+' gasto'+(n===1?'':'s')+' registrado'+(n===1?'':'s')+(navigator.onLine===false?' (sin conexión: se sincronizará solo)':'');el.hidden=false;netT=setTimeout(()=>{el.hidden=true},4000)}
  catch(e){vzTexto('Error: '+e.message);b.disabled=false}}
-function enlazaVoz(){$('#vz-open').insertAdjacentHTML('afterbegin',Icons.svg('mic'));$('#vz-mi').innerHTML=Icons.svg('mic');
+function enlazaVoz(){$('#vz-open .vz-ic').innerHTML=Icons.svg('mic');$('#vz-x').innerHTML=Icons.svg('close');$('#vz-mi').innerHTML=Icons.svg('mic');
  const sl=$('#vz-lang');sl.innerHTML=VZ_LANGS.map(([v,n])=>`<option value="${v}">${n}</option>`).join('');sl.value=vzLang();sl.onchange=()=>lsSet('ar_voz_lang',sl.value);
- $('#vz-open').onclick=abrirVz;$('#vz-x').onclick=cerrarVz;$('#vz-back').onclick=e=>{if(e.target.id==='vz-back')cerrarVz()};$('#vz-mic').onclick=alternaVz;$('#vz-an').onclick=analizaVz;
+ $('#vz-open').onclick=()=>{abrirVz();alternaVz()};   // al tocar: se pone rojo y empieza a grabar$('#vz-x').onclick=cerrarVz;$('#vz-back').onclick=e=>{if(e.target.id==='vz-back')cerrarVz()};$('#vz-mic').onclick=alternaVz;$('#vz-an').onclick=analizaVz;
  const rev=$('#vz-rev');
  rev.addEventListener('input',e=>{const k=e.target.dataset.k,c=e.target.closest('[data-vi]');if(!vz||!c||(k!=='desc'&&k!=='monto'))return;vz.items[+c.dataset.vi][k]=e.target.value});
  rev.addEventListener('change',e=>{const el=e.target,card=el.closest('[data-vi]'),k=el.dataset.k;if(!vz||!card||!k)return;const i=+card.dataset.vi,it=vz.items[i];if(!it)return;

@@ -1,4 +1,10 @@
 # Changelog
+## 0.18.2
+- **Botón «Grabar registro» rediseñado:** ahora es una tarjeta vertical (152×184 px) de esquinas redondeadas, con degradado azul moderno y un contorno luminoso muy sutil. Ya no ocupa todo el ancho (en móvil queda centrada).
+- **Colores:** azul en reposo → **rojo** al pasar el mouse (escritorio, con zoom hacia adelante) → rojo fijo mientras graba, con un pulso suave. En claro y oscuro.
+- **Al tocarla (móvil o escritorio) se pone roja y empieza a grabar de inmediato** (antes había que pulsar otro botón dentro de la ventana). El texto cambia a «Grabando…». El micrófono de la ventana también es azul en reposo y rojo al grabar.
+- Corrección: el botón ✕ de la ventana de grabar salía vacío (faltaba su icono).
+- Sin cambios en la base de datos.
 ## 0.18.1
 - **Perfil › «Buscar actualizaciones»** (antes de «Acerca de»): muestra la versión instalada y busca si hay una nueva. Si la hay, cierra la ventana y muestra el aviso «Nueva versión» abajo a la izquierda; si no, dice «Ya tienes la última versión».
 - **Dictado: solo se registra lo que tiene monto.** Todo lo que se diga sin precio (introducción, «y esos son los registros del día», comentarios) se ignora, y al analizar la app avisa «Ignoré lo que no tenía monto: …». Se ignoran también muletillas («digamos», «o sea», «bueno», «entonces», «pues», «por ejemplo») y frases de cierre («y esos son…», «eso es todo», «nada más», «ya está»).
