@@ -1,6 +1,6 @@
 (function(){
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],R=Reports,esc=R.esc,F=R.fmt;
-const VERSION='0.18.2';
+const VERSION='0.18.3';
 const esOscuro=()=>document.documentElement.dataset.tema==='dark';
 let D,movs=[],custom=[],plan=[],pagos=[],metas=[],plOk=false,metOk=false,ch={},st,userEmail='';
 let chartOK=false,chartP=null,pdfP=null,gTok=0,notaTocada=false,ultSig='';
@@ -721,7 +721,9 @@ async function registraVz(){if(!vz)return;const t=tree(),bad=vz.items.findIndex(
  catch(e){vzTexto('Error: '+e.message);b.disabled=false}}
 function enlazaVoz(){$('#vz-open .vz-ic').innerHTML=Icons.svg('mic');$('#vz-x').innerHTML=Icons.svg('close');$('#vz-mi').innerHTML=Icons.svg('mic');
  const sl=$('#vz-lang');sl.innerHTML=VZ_LANGS.map(([v,n])=>`<option value="${v}">${n}</option>`).join('');sl.value=vzLang();sl.onchange=()=>lsSet('ar_voz_lang',sl.value);
- $('#vz-open').onclick=()=>{abrirVz();alternaVz()};   // al tocar: se pone rojo y empieza a grabar$('#vz-x').onclick=cerrarVz;$('#vz-back').onclick=e=>{if(e.target.id==='vz-back')cerrarVz()};$('#vz-mic').onclick=alternaVz;$('#vz-an').onclick=analizaVz;
+ /* al tocar el botón: se pone rojo y empieza a grabar (comentario aparte: nunca en la misma línea que otro código) */
+ $('#vz-open').onclick=()=>{abrirVz();alternaVz()};
+ $('#vz-x').onclick=cerrarVz;$('#vz-back').onclick=e=>{if(e.target.id==='vz-back')cerrarVz()};$('#vz-mic').onclick=alternaVz;$('#vz-an').onclick=analizaVz;
  const rev=$('#vz-rev');
  rev.addEventListener('input',e=>{const k=e.target.dataset.k,c=e.target.closest('[data-vi]');if(!vz||!c||(k!=='desc'&&k!=='monto'))return;vz.items[+c.dataset.vi][k]=e.target.value});
  rev.addEventListener('change',e=>{const el=e.target,card=el.closest('[data-vi]'),k=el.dataset.k;if(!vz||!card||!k)return;const i=+card.dataset.vi,it=vz.items[i];if(!it)return;

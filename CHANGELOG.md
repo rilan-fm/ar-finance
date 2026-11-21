@@ -1,4 +1,9 @@
 # Changelog
+## 0.18.3
+- **Corrección importante:** en la 0.18.2 los botones de la ventana «Grabar registro» (Detener, Analizar, ✕, tocar fuera, Registrar) no respondían: un comentario escrito en la misma línea de código dejó sin conectar esos botones. Ya funcionan todos (probado en móvil y escritorio).
+- **Contorno del botón:** cian de la marca (#13dbf3) en reposo y naranja de la marca (#fe9900) cuando se pone rojo (antes era casi blanco).
+- **Alineación:** la tarjeta queda centrada también en escritorio.
+- Sin cambios en la base de datos.
 ## 0.18.2
 - **Botón «Grabar registro» rediseñado:** ahora es una tarjeta vertical (152×184 px) de esquinas redondeadas, con degradado azul moderno y un contorno luminoso muy sutil. Ya no ocupa todo el ancho (en móvil queda centrada).
 - **Colores:** azul en reposo → **rojo** al pasar el mouse (escritorio, con zoom hacia adelante) → rojo fijo mientras graba, con un pulso suave. En claro y oscuro.
