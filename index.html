@@ -4,7 +4,7 @@
 <title>Ar_Finance</title><meta name="theme-color" content="#0b1130">
 <script>(function(){var d=document.documentElement;try{var t=localStorage.getItem("ar_tema")||"auto";d.dataset.tema=(t==="oscuro"||(t!=="claro"&&matchMedia("(prefers-color-scheme:dark)").matches))?"dark":"light"}catch(e){d.dataset.tema="light"}})()</script>
 <link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icons/icon-192.png"><link rel="apple-touch-icon" href="icons/icon-192.png"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-<link rel="stylesheet" href="css/styles.css?v=0.18.3">
+<link rel="stylesheet" href="css/styles.css?v=0.18.4">
 </head><body>
 <section id="login" class="card login">
   <span class="lgw"><img class="logo-l lg-l" src="img/logo-full-light.png" alt="Ar_Finance"><img class="logo-l lg-d" src="img/logo-full-dark.png" alt="" aria-hidden="true"></span>
@@ -100,7 +100,7 @@
 <div id="vz-back" hidden><div id="vz-box" class="card" role="dialog" aria-modal="true" aria-labelledby="vz-t">
   <div class="vz-hd"><h3 id="vz-t">Grabar registro</h3><button id="vz-x" class="sb-tg" type="button" aria-label="Cerrar" data-ic="close"></button></div>
   <p class="muted lab">Toca el micrófono y di tus gastos seguidos, con su monto. Ej.: «plátano 10 bolivianos, carne de res 150, factura de agua 40».</p>
-  <label class="vz-lg">Idioma del dictado<select id="vz-lang"></select></label>
+  <p class="muted lab vz-tip">¿Tu teléfono no deja grabar con este botón? Toca el cuadro de texto de abajo y usa el <b>micrófono del teclado</b> (Samsung o Google): escribe lo que dices. Luego pulsa «Analizar».</p><label class="vz-lg">Idioma del dictado<select id="vz-lang"></select></label>
   <button id="vz-mic" class="vz-mic" type="button" aria-pressed="false"><span id="vz-mi"></span><span id="vz-mt">Grabar</span></button>
   <textarea id="vz-txt" rows="4" placeholder="Aquí aparece lo que dices. Puedes corregirlo o escribirlo (también sirve el micrófono de tu teclado)."></textarea>
   <p id="vz-m" class="lab"></p>
@@ -110,10 +110,10 @@
 <div id="ua" class="ua" role="status" aria-live="polite" hidden></div>
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js"></script>
 <script defer src="js/config.js"></script>
-<script defer src="js/data.js?v=0.18.3"></script>
-<script defer src="js/reports.js?v=0.18.3"></script>
-<script defer src="js/icons.js?v=0.18.3"></script>
-<script defer src="js/pdf.js?v=0.18.3"></script>
-<script defer src="js/voz.js?v=0.18.3"></script>
-<script defer src="js/app.js?v=0.18.3"></script>
+<script defer src="js/data.js?v=0.18.4"></script>
+<script defer src="js/reports.js?v=0.18.4"></script>
+<script defer src="js/icons.js?v=0.18.4"></script>
+<script defer src="js/pdf.js?v=0.18.4"></script>
+<script defer src="js/voz.js?v=0.18.4"></script>
+<script defer src="js/app.js?v=0.18.4"></script>
 </body></html>

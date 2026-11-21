@@ -1,4 +1,8 @@
 # Changelog
+## 0.18.4
+- **Botón «Grabar registro» con estilo neón minimalista:** tarjeta oscura con contorno cian brillante (reposo) y contorno rojo-rosa con pulso de neón mientras graba o al pasar el mouse. Icono con degradado. Igual en modo claro y oscuro.
+- Aviso en la ventana de grabar: si el teléfono no deja usar el botón, usar el micrófono del teclado dentro del cuadro de texto.
+- Sin cambios en la base de datos.
 ## 0.18.3
 - **Corrección importante:** en la 0.18.2 los botones de la ventana «Grabar registro» (Detener, Analizar, ✕, tocar fuera, Registrar) no respondían: un comentario escrito en la misma línea de código dejó sin conectar esos botones. Ya funcionan todos (probado en móvil y escritorio).
 - **Contorno del botón:** cian de la marca (#13dbf3) en reposo y naranja de la marca (#fe9900) cuando se pone rojo (antes era casi blanco).

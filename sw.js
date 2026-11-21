@@ -2,7 +2,7 @@
 // Los DATOS no pasan por aquí (los guarda data.js). Subir V en cada versión, igual que ?v= en index.html.
 // 0.17.0: una versión nueva NO se activa sola. Espera a que la persona pulse «Descargar actualización» (con progreso)
 // y luego «Instalar y reiniciar». Mensajes de la app: ESTADO, DESCARGAR, ACTIVAR.
-const V='0.18.3',SHELL='ar-shell-'+V,CDN='ar-cdn';
+const V='0.18.4',SHELL='ar-shell-'+V,CDN='ar-cdn';
 const LOCAL=['./','index.html','css/styles.css?v='+V,'js/config.js','js/data.js?v='+V,'js/reports.js?v='+V,'js/icons.js?v='+V,'js/pdf.js?v='+V,'js/voz.js?v='+V,'js/app.js?v='+V,'manifest.webmanifest','icons/icon-192.png','icons/icon-512.png','img/logo-full-dark.png','img/logo-full-light.png'];
 const LIBS=['https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js','https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js','https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'];
 const HOSTS=['cdn.jsdelivr.net','cdnjs.cloudflare.com'];
